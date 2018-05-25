@@ -12,8 +12,12 @@ source('global.R', local = TRUE)
 
 ## VARS ####
 vars <- c(
-  'Precipitació' = 'precipitacioanual',
-  'Temperatura' = 'temperaturamitjanaanual'
+  'Cap' = '',
+  'Precipitació Anual' = 'precipitacioanual',
+  'Temperatura Minima Anual' = 'temperaturaminimaanual',
+  'Temperatura Mitjana Anual' = 'temperaturamitjanaanual',
+  'Temperatura Maxima Anual' = 'temperaturamaximaanual',
+  'Radiació Anual' = 'radiacioanual'
 )
 
 ifns <- c(
@@ -56,8 +60,10 @@ ui <- navbarPage(
         
         h2("Pinta y Colorea"),
         
-        selectInput('color', 'Color', vars),
-        selectInput('size', 'Mida', vars)
+        selectInput(
+          'color', 'Color', vars, selected = 'Temperatura Mitjana Anual'
+        ),
+        selectInput('size', 'Mida', vars, selected = 'Cap')
       ),
       
       # overlay panel with controls for ifn data
@@ -143,7 +149,7 @@ server <- function(input, output, session) {
     sig_name <- paste0('parcela', input$ifn, '_sig')
     
     data_parcelas <- tbl(oracle_ifn, clima_name) %>%
-      select(idparcela, precipitacioanual, temperaturamitjanaanual) %>%
+      # select(idparcela, precipitacioanual, temperaturamitjanaanual) %>%
       inner_join(tbl(oracle_ifn, sig_name), by = 'idparcela') %>%
       collect()
     
@@ -167,22 +173,31 @@ server <- function(input, output, session) {
   observe({
     color_var <- input$color
     size_var <- input$size
+    data_par <- data_parcelas()
     
-    # color palette
-    color_vector <- data_parcelas() %>%
-      pull(color_var)
-    pal <- colorBin('viridis', color_vector, 9)
+    if (color_var == '') {
+      color_vector <- rep('parcela', nrow(data_par))
+      pal <- colorFactor('viridis', color_vector)
+    } else {
+      # color palette
+      color_vector <- data_par %>%
+        pull(color_var)
+      pal <- colorBin('viridis', color_vector, 9)
+    }
     
-    # size palette
-    # size_vector <- data_parcelas[[size_var]] / max(data_parcelas[[size_var]]) * 3000
-    
+    if (size_var ==  '') {
+      size_vector <- rep(1000, nrow(data_par))
+    } else {
+      # size palette
+      size_vector <- data_par[[size_var]] / max(data_par[[size_var]]) * 3000
+    }
     
     # update map
-    leafletProxy('ifn_map', data = data_parcelas()) %>%
+    leafletProxy('ifn_map', data = data_par) %>%
       addCircles(
         group = 'Parcelas', lng = ~ long, lat = ~ lat,
         layerId = ~idparcela, stroke = FALSE, fillOpacity = 0.4,
-        fillColor = pal(color_vector), radius = 500
+        fillColor = pal(color_vector), radius = size_vector
       ) %>%
       addLegend(
         position = 'bottomright', pal = pal, values = color_vector,
