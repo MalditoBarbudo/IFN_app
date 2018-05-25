@@ -17,7 +17,10 @@ vars <- c(
   'Temperatura Minima Anual' = 'temperaturaminimaanual',
   'Temperatura Mitjana Anual' = 'temperaturamitjanaanual',
   'Temperatura Maxima Anual' = 'temperaturamaximaanual',
-  'Radiació Anual' = 'radiacioanual'
+  'Radiació Anual' = 'radiacioanual',
+  'Altitud' = 'altitud',
+  'Orientació' = 'orientacio',
+  'Pendent (%)' = 'pendentpercentatge'
 )
 
 ifns <- c(
