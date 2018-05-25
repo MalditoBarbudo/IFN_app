@@ -16,6 +16,13 @@ vars <- c(
   'Temperatura' = 'temperaturamitjanaanual'
 )
 
+ifns <- c(
+  'IFN 2' = 'ifn2',
+  'IFN 3' = 'ifn3'#,
+  # 'IFN 4' = 'ifn4',
+  
+)
+
 ## UI ####
 ui <- navbarPage(
   # opts
@@ -41,7 +48,7 @@ ui <- navbarPage(
         'ifn_map', width = '100%', height = '100%'
       ),
       
-      # overlay panel with controls and selected parcels
+      # overlay panel with controls for color & size
       absolutePanel(
         id = 'controls', class = 'panel panel-default', fixed = TRUE,
         draggable = TRUE, top = 320, left = 'auto', right = 20, bottom = 'auto',
@@ -51,6 +58,17 @@ ui <- navbarPage(
         
         selectInput('color', 'Color', vars),
         selectInput('size', 'Mida', vars)
+      ),
+      
+      # overlay panel with controls for ifn data
+      absolutePanel(
+        id = 'ifnsel', class = 'panel panel-default', fixed = TRUE,
+        draggable = TRUE, top = 320, left = 20, right = 'auto', bottom = 'auto',
+        width = 330, height = 'auto',
+        
+        h2("Dades IFN"),
+        
+        selectInput('ifn', 'Versiò', ifns)
       ),
       
       tags$div(
@@ -118,13 +136,40 @@ server <- function(input, output, session) {
     
   })
   
+  # reactive for generate data for the different IFNs
+  data_parcelas <- reactive({
+    
+    clima_name <- paste0('parcela', input$ifn, '_clima')
+    sig_name <- paste0('parcela', input$ifn, '_sig')
+    
+    data_parcelas <- tbl(oracle_ifn, clima_name) %>%
+      select(idparcela, precipitacioanual, temperaturamitjanaanual) %>%
+      inner_join(tbl(oracle_ifn, sig_name), by = 'idparcela') %>%
+      collect()
+    
+    coordinates_parcelas <- data_parcelas[,c('idparcela', 'utm_x', 'utm_y')]
+    coordinates(coordinates_parcelas) <- ~utm_x+utm_y
+    proj4string(coordinates_parcelas) <- CRS("+init=epsg:25831")
+    
+    coordinates_par_transf <- spTransform(
+      coordinates_parcelas, CRS("+proj=longlat +datum=WGS84")
+    )
+    
+    data_parcelas %>%
+      mutate(
+        long = coordinates_par_transf@coords[,1],
+        lat = coordinates_par_transf@coords[,2]
+      )
+    
+  })
+  
   # observer to maintain the color of polygons
   observe({
     color_var <- input$color
     size_var <- input$size
     
     # color palette
-    color_vector <- data_parcelas %>%
+    color_vector <- data_parcelas() %>%
       pull(color_var)
     pal <- colorBin('viridis', color_vector, 9)
     
@@ -133,7 +178,7 @@ server <- function(input, output, session) {
     
     
     # update map
-    leafletProxy('ifn_map', data = data_parcelas) %>%
+    leafletProxy('ifn_map', data = data_parcelas()) %>%
       addCircles(
         group = 'Parcelas', lng = ~ long, lat = ~ lat,
         layerId = ~idparcela, stroke = FALSE, fillOpacity = 0.4,
