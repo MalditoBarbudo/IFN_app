@@ -66,7 +66,8 @@ ui <- navbarPage(
         selectInput(
           'color', 'Color', vars, selected = 'Temperatura Mitjana Anual'
         ),
-        selectInput('size', 'Mida', vars, selected = 'Cap')
+        selectInput('size', 'Mida', vars, selected = 'Cap'),
+        checkboxInput('inverse_pal', 'Invert palette', value = FALSE)
       ),
       
       # overlay panel with controls for ifn data
@@ -100,42 +101,42 @@ server <- function(input, output, session) {
       addPolygons(
         data = polygons_municipis, group = 'Municipis',
         weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = FALSE,
+        opacity = 1.0, fill = TRUE,
         label = ~NOMMUNI,
-        # fillColor = ~colorQuantile("YlOrRd", ALAND)(ALAND),
+        fillColor = "#CF000F00",
         highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = TRUE,
-                                            fill = FALSE)
+                                            bringToFront = FALSE,
+                                            fill = TRUE, fillColor = "#CF000F00")
       ) %>%
       addPolygons(
         data = polygons_comarques, group = 'Comarques',
         weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = FALSE,
+        opacity = 1.0, fill = TRUE,
         label = ~NOMCOMAR,
-        # fillColor = ~colorQuantile("YlOrRd", ALAND)(ALAND),
+        fillColor = "#CF000F00",
         highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = TRUE,
-                                            fill = FALSE)
+                                            bringToFront = FALSE,
+                                            fill = TRUE, fillColor = "#CF000F00")
       ) %>%
       addPolygons(
         data = polygons_vegueries, group = 'Vegueries',
         weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = FALSE,
+        opacity = 1.0, fill = TRUE,
         label = ~NOMVEGUE,
-        # fillColor = ~colorQuantile("YlOrRd", ALAND)(ALAND),
+        fillColor = "#CF000F00",
         highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = TRUE,
-                                            fill = FALSE)
+                                            bringToFront = FALSE,
+                                            fill = TRUE, fillColor = "#CF000F00")
       ) %>%
       addPolygons(
         data = polygons_provincies, group = 'Provincies',
         weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = FALSE,
+        opacity = 1.0, fill = TRUE,
         label = ~NOMPROV,
-        # fillColor = ~colorQuantile("YlOrRd", ALAND)(ALAND),
+        fillColor = "#CF000F00",
         highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = TRUE,
-                                            fill = FALSE)
+                                            bringToFront = FALSE,
+                                            fill = TRUE, fillColor = "#CF000F00")
       ) %>%
       addLayersControl(
         baseGroups = c('Provincies', 'Vegueries',
@@ -185,7 +186,7 @@ server <- function(input, output, session) {
       # color palette
       color_vector <- data_par %>%
         pull(color_var)
-      pal <- colorBin('viridis', color_vector, 9)
+      pal <- colorBin('viridis', color_vector, 9, reverse = input$inverse_pal)
     }
     
     if (size_var ==  '') {
