@@ -103,7 +103,7 @@ server <- function(input, output, session) {
         weight = 1, smoothFactor = 0.5,
         opacity = 1.0, fill = TRUE,
         label = ~NOMMUNI,
-        fillColor = "#CF000F00",
+        color = '#6C7A89FF', fillColor = "#CF000F00",
         highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
                                             bringToFront = FALSE,
                                             fill = TRUE, fillColor = "#CF000F00")
@@ -113,7 +113,7 @@ server <- function(input, output, session) {
         weight = 1, smoothFactor = 0.5,
         opacity = 1.0, fill = TRUE,
         label = ~NOMCOMAR,
-        fillColor = "#CF000F00",
+        color = '#6C7A89FF', fillColor = "#CF000F00",
         highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
                                             bringToFront = FALSE,
                                             fill = TRUE, fillColor = "#CF000F00")
@@ -123,7 +123,7 @@ server <- function(input, output, session) {
         weight = 1, smoothFactor = 0.5,
         opacity = 1.0, fill = TRUE,
         label = ~NOMVEGUE,
-        fillColor = "#CF000F00",
+        color = '#6C7A89FF', fillColor = "#CF000F00",
         highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
                                             bringToFront = FALSE,
                                             fill = TRUE, fillColor = "#CF000F00")
@@ -133,7 +133,7 @@ server <- function(input, output, session) {
         weight = 1, smoothFactor = 0.5,
         opacity = 1.0, fill = TRUE,
         label = ~NOMPROV,
-        fillColor = "#CF000F00",
+        color = '#6C7A89FF', fillColor = "#CF000F00",
         highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
                                             bringToFront = FALSE,
                                             fill = TRUE, fillColor = "#CF000F00")
@@ -150,26 +150,12 @@ server <- function(input, output, session) {
   data_parcelas <- reactive({
     
     clima_name <- paste0('parcela', input$ifn, '_clima')
-    sig_name <- paste0('parcela', input$ifn, '_sig')
+    sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
     
     data_parcelas <- tbl(oracle_ifn, clima_name) %>%
       # select(idparcela, precipitacioanual, temperaturamitjanaanual) %>%
       inner_join(tbl(oracle_ifn, sig_name), by = 'idparcela') %>%
       collect()
-    
-    coordinates_parcelas <- data_parcelas[,c('idparcela', 'utm_x', 'utm_y')]
-    coordinates(coordinates_parcelas) <- ~utm_x+utm_y
-    proj4string(coordinates_parcelas) <- CRS("+init=epsg:25831")
-    
-    coordinates_par_transf <- spTransform(
-      coordinates_parcelas, CRS("+proj=longlat +datum=WGS84")
-    )
-    
-    data_parcelas %>%
-      mutate(
-        long = coordinates_par_transf@coords[,1],
-        lat = coordinates_par_transf@coords[,2]
-      )
     
   })
   
@@ -199,9 +185,10 @@ server <- function(input, output, session) {
     # update map
     leafletProxy('ifn_map', data = data_par) %>%
       addCircles(
-        group = 'Parcelas', lng = ~ long, lat = ~ lat,
+        group = 'Parcelas', lng = ~ longitude, lat = ~ latitude,
         layerId = ~idparcela, stroke = FALSE, fillOpacity = 0.4,
-        fillColor = pal(color_vector), radius = size_vector
+        fillColor = pal(color_vector), radius = size_vector,
+        options = pathOptions(className = 'parceladots')
       ) %>%
       addLegend(
         position = 'bottomright', pal = pal, values = color_vector,

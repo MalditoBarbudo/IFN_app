@@ -1,18 +1,31 @@
 # Global script
 
 # data for polygons (municipis, comarques, vegueries i provincies)
-polygons_municipis <- readOGR('shapefiles', 'bm5mv20sh0tpm1_20180101_0') %>%
-  spTransform(CRS("+proj=longlat +datum=WGS84"))
 
-polygons_comarques <- readOGR('shapefiles', 'bm5mv20sh0tpc1_20180101_0') %>%
-  spTransform(CRS("+proj=longlat +datum=WGS84"))
+################################################################################
+# CREATION data
+# 
+# 
+# polygons_municipis <- readOGR('shapefiles', 'bm5mv20sh0tpm1_20180101_0') %>%
+#   spTransform(CRS("+proj=longlat +datum=WGS84"))
+# 
+# polygons_comarques <- readOGR('shapefiles', 'bm5mv20sh0tpc1_20180101_0') %>%
+#   spTransform(CRS("+proj=longlat +datum=WGS84"))
+# 
+# polygons_vegueries <- readOGR('shapefiles', 'bm5mv20sh0tpv1_20180101_0') %>%
+#   spTransform(CRS("+proj=longlat +datum=WGS84"))
+# 
+# polygons_provincies <- readOGR('shapefiles', 'bm5mv20sh0tpp1_20180101_0') %>%
+#   spTransform(CRS("+proj=longlat +datum=WGS84"))
+# 
+# save(
+#   polygons_municipis, polygons_comarques,
+#   polygons_vegueries, polygons_provincies,
+#   file = 'shapefiles/polygons.RData'
+# )
+################################################################################
 
-polygons_vegueries <- readOGR('shapefiles', 'bm5mv20sh0tpv1_20180101_0') %>%
-  spTransform(CRS("+proj=longlat +datum=WGS84"))
-
-polygons_provincies <- readOGR('shapefiles', 'bm5mv20sh0tpp1_20180101_0') %>%
-  spTransform(CRS("+proj=longlat +datum=WGS84"))
-
+load('shapefiles/polygons.RData')
 
 # data connection
 oracle_ifn <- DBI::dbConnect(
