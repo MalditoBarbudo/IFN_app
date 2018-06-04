@@ -9,6 +9,7 @@ library(viridis)
 
 ## SOURCES ####
 source('global.R', local = TRUE)
+source('modules/mod_baseMapOutput.R')
 
 ## VARS ####
 vars <- c(
@@ -51,9 +52,7 @@ ui <- navbarPage(
       ),
       
       # map output
-      leafletOutput(
-        'ifn_map', width = '100%', height = '100%'
-      ),
+      mod_baseMapOutput('ifn_map'),
       
       # overlay panel with controls for color & size
       absolutePanel(
@@ -92,59 +91,14 @@ ui <- navbarPage(
 ## SERVER ####
 server <- function(input, output, session) {
   
-  # interactive map ####
-  output$ifn_map <- renderLeaflet({
-    
-    leaflet() %>%
-      # addProviderTiles(providers$Hydda.Base, group = 'Base') %>%
-      setView(1.519410, 41.720509, zoom = 8) %>%
-      addPolygons(
-        data = polygons_municipis, group = 'Municipis',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOMMUNI,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addPolygons(
-        data = polygons_comarques, group = 'Comarques',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOMCOMAR,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addPolygons(
-        data = polygons_vegueries, group = 'Vegueries',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOMVEGUE,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addPolygons(
-        data = polygons_provincies, group = 'Provincies',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOMPROV,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addLayersControl(
-        baseGroups = c('Provincies', 'Vegueries',
-                       'Comarques', 'Municipis'),
-        options = layersControlOptions(collapsed = FALSE)
-      )
-    
-  })
+  #### interactive map ####
+  # see mod_baseMapOutput.R file for more info about map widget
+  baseMap <- callModule(
+    mod_baseMap, 'ifn_map',
+    municipis = polygons_municipis, comarques = polygons_comarques,
+    vegueries = polygons_vegueries, provincies = polygons_provincies
+  )
+  
   
   # reactive for generate data for the different IFNs
   data_parcelas <- reactive({
