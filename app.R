@@ -5,10 +5,11 @@ library(rgdal)
 library(tidyverse)
 library(dbplyr)
 library(RPostgreSQL)
+library(pool)
 library(viridis)
 
 ## SOURCES ####
-source('global.R', local = TRUE)
+source('global.R')
 source('modules/mod_baseMapOutput.R')
 
 ## VARS ####
@@ -51,9 +52,6 @@ ui <- navbarPage(
         # includeScript("resources/gomap.js")
       ),
       
-      # map output
-      mod_baseMapOutput('ifn_map'),
-      
       # overlay panel with controls for color & size
       absolutePanel(
         id = 'controls', class = 'panel panel-default', fixed = TRUE,
@@ -63,7 +61,7 @@ ui <- navbarPage(
         h2("Pinta y Colorea"),
         
         selectInput(
-          'color', 'Color', vars, selected = 'Temperatura Mitjana Anual'
+          'color', 'Color', vars, selected = 'temperaturamitjanaanual'
         ),
         selectInput('size', 'Mida', vars, selected = 'Cap'),
         checkboxInput('inverse_pal', 'Invert palette', value = FALSE)
@@ -80,6 +78,9 @@ ui <- navbarPage(
         selectInput('ifn', 'Versiò', ifns)
       ),
       
+      # map output
+      mod_baseMapOutput('ifn_map'),
+      
       tags$div(
         id = 'cite',
         "Dades compilats pel CREAF & CTFC basats en l'IFN"
@@ -93,63 +94,65 @@ server <- function(input, output, session) {
   
   #### interactive map ####
   # see mod_baseMapOutput.R file for more info about map widget
-  baseMap <- callModule(
+  callModule(
     mod_baseMap, 'ifn_map',
     municipis = polygons_municipis, comarques = polygons_comarques,
-    vegueries = polygons_vegueries, provincies = polygons_provincies
+    vegueries = polygons_vegueries, provincies = polygons_provincies,
+    ifn = reactive(input$ifn), size = reactive(input$size),
+    color = reactive(input$color), inv_pal = reactive(input$inverse_pal)
   )
   
   
-  # reactive for generate data for the different IFNs
-  data_parcelas <- reactive({
-    
-    clima_name <- paste0('parcela', input$ifn, '_clima')
-    sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
-    
-    data_parcelas <- tbl(oracle_ifn, clima_name) %>%
-      # select(idparcela, precipitacioanual, temperaturamitjanaanual) %>%
-      inner_join(tbl(oracle_ifn, sig_name), by = 'idparcela') %>%
-      collect()
-    
-  })
-  
-  # observer to maintain the color of polygons
-  observe({
-    color_var <- input$color
-    size_var <- input$size
-    data_par <- data_parcelas()
-    
-    if (color_var == '') {
-      color_vector <- rep('parcela', nrow(data_par))
-      pal <- colorFactor('viridis', color_vector)
-    } else {
-      # color palette
-      color_vector <- data_par %>%
-        pull(color_var)
-      pal <- colorBin('viridis', color_vector, 9, reverse = input$inverse_pal)
-    }
-    
-    if (size_var ==  '') {
-      size_vector <- rep(1000, nrow(data_par))
-    } else {
-      # size palette
-      size_vector <- data_par[[size_var]] / max(data_par[[size_var]]) * 3000
-    }
-    
-    # update map
-    leafletProxy('ifn_map', data = data_par) %>%
-      addCircles(
-        group = 'Parcelas', lng = ~ longitude, lat = ~ latitude,
-        layerId = ~idparcela, stroke = FALSE, fillOpacity = 0.4,
-        fillColor = pal(color_vector), radius = size_vector,
-        options = pathOptions(className = 'parceladots')
-      ) %>%
-      addLegend(
-        position = 'bottomright', pal = pal, values = color_vector,
-        title = color_var, layerId = 'color_legend'
-      )
-    
-  })
+  # # reactive for generate data for the different IFNs
+  # data_parcelas <- reactive({
+  #   
+  #   clima_name <- paste0('parcela', input$ifn, '_clima')
+  #   sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
+  #   
+  #   data_parcelas <- tbl(oracle_ifn, clima_name) %>%
+  #     # select(idparcela, precipitacioanual, temperaturamitjanaanual) %>%
+  #     inner_join(tbl(oracle_ifn, sig_name), by = 'idparcela') %>%
+  #     collect()
+  #   
+  # })
+  # 
+  # # observer to maintain the color of polygons
+  # observe({
+  #   color_var <- input$color
+  #   size_var <- input$size
+  #   data_par <- data_parcelas()
+  #   
+  #   if (color_var == '') {
+  #     color_vector <- rep('parcela', nrow(data_par))
+  #     pal <- colorFactor('viridis', color_vector)
+  #   } else {
+  #     # color palette
+  #     color_vector <- data_par %>%
+  #       pull(color_var)
+  #     pal <- colorBin('viridis', color_vector, 9, reverse = input$inverse_pal)
+  #   }
+  #   
+  #   if (size_var ==  '') {
+  #     size_vector <- rep(1000, nrow(data_par))
+  #   } else {
+  #     # size palette
+  #     size_vector <- data_par[[size_var]] / max(data_par[[size_var]]) * 3000
+  #   }
+  #   
+  #   # update map
+  #   leafletProxy('ifn_map-baseMap', data = data_par) %>%
+  #     addCircles(
+  #       group = 'Parcelas', lng = ~ longitude, lat = ~ latitude,
+  #       layerId = ~idparcela, stroke = FALSE, fillOpacity = 0.4,
+  #       fillColor = pal(color_vector), radius = size_vector,
+  #       options = pathOptions(className = 'parceladots')
+  #     ) %>%
+  #     addLegend(
+  #       position = 'bottomright', pal = pal, values = color_vector,
+  #       title = color_var, layerId = 'color_legend'
+  #     )
+  #   
+  # })
   
 }
 

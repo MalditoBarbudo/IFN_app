@@ -28,11 +28,19 @@
 load('shapefiles/polygons.RData')
 
 # data connection
-oracle_ifn <- DBI::dbConnect(
-  RPostgreSQL::PostgreSQL(),
+# oracle_ifn <- DBI::dbConnect(
+#   RPostgreSQL::PostgreSQL(),
+#   user = 'ifn',
+#   password = rstudioapi::askForPassword('Password for ifn'),
+#   dbname = 'oracle_ifn'
+# )
+
+oracle_ifn <- dbPool(
+  drv = RPostgreSQL::PostgreSQL(),
   user = 'ifn',
   password = rstudioapi::askForPassword('Password for ifn'),
-  dbname = 'oracle_ifn'
+  dbname = 'oracle_ifn',
+  idleTimeout = 3600000
 )
 
 # data_parcelas <- tbl(oracle_ifn, 'parcelaifn2_clima') %>%
@@ -52,4 +60,9 @@ oracle_ifn <- DBI::dbConnect(
 #   mutate(long = coordinates_par_transf@coords[,1],
 #          lat = coordinates_par_transf@coords[,2])
 
-
+## On.Stop routine ####
+onStop(
+  function() {
+    poolClose(oracle_ifn)
+  }
+)
