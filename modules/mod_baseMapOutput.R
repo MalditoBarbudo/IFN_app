@@ -19,9 +19,9 @@ mod_baseMapOutput <- function(id) {
 #' @param session internal
 #' @param municipis,comarques,vegueries,provincies polygons objects for each
 #'   regional level
-#' @param ifn,size,color,inv_pal reactive expresions containing the corresponding
+#' @param size,color,inv_pal reactive expresions containing the corresponding
 #'   inputs not described in mod_baseMapOutput
-#' @param event reactive indicating the shape input click
+#' @param data_parcelas reactive with the data
 #' 
 #' @export
 #' 
@@ -29,29 +29,8 @@ mod_baseMapOutput <- function(id) {
 mod_baseMap <- function(
   input, output, session,
   municipis, comarques, vegueries, provincies,
-  ifn, size, color, inv_pal
+  size, color, inv_pal, data_parcelas
 ) {
-  
-  # data
-  data_parcelas <- reactive({
-    
-    ifn_sel <- ifn()
-    
-    # tables names, depending on the ifn selected
-    clima_name <- paste0('parcela', ifn_sel, '_clima')
-    sig_name <- paste0('parcela', ifn_sel, '_sig_etrs89')
-    cec_name <- paste0('r_cadesclcon_', ifn_sel)
-    
-    # table for
-    #   1. parcelas
-    #   2. colores y tamaños
-    #   3. popups
-    tbl(oracle_ifn, clima_name) %>%
-      inner_join(tbl(oracle_ifn, sig_name), by = 'idparcela') %>%
-      inner_join(tbl(oracle_ifn, cec_name), by = 'idparcela') %>%
-      # select(idparcela) %>%
-      collect()
-  })
   
   # actual base map
   output$baseMap <- renderLeaflet({
@@ -59,46 +38,46 @@ mod_baseMap <- function(
     leaflet() %>%
       # addProviderTiles(providers$Hydda.Base, group = 'Base') %>%
       setView(1.519410, 41.720509, zoom = 8) %>%
-      addPolygons(
-        data = municipis, group = 'Municipis',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOMMUNI, layerId = ~NOMMUNI,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addPolygons(
-        data = comarques, group = 'Comarques',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOMCOMAR, layerId = ~NOMCOMAR,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addPolygons(
-        data = vegueries, group = 'Vegueries',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOMVEGUE, layerId = ~NOMVEGUE,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addPolygons(
-        data = provincies, group = 'Provincies',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOMPROV, layerId = ~NOMPROV,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
+      # addPolygons(
+      #   data = municipis, group = 'Municipis',
+      #   weight = 1, smoothFactor = 0.5,
+      #   opacity = 1.0, fill = TRUE,
+      #   label = ~NOMMUNI, layerId = ~NOMMUNI,
+      #   color = '#6C7A89FF', fillColor = "#CF000F00",
+      #   highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
+      #                                       bringToFront = FALSE,
+      #                                       fill = TRUE, fillColor = "#CF000F00")
+      # ) %>%
+      # addPolygons(
+      #   data = comarques, group = 'Comarques',
+      #   weight = 1, smoothFactor = 0.5,
+      #   opacity = 1.0, fill = TRUE,
+      #   label = ~NOMCOMAR, layerId = ~NOMCOMAR,
+      #   color = '#6C7A89FF', fillColor = "#CF000F00",
+      #   highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
+      #                                       bringToFront = FALSE,
+      #                                       fill = TRUE, fillColor = "#CF000F00")
+      # ) %>%
+      # addPolygons(
+      #   data = vegueries, group = 'Vegueries',
+      #   weight = 1, smoothFactor = 0.5,
+      #   opacity = 1.0, fill = TRUE,
+      #   label = ~NOMVEGUE, layerId = ~NOMVEGUE,
+      #   color = '#6C7A89FF', fillColor = "#CF000F00",
+      #   highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
+      #                                       bringToFront = FALSE,
+      #                                       fill = TRUE, fillColor = "#CF000F00")
+      # ) %>%
+      # addPolygons(
+      #   data = provincies, group = 'Provincies',
+      #   weight = 1, smoothFactor = 0.5,
+      #   opacity = 1.0, fill = TRUE,
+      #   label = ~NOMPROV, layerId = ~NOMPROV,
+      #   color = '#6C7A89FF', fillColor = "#CF000F00",
+      #   highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
+      #                                       bringToFront = FALSE,
+      #                                       fill = TRUE, fillColor = "#CF000F00")
+      # ) %>%
       addLayersControl(
         baseGroups = c('Provincies', 'Vegueries',
                        'Comarques', 'Municipis'),
@@ -126,12 +105,12 @@ mod_baseMap <- function(
       
       popup_content <- as.character(
         tagList(
-          h4(paste0('Parcela: #', data_sel_site[['idparcela']])),
-          strong(sprintf('altitud: %1.f m', data_sel_site[['altitud']])),
+          h4(paste0('Parcela: #', data_sel_site[['idparcela']][1])),
+          strong(sprintf('altitud: %1.f m', data_sel_site[['altitud']][1])),
           br(),
-          strong(sprintf('pendent: %1.f %%', data_sel_site[['pendentpercentatge']])),
+          strong(sprintf('pendent: %1.f %%', data_sel_site[['pendentpercentatge']][1])),
           br(),
-          strong(sprintf('nivell de protecció: %s', data_sel_site[['proteccio']]))
+          strong(sprintf('nivell de protecció: %s', data_sel_site[['proteccio']][1]))
         )
       )
       

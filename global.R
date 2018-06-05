@@ -6,16 +6,20 @@
 # CREATION data
 # 
 # 
-# polygons_municipis <- readOGR('shapefiles', 'bm5mv20sh0tpm1_20180101_0') %>%
+# polygons_municipis <- readOGR('shapefiles', 'bm5mv20sh0tpm1_20180101_0',
+#                               GDAL1_integer64_policy = TRUE) %>%
 #   spTransform(CRS("+proj=longlat +datum=WGS84"))
 # 
-# polygons_comarques <- readOGR('shapefiles', 'bm5mv20sh0tpc1_20180101_0') %>%
+# polygons_comarques <- readOGR('shapefiles', 'bm5mv20sh0tpc1_20180101_0',
+#                               GDAL1_integer64_policy = TRUE) %>%
 #   spTransform(CRS("+proj=longlat +datum=WGS84"))
 # 
-# polygons_vegueries <- readOGR('shapefiles', 'bm5mv20sh0tpv1_20180101_0') %>%
+# polygons_vegueries <- readOGR('shapefiles', 'bm5mv20sh0tpv1_20180101_0',
+#                               GDAL1_integer64_policy = TRUE) %>%
 #   spTransform(CRS("+proj=longlat +datum=WGS84"))
 # 
-# polygons_provincies <- readOGR('shapefiles', 'bm5mv20sh0tpp1_20180101_0') %>%
+# polygons_provincies <- readOGR('shapefiles', 'bm5mv20sh0tpp1_20180101_0',
+#                               GDAL1_integer64_policy = TRUE) %>%
 #   spTransform(CRS("+proj=longlat +datum=WGS84"))
 # 
 # save(
