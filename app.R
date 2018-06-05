@@ -79,11 +79,11 @@ ui <- navbarPage(
         selectInput('ifn', 'Versiò', ifns)
       ),
       
-      # conditional panel for shape info
-      mod_shapeCondPanelUI('info_shape'),
-      
       # map output
       mod_baseMapOutput('ifn_map'),
+      
+      # conditional panel for shape info
+      mod_shapeCondPanelUI('info_shape'),
       
       tags$div(
         id = 'cite',
@@ -119,7 +119,7 @@ server <- function(input, output, session) {
   })
   
   # see mod_baseMapOutput.R file for more info about map widget
-  callModule(
+  ifn_map <- callModule(
     mod_baseMap, 'ifn_map',
     municipis = polygons_municipis, comarques = polygons_comarques,
     vegueries = polygons_vegueries, provincies = polygons_provincies,
@@ -129,7 +129,8 @@ server <- function(input, output, session) {
   
   # conditional panel for shapes info (parcelas y territorios)
   callModule(
-    mod_shapeCondPanel, 'info_shape', data = data_parcelas
+    mod_shapeCondPanel, 'info_shape', data = data_parcelas,
+    baseMap_reactives = ifn_map
   )
   
   

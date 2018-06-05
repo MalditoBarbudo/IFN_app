@@ -29,15 +29,7 @@
 # )
 ################################################################################
 
-load('shapefiles/polygons.RData')
-
-# data connection
-# oracle_ifn <- DBI::dbConnect(
-#   RPostgreSQL::PostgreSQL(),
-#   user = 'ifn',
-#   password = rstudioapi::askForPassword('Password for ifn'),
-#   dbname = 'oracle_ifn'
-# )
+# load('shapefiles/polygons.RData')
 
 oracle_ifn <- dbPool(
   drv = RPostgreSQL::PostgreSQL(),
@@ -46,23 +38,6 @@ oracle_ifn <- dbPool(
   dbname = 'oracle_ifn',
   idleTimeout = 3600000
 )
-
-# data_parcelas <- tbl(oracle_ifn, 'parcelaifn2_clima') %>%
-#   select(idparcela, precipitacioanual, temperaturamitjanaanual) %>%
-#   inner_join(tbl(oracle_ifn, 'parcelaifn2_sig'), by = 'idparcela') %>%
-#   collect()
-# 
-# coordinates_parcelas <- data_parcelas[,c('idparcela', 'utm_x', 'utm_y')]
-# coordinates(coordinates_parcelas) <- ~utm_x+utm_y
-# proj4string(coordinates_parcelas) <- CRS("+init=epsg:25831")
-# 
-# coordinates_par_transf <- spTransform(
-#   coordinates_parcelas, CRS("+proj=longlat +datum=WGS84")
-# )
-# 
-# data_parcelas <- data_parcelas %>%
-#   mutate(long = coordinates_par_transf@coords[,1],
-#          lat = coordinates_par_transf@coords[,2])
 
 ## On.Stop routine ####
 onStop(

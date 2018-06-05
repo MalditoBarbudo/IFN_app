@@ -12,18 +12,16 @@ mod_shapeCondPanelUI <- function(id) {
   tagList(
     
     conditionalPanel(
-      condition = "input.baseMap_shape_click != ''",
-      
+      condition = "typeof input.baseMap_shape_click !== 'undefined'",
+      # condition = "1 == 1",
       absolutePanel(
         id = 'shape_control', class = 'panel panel-default', fixed = TRUE,
         draggable = TRUE, top = 520, left = 20, right = 'auto', bottom = 'auto',
         width = 330, height = 'auto',
         
-        h4('Inspector de parcel·les/territoris'),
+        uiOutput(ns('info_shape')),
         br(),
-        textOutput(ns('nom_shape')),
-        br(),
-        plotOutput(ns('donut'), height = '100px'),
+        plotOutput(ns('donut'), height = '250px'),
         br(),
         "Qué más va aqui???"
       )
@@ -36,47 +34,49 @@ mod_shapeCondPanelUI <- function(id) {
 #' @param output internal
 #' @param session internal
 #' @param data reactive with the data
+#' @param event shape click event
 #' 
 #' @export
 #' 
 #' @rdname mod_shapeCondPanel
 mod_shapeCondPanel <- function(
   input, output, session,
-  data
+  data, baseMap_reactives
 ) {
   
   # reactive to get the data to generate the conditional panel
   shape_data <- eventReactive(
-    eventExpr = input$baseMap_shape_click,
+    eventExpr = baseMap_reactives$ifn_map_shape_click,
     valueExpr = {
       
-      event <- input$baseMap_shape_click
+      click <- baseMap_reactives$ifn_map_shape_click
+      
       data_parceles <- data()
-      if (!is.na(as.numeric(event$id))) {
+      if (!is.na(as.numeric(click$id))) {
         # parcelas
         data_parceles %>%
-          filter(id_parcela == event$id)
+          filter(idparcela == click$id)
         
       } else {
         # territoris
-        if (event$id %in% unique(data_parcelas[['provincia']])) {
+        if (click$id %in% unique(data_parcelas[['provincia']])) {
           data_terriori <- data_parceles %>%
-            filter(provincia == event$id)
+            filter(provincia == click$id)
         }
         
-        if (event$id %in% unique(data_parcelas[['vegueria']])) {
+        if (click$id %in% unique(data_parcelas[['vegueria']])) {
           data_terriori <- data_parceles %>%
-            filter(vegueria == event$id)
+            filter(vegueria == click$id)
         }
         
-        if (event$id %in% unique(data_parcelas[['comarca']])) {
+        if (click$id %in% unique(data_parcelas[['comarca']])) {
           data_terriori <- data_parceles %>%
-            filter(comarca == event$id)
+            filter(comarca == click$id)
         }
         
-        if (event$id %in% unique(data_parcelas[['municipi']])) {
+        if (click$id %in% unique(data_parcelas[['municipi']])) {
           data_terriori <- data_parceles %>%
-            filter(municipi == event$id)
+            filter(municipi == click$id)
         }
       }
     }
@@ -85,18 +85,45 @@ mod_shapeCondPanel <- function(
   # donut plot
   output$donut <- renderPlot({
     
-    if (length(unique(shape_data()[['idparcela']])) < 2) {
-      shape_data() %>%
+    plot_data <- shape_data()
+    if (length(unique(plot_data[['idparcela']])) < 2) {
+      plot_data %>%
         ggplot(aes(x = 2, y = percdens, fill = idcaducesclerconif)) +
         geom_col() +
         coord_polar(theta = 'y') +
-        scale_x_continuous(limits = c(0, 2.5)) +
-        scale_fill_viridis(discrete = TRUE, end = 0.5, name = 'grup funcional') +
+        scale_x_continuous(limits = c(.5, 2.5)) +
+        # scale_fill_viridis(discrete = TRUE, end = 0.5, name = 'densitat %') +
+        scale_fill_manual(name = 'densitat %', values = c(
+          "Conífera" = "#440154FF",
+          "Caducifoli" = "#3B528BFF",
+          "Esclerofil·le" = "#21908CFF"
+        )) +
         theme_void() +
         theme(legend.position = c(.5,.5))
     } else {
       return()
     }
+  })
+  
+  # text output
+  output$info_shape <- renderUI({
+    
+    click <- baseMap_reactives$ifn_map_shape_click
+    data_sel_site <- shape_data()
+    
+    if (length(unique(data_sel_site[['idparcela']])) < 2) {
+      tagList(
+        h4(paste0('Parcela: #', data_sel_site[['idparcela']][1])),
+        strong(sprintf('altitud: %1.f m', data_sel_site[['altitud']][1])),
+        br(),
+        strong(sprintf('pendent: %1.f %%', data_sel_site[['pendentpercentatge']][1])),
+        br(),
+        strong(sprintf('nivell de protecció: %s', data_sel_site[['proteccio']][1]))
+      )
+    } else {
+      return()
+    }
+    
   })
   
 }

@@ -58,7 +58,25 @@ div.outer {
   transition: opacity 500ms 1s;
   z-index: 999;
 }
-#controls:ifnsel {
+#ifnsel:hover {
+  /* Fade in while hovering */
+  opacity: 0.95;
+  transition-delay: 0;
+}
+
+/* Shape conditional selector */
+#shape_control {
+  /* Appearance */
+  background-color: white;
+  padding: 0 20px 20px 20px;
+  cursor: move;
+  /* Fade out while not hovering */
+  opacity: 0.65;
+  zoom: 0.9;
+  transition: opacity 500ms 1s;
+  z-index: 999;
+}
+#shape_control:hover {
   /* Fade in while hovering */
   opacity: 0.95;
   transition-delay: 0;

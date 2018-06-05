@@ -87,53 +87,44 @@ mod_baseMap <- function(
   })
   
   # popup observer
-  observe({
-    # event
-    event <- input$baseMap_shape_click
-    
-    # popup content and leaflet proxy function
-    parcela_popup <- function(id, lat, lng) {
-      # popup_content <- as.character(
-      #   tagList(
-      #     tags$h4('Parcela #', data_sel_site[['idparcela']]),
-      #     tags$p('altitud (m): ', data_sel_site[['altitud']]),
-      #     tags$p('pendent (%): ', data_sel_site[['pendentpercentatge']]),
-      #     tags$p('nivell de protecció: ', data_sel_site[['proteccio']]),
-      #     tags$p('nom bosc: ', data_sel_site[['nomforest']])
-      #   )
-      # )
-      
-      popup_content <- as.character(
-        tagList(
-          h4(paste0('Parcela: #', data_sel_site[['idparcela']][1])),
-          strong(sprintf('altitud: %1.f m', data_sel_site[['altitud']][1])),
-          br(),
-          strong(sprintf('pendent: %1.f %%', data_sel_site[['pendentpercentatge']][1])),
-          br(),
-          strong(sprintf('nivell de protecció: %s', data_sel_site[['proteccio']][1]))
-        )
-      )
-      
-      leafletProxy('baseMap') %>%
-        addPopups(lng, lat, popup_content, layerId = id)
-    }
-    
-    # check if event is null
-    if (is.null(event)) {
-      return()
-    } else {
-      # check if parcela or area
-      if (!is.na(as.numeric(event$id))) {
-        # data
-        data_sel_site <- data_parcelas() %>%
-          filter(idparcela == event$id)
-        isolate(parcela_popup(event$id, event$lat, event$lng))
-      } else {
-        return()
-      }
-    }
-    
-  })
+  # observe({
+  #   # event
+  #   event <- input$baseMap_shape_click
+  #   
+  #   # popup content and leaflet proxy function
+  #   parcela_popup <- function(id, lat, lng) {
+  #     
+  #     popup_content <- as.character(
+  #       tagList(
+  #         h4(paste0('Parcela: #', data_sel_site[['idparcela']][1])),
+  #         strong(sprintf('altitud: %1.f m', data_sel_site[['altitud']][1])),
+  #         br(),
+  #         strong(sprintf('pendent: %1.f %%', data_sel_site[['pendentpercentatge']][1])),
+  #         br(),
+  #         strong(sprintf('nivell de protecció: %s', data_sel_site[['proteccio']][1]))
+  #       )
+  #     )
+  #     
+  #     leafletProxy('baseMap') %>%
+  #       addPopups(lng, lat, popup_content, layerId = id)
+  #   }
+  #   
+  #   # check if event is null
+  #   if (is.null(event)) {
+  #     return()
+  #   } else {
+  #     # check if parcela or area
+  #     if (!is.na(as.numeric(event$id))) {
+  #       # data
+  #       data_sel_site <- data_parcelas() %>%
+  #         filter(idparcela == event$id)
+  #       isolate(parcela_popup(event$id, event$lat, event$lng))
+  #     } else {
+  #       return()
+  #     }
+  #   }
+  #   
+  # })
   
   # observer for color and size of plot circles
   observe({
@@ -164,7 +155,8 @@ mod_baseMap <- function(
     leafletProxy('baseMap', data = data_par) %>%
       addCircles(
         group = 'Parcelas', lng = ~longitude, lat = ~latitude,
-        layerId = ~idparcela, stroke = FALSE, fillOpacity = 0.4,
+        label = ~idparcela, layerId = ~idparcela,
+        stroke = FALSE, fillOpacity = 0.4,
         fillColor = pal(color_vector), radius = size_vector,
         options = pathOptions(className = 'parceladots')
       ) %>%
@@ -173,5 +165,15 @@ mod_baseMap <- function(
         title = color_var, layerId = 'color_legend'
       )
   })
+  
+  # prepare the returning reactive values
+  baseMap_reactives <- reactiveValues()
+  
+  # add here all the inputs from the map needed
+  observe({
+    baseMap_reactives$ifn_map_shape_click <- input$baseMap_shape_click
+  })
+  
+  return(baseMap_reactives)
   
 }
