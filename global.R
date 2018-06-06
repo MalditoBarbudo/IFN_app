@@ -5,21 +5,20 @@
 ################################################################################
 # CREATION data
 # 
-# 
-# polygons_municipis <- readOGR('shapefiles', 'bm5mv20sh0tpm1_20180101_0',
-#                               GDAL1_integer64_policy = TRUE) %>%
+# polygons_municipis <- readOGR('shapefiles', 'bm1000mv33sh1fpm1r170',
+#                               GDAL1_integer64_policy = FALSE) %>%
 #   spTransform(CRS("+proj=longlat +datum=WGS84"))
 # 
-# polygons_comarques <- readOGR('shapefiles', 'bm5mv20sh0tpc1_20180101_0',
-#                               GDAL1_integer64_policy = TRUE) %>%
+# polygons_comarques <- readOGR('shapefiles', 'bm1000mv33sh1fpc1r170',
+#                               GDAL1_integer64_policy = FALSE) %>%
 #   spTransform(CRS("+proj=longlat +datum=WGS84"))
 # 
-# polygons_vegueries <- readOGR('shapefiles', 'bm5mv20sh0tpv1_20180101_0',
-#                               GDAL1_integer64_policy = TRUE) %>%
+# polygons_vegueries <- readOGR('shapefiles', 'bm500mv20sh0tpv1_20180101_0',
+#                               GDAL1_integer64_policy = FALSE) %>%
 #   spTransform(CRS("+proj=longlat +datum=WGS84"))
 # 
-# polygons_provincies <- readOGR('shapefiles', 'bm5mv20sh0tpp1_20180101_0',
-#                               GDAL1_integer64_policy = TRUE) %>%
+# polygons_provincies <- readOGR('shapefiles', 'bm1000mv33sh1fpp1r170',
+#                                GDAL1_integer64_policy = FALSE) %>%
 #   spTransform(CRS("+proj=longlat +datum=WGS84"))
 # 
 # save(
@@ -29,7 +28,7 @@
 # )
 ################################################################################
 
-# load('shapefiles/polygons.RData')
+load('shapefiles/polygons.RData')
 
 oracle_ifn <- dbPool(
   drv = RPostgreSQL::PostgreSQL(),
