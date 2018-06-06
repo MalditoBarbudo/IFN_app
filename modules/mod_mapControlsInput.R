@@ -40,7 +40,7 @@ mod_mapControlsInput <- function(id) {
         id = 'ifn_sel',
         h2("Dades IFN"),
         
-        selectInput(ns('ifn'), 'Versiò', ifns)
+        selectInput(ns('ifn'), 'Versiò', ifns, selected = 'ifn2')
       ),
       
       # pinta y colorea selector
@@ -71,16 +71,16 @@ mod_mapControls <- function(
   input, output, session
 ) {
   
-  map_controls_reactives <- reactiveValues()
+  mapControls_reactives <- reactiveValues()
   
   # add here all the reactive expression that must be used for other modules o
   # the general app
   observe({
-    map_controls_reactives$ifn <- input$ifn
-    map_controls_reactives$color <- input$color
-    map_controls_reactives$size <- input$size
-    map_controls_reactives$inverse_pal <- input$inverse_pal
+    mapControls_reactives$ifn <- input$ifn
+    mapControls_reactives$color <- input$color
+    mapControls_reactives$size <- input$size
+    mapControls_reactives$inverse_pal <- input$inverse_pal
   })
   
-  return(map_controls_reactives)
+  return(mapControls_reactives)
 }
