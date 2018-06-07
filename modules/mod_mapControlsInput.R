@@ -29,31 +29,41 @@ mod_mapControlsInput <- function(id) {
   )
   
   tagList(
-    absolutePanel(
-      id = 'controls',  class = 'panel panel-default', fixed = TRUE,
-      draggable = TRUE, top = 320, left = 20, right = 'auto', bottom = 'auto',
-      width = 330, height = 'auto',
+    # divs to each element, to be able to use shinyjs to play with them
+    # ifn data selector
+    div(
+      id = 'ifn_sel',
+      h4("Dades IFN"),
       
-      # divs to each element, to be able to use shinyjs to play with them
-      # ifn data selector
-      div(
-        id = 'ifn_sel',
-        h2("Dades IFN"),
-        
-        selectInput(ns('ifn'), 'Versiò', ifns, selected = 'ifn2')
-      ),
+      selectInput(ns('ifn'), 'Versiò', ifns, selected = 'ifn2')
+    ),
+    
+    # administrative divisions
+    div(
+      id = 'admin_divs',
+      h4("Divisions administratives"),
       
-      # pinta y colorea selector
-      div(
-        id = 'colour_and_size',
-        h2("Pinta y Colorea"),
-        
-        selectInput(
-          ns('color'), 'Color', vars, selected = 'temperaturamitjanaanual'
+      radioButtons(
+        ns('territori'), '',
+        choices = c(
+          Provincies = 'provincies', Vegueries = 'vegueries',
+          Comarques = 'comarques', Municipis = 'municipis'
         ),
-        selectInput(ns('size'), 'Mida', vars, selected = 'Cap'),
-        checkboxInput(ns('inverse_pal'), 'Invertir colors', value = FALSE)
+        inline = TRUE,
+        selected = 'provincies'
       )
+    ),
+    
+    # pinta y colorea selector
+    div(
+      id = 'colour_and_size',
+      h4("Pinta y Colorea"),
+      
+      selectInput(
+        ns('color'), 'Color', vars, selected = 'temperaturamitjanaanual'
+      ),
+      checkboxInput(ns('inverse_pal'), 'Invertir colors', value = FALSE),
+      selectInput(ns('size'), 'Mida', vars, selected = 'Cap')
     )
   )
   
@@ -80,7 +90,9 @@ mod_mapControls <- function(
     mapControls_reactives$color <- input$color
     mapControls_reactives$size <- input$size
     mapControls_reactives$inverse_pal <- input$inverse_pal
+    mapControls_reactives$territori <- input$territori
   })
   
+  # return the 
   return(mapControls_reactives)
 }

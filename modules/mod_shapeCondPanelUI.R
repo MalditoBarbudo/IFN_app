@@ -9,19 +9,18 @@ mod_shapeCondPanelUI <- function(id) {
   
   ns <- NS(id)
   
-  tagList(
-    absolutePanel(
-      id = 'shape_control', class = 'panel panel-default', fixed = TRUE,
-      draggable = TRUE, top = 520, left = 20, right = 'auto', bottom = 'auto',
-      width = 330, height = 'auto',
-      
-      uiOutput(ns('info_shape')),
-      br(),
-      plotOutput(ns('donut'), height = '250px'),
-      br(),
-      "Qué más va aqui???",
-      br(),
-      textOutput(ns('debug'))
+  hidden(
+    div(
+      id = ns('cond_shape'),
+      tagList(
+        uiOutput(ns('info_shape')),
+        br(),
+        plotOutput(ns('donut'), height = '250px'),
+        br(),
+        "Qué más va aqui???",
+        br(),
+        textOutput(ns('debug'))
+      )
     )
   )
 }
@@ -30,23 +29,23 @@ mod_shapeCondPanelUI <- function(id) {
 #' @param input internal
 #' @param output internal
 #' @param session internal
-#' @param data reactive with the data
-#' @param baseMap_reactives reactive values list obtained from mod_baseMap
+#' @param data reactive with the data from dataReactive module
+#' @param map_inputs reactive input values from mod_baseMap module
 #' 
 #' @export
 #' 
 #' @rdname mod_shapeCondPanel
 mod_shapeCondPanel <- function(
   input, output, session,
-  data, baseMap_reactives
+  data, map_inputs
 ) {
   
   # reactive to get the data to generate the conditional panel
   shape_data <- eventReactive(
-    eventExpr = baseMap_reactives$ifn_map_shape_click,
+    eventExpr = map_inputs$shape_click,
     valueExpr = {
       
-      click <- baseMap_reactives$ifn_map_shape_click
+      click <- map_inputs$shape_click
       
       data_parceles <- data()
       if (click$group == 'Parcelas') {
@@ -83,7 +82,7 @@ mod_shapeCondPanel <- function(
   output$donut <- renderPlot({
     
     plot_data <- shape_data()
-    click <- baseMap_reactives$ifn_map_shape_click
+    click <- map_inputs$shape_click
     
     if (click$group == 'Parcelas') {
       plot_data %>%
@@ -119,7 +118,7 @@ mod_shapeCondPanel <- function(
   # text output
   output$info_shape <- renderUI({
     
-    click <- baseMap_reactives$ifn_map_shape_click
+    click <- map_inputs$shape_click
     data_sel_site <- shape_data()
     
     if (click$group == 'Parcelas') {
@@ -140,16 +139,26 @@ mod_shapeCondPanel <- function(
   })
   
   output$debug <- renderPrint({
-    baseMap_reactives$ifn_map_shape_click
+    map_inputs$map_click
   })
   
   # observer to toggle the "conditional shape panel"
   observe({
     shinyjs::toggleElement(
-      id = "shape_control", anim = TRUE, animType = 'fade', time = 0.5,
-      condition = !is.null(baseMap_reactives$ifn_map_shape_click) &&
-        baseMap_reactives$ifn_map_shape_click$id != ""
+      id = "cond_shape", anim = TRUE, animType = 'fade', time = 0.5,
+      condition = !is.null(map_inputs$shape_click) &&
+        map_inputs$shape_click$id != ""
     )
   })
+  
+  # observer to hide the cond panel if baseMap is clicked
+  observeEvent(
+    eventExpr = map_inputs$map_click,
+    handlerExpr = {
+      shinyjs::hideElement(
+        "cond_shape", anim = TRUE, animType = 'fade', time = 0.5
+      )
+    }
+  )
   
 }

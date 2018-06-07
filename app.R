@@ -14,6 +14,7 @@ source('global.R')
 source('modules/mod_baseMapOutput.R')
 source('modules/mod_shapeCondPanelUI.R')
 source('modules/mod_mapControlsInput.R')
+source('modules/mod_dataReactiveOutput.R')
 
 ## VARS ####
 # vars <- c(
@@ -59,40 +60,24 @@ ui <- tagList(
           # includeScript("resources/gomap.js")
         ),
         
-        # # overlay panel with controls for color & size
-        # absolutePanel(
-        #   id = 'controls', class = 'panel panel-default', fixed = TRUE,
-        #   draggable = TRUE, top = 320, left = 'auto', right = 20, bottom = 'auto',
-        #   width = 330, height = 'auto',
-        #   
-        #   h2("Pinta y Colorea"),
-        #   
-        #   selectInput(
-        #     'color', 'Color', vars, selected = 'temperaturamitjanaanual'
-        #   ),
-        #   selectInput('size', 'Mida', vars, selected = 'Cap'),
-        #   checkboxInput('inverse_pal', 'Invert palette', value = FALSE)
-        # ),
-        # 
-        # # overlay panel with controls for ifn data
-        # absolutePanel(
-        #   id = 'ifnsel', class = 'panel panel-default', fixed = TRUE,
-        #   draggable = TRUE, top = 320, left = 20, right = 'auto', bottom = 'auto',
-        #   width = 330, height = 'auto',
-        #   
-        #   h2("Dades IFN"),
-        #   
-        #   selectInput('ifn', 'Versiò', ifns)
-        # ),
+        absolutePanel(
+          id = 'controls', class = 'panel panel-default', fixed = TRUE,
+          draggable = TRUE, top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+          width = 330, height = 'auto',
+          
+          # panel title
+          h2('Juega con el mapa'),
+          
+          # modules to include
+          # controls
+          mod_mapControlsInput('map_controls'),
+          
+          # conditional panel for shape info
+          mod_shapeCondPanelUI('info_shape')
+        ),
         
-        # controls
-        mod_mapControlsInput('map_controls'),
-        
-        # map output
+        # map module
         mod_baseMapOutput('ifn_map'),
-        
-        # conditional panel for shape info
-        # mod_shapeCondPanelUI('info_shape'),
         
         tags$div(
           id = 'cite',
@@ -112,19 +97,24 @@ server <- function(input, output, session) {
     mod_mapControls, 'map_controls'
   )
   
+  # data module
+  data_parcelas <- callModule(
+    mod_dataReactive, 'data_parcelas', ifn = reactive(map_controls$ifn)
+  )
+  
   # see mod_baseMapOutput.R file for more info about map widget
   ifn_map <- callModule(
     mod_baseMap, 'ifn_map',
     municipis = polygons_municipis, comarques = polygons_comarques,
     vegueries = polygons_vegueries, provincies = polygons_provincies,
-    map_controls = map_controls
+    map_controls = map_controls, data = data_parcelas
   )
   
   # conditional panel for shapes info (parcelas y territorios)
-  # callModule(
-  #   mod_shapeCondPanel, 'info_shape', data = map_controls$data_parcelas,
-  #   baseMap_reactives = ifn_map
-  # )
+  callModule(
+    mod_shapeCondPanel, 'info_shape',
+    map_inputs = ifn_map, data = data_parcelas
+  )
 }
 
 # Run the application 

@@ -20,6 +20,7 @@ mod_baseMapOutput <- function(id) {
 #' @param municipis,comarques,vegueries,provincies polygons objects for each
 #'   regional level
 #' @param map_controls reactives from mod_mapControl module
+#' @param data reactive from mod_dataReactive module
 #' 
 #' @export
 #' 
@@ -27,70 +28,24 @@ mod_baseMapOutput <- function(id) {
 mod_baseMap <- function(
   input, output, session,
   municipis,comarques,vegueries,provincies,
-  map_controls
+  map_controls, data
 ) {
+  
+  
+  nom_comarques <- as.character(comarques@data$NOM_COMAR)
+  nom_municipis <- as.character(municipis@data$NOM_MUNI)
+  nom_vegueries <- as.character(vegueries@data$NOMVEGUE)
+  nom_provincies <- as.character(provincies@data$NOM_PROV)
   
   # actual base map
   output$baseMap <- renderLeaflet({
     
-    nom_comarques <- as.character(comarques@data$NOM_COMAR)
-    nom_municipis <- as.character(municipis@data$NOM_MUNI)
-    nom_vegueries <- as.character(vegueries@data$NOMVEGUE)
-    nom_provincies <- as.character(provincies@data$NOM_PROV)
-    
     leaflet() %>%
       # addProviderTiles(providers$Hydda.Base, group = 'Base') %>%
       setView(1.519410, 41.720509, zoom = 8) %>%
-      addPolygons(
-        data = municipis, group = 'Municipis',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOM_MUNI,
-        layerId = nom_municipis,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addPolygons(
-        data = comarques, group = 'Comarques',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOM_COMAR,
-        layerId = nom_comarques,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addPolygons(
-        data = vegueries, group = 'Vegueries',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOMVEGUE,
-        layerId = nom_vegueries,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addPolygons(
-        data = provincies, group = 'Provincies',
-        weight = 1, smoothFactor = 0.5,
-        opacity = 1.0, fill = TRUE,
-        label = ~NOM_PROV,
-        layerId = nom_provincies,
-        color = '#6C7A89FF', fillColor = "#CF000F00",
-        highlightOptions = highlightOptions(color = "#CF000F", weight = 2,
-                                            bringToFront = FALSE,
-                                            fill = TRUE, fillColor = "#CF000F00")
-      ) %>%
-      addLayersControl(
-        baseGroups = c('Provincies', 'Vegueries',
-                       'Comarques', 'Municipis'),
-        options = layersControlOptions(collapsed = FALSE)
-      )
-    
+      # map panes to put the polygons and plots
+      addMapPane('territoris', zIndex = 410) %>%
+      addMapPane('parceles', zIndex = 420)
   })
   
   # popup observer
@@ -133,25 +88,110 @@ mod_baseMap <- function(
   #   
   # })
   
-  # data
-  data_parcelas <- reactive({
+  # observer for polygons. We use this instead of add polygons directly in the
+  # map and control them with the default addLayersControl because some ids
+  # are identical between polygon layers (i.e. Barcelona or Lleida) causing
+  # some polygons to dissapear. In this way (less efficient, I'm afraid), we
+  # control the polygons drawing with a classic input - observer pair, as we
+  # do with the plots dots.
+  observe({
     
-    ifn_sel <- map_controls$ifn
+    # variables
+    territori_val <- map_controls$territori
     
-    # tables names, depending on the ifn selected
-    clima_name <- paste0('parcela', ifn_sel, '_clima')
-    sig_name <- paste0('parcela', ifn_sel, '_sig_etrs89')
-    cec_name <- paste0('r_cadesclcon_', ifn_sel)
+    if (is.null(territori_val)) {
+      return()
+    }
     
-    # table for
-    #   1. parcelas
-    #   2. colores y tamaños
-    #   3. popups
-    tbl(oracle_ifn, clima_name) %>%
-      inner_join(tbl(oracle_ifn, sig_name), by = 'idparcela') %>%
-      inner_join(tbl(oracle_ifn, cec_name), by = 'idparcela') %>%
-      # select(idparcela) %>%
-      collect()
+    if (territori_val == 'provincies') {
+      leafletProxy('baseMap') %>%
+        clearGroup('Vegueries') %>%
+        clearGroup('Comarques') %>%
+        clearGroup('Municipis') %>%
+        addPolygons(
+          data = provincies, group = 'Provincies',
+          weight = 1, smoothFactor = 0.5,
+          opacity = 1.0, fill = TRUE,
+          label = ~NOM_PROV,
+          layerId = nom_provincies,
+          color = '#6C7A89FF', fillColor = "#CF000F00",
+          highlightOptions = highlightOptions(
+            color = "#CF000F", weight = 2,
+            bringToFront = FALSE,
+            fill = TRUE, fillColor = "#CF000F00"
+          ),
+          options = pathOptions(
+            pane = 'territoris'
+          )
+        )
+    } else {
+      if (territori_val == 'vegueries') {
+        leafletProxy('baseMap') %>%
+          clearGroup('Provincies') %>%
+          clearGroup('Comarques') %>%
+          clearGroup('Municipis') %>%
+          addPolygons(
+            data = vegueries, group = 'Vegueries',
+            weight = 1, smoothFactor = 0.5,
+            opacity = 1.0, fill = TRUE,
+            label = ~NOMVEGUE,
+            layerId = nom_vegueries,
+            color = '#6C7A89FF', fillColor = "#CF000F00",
+            highlightOptions = highlightOptions(
+              color = "#CF000F", weight = 2,
+              bringToFront = FALSE,
+              fill = TRUE, fillColor = "#CF000F00"
+            ),
+            options = pathOptions(
+              pane = 'territoris'
+            )
+        )
+      } else {
+        if (territori_val == 'comarques') {
+          leafletProxy('baseMap') %>%
+            clearGroup('Vegueries') %>%
+            clearGroup('Provincies') %>%
+            clearGroup('Municipis') %>%
+            addPolygons(
+              data = comarques, group = 'Comarques',
+              weight = 1, smoothFactor = 0.5,
+              opacity = 1.0, fill = TRUE,
+              label = ~NOM_COMAR,
+              layerId = nom_comarques,
+              color = '#6C7A89FF', fillColor = "#CF000F00",
+              highlightOptions = highlightOptions(
+                color = "#CF000F", weight = 2,
+                bringToFront = FALSE,
+                fill = TRUE, fillColor = "#CF000F00"
+              ),
+              options = pathOptions(
+                pane = 'territoris'
+              )
+            )
+        } else {
+          leafletProxy('baseMap') %>%
+            clearGroup('Vegueries') %>%
+            clearGroup('Comarques') %>%
+            clearGroup('Provincies') %>%
+            addPolygons(
+              data = municipis, group = 'Municipis',
+              weight = 1, smoothFactor = 0.5,
+              opacity = 1.0, fill = TRUE,
+              label = ~NOM_MUNI,
+              layerId = nom_municipis,
+              color = '#6C7A89FF', fillColor = "#CF000F00",
+              highlightOptions = highlightOptions(
+                color = "#CF000F", weight = 2,
+                bringToFront = FALSE,
+                fill = TRUE, fillColor = "#CF000F00"
+              ),
+              options = pathOptions(
+                pane = 'territoris'
+              )
+            )
+        }
+      }
+    }
   })
   
   # observer for color and size of plot circles
@@ -161,7 +201,7 @@ mod_baseMap <- function(
     color_var <- map_controls$color
     size_var <- map_controls$size
     reverse <- map_controls$inverse_pal
-    data_par <- data_parcelas()
+    data_par <- data()
     
     # color vector and palette
     if (color_var == '') {
@@ -181,12 +221,13 @@ mod_baseMap <- function(
     
     # update map
     leafletProxy('baseMap', data = data_par) %>%
+      clearGroup('Parcelas') %>%
       addCircles(
         group = 'Parcelas', lng = ~longitude, lat = ~latitude,
         label = ~idparcela, layerId = ~idparcela,
         stroke = FALSE, fillOpacity = 0.4,
         fillColor = pal(color_vector), radius = size_vector,
-        options = pathOptions(className = 'parceladots')
+        options = pathOptions(pane = 'parceles')
       ) %>%
       addLegend(
         position = 'bottomright', pal = pal, values = color_vector,
@@ -199,7 +240,16 @@ mod_baseMap <- function(
   
   # add here all the inputs from the map needed
   observe({
-    baseMap_reactives$ifn_map_shape_click <- input$baseMap_shape_click
+    # shape
+    baseMap_reactives$shape_click <- input$baseMap_shape_click
+    # baseMap_reactives$shape_mouseover <- input$baseMap_shape_mouseover
+    # baseMap_reactives$shape_mouseout <- input$baseMap_shape_mouseout
+    
+    # basemap
+    baseMap_reactives$map_click <- input$baseMap_click
+    # baseMap_reactives$map_bounds <- input$baseMap_bounds
+    # baseMap_reactives$map_zoom <- input$baseMap_zoom
+    # baseMap_reactives$map_center <- input$baseMap_center
   })
   
   return(baseMap_reactives)
