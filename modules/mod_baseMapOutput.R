@@ -230,7 +230,7 @@ mod_baseMap <- function(
         options = pathOptions(pane = 'parceles')
       ) %>%
       addLegend(
-        position = 'bottomright', pal = pal, values = color_vector,
+        position = 'topright', pal = pal, values = color_vector,
         title = color_var, layerId = 'color_legend'
       )
   })
@@ -243,10 +243,10 @@ mod_baseMap <- function(
     # shape
     baseMap_reactives$shape_click <- input$baseMap_shape_click
     # baseMap_reactives$shape_mouseover <- input$baseMap_shape_mouseover
-    # baseMap_reactives$shape_mouseout <- input$baseMap_shape_mouseout
+    baseMap_reactives$shape_mouseout <- input$baseMap_shape_mouseout
     
     # basemap
-    baseMap_reactives$map_click <- input$baseMap_click
+    # baseMap_reactives$map_click <- input$baseMap_click
     # baseMap_reactives$map_bounds <- input$baseMap_bounds
     # baseMap_reactives$map_zoom <- input$baseMap_zoom
     # baseMap_reactives$map_center <- input$baseMap_center

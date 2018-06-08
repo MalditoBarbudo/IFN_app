@@ -56,23 +56,23 @@ mod_shapeCondPanel <- function(
       } else {
         # territoris
         if (click$group == 'Provincies') {
-          data_terriori <- data_parceles %>%
+          data_parceles %>%
             filter(provincia == click$id)
-        }
-        
-        if (click$group == 'Vegueries') {
-          data_terriori <- data_parceles %>%
-            filter(vegueria == click$id)
-        }
-        
-        if (click$group == 'Comarques') {
-          data_terriori <- data_parceles %>%
-            filter(comarca == click$id)
-        }
-        
-        if (click$group == 'Municipis') {
-          data_terriori <- data_parceles %>%
-            filter(municipi == click$id)
+        } else {
+          if (click$group == 'Vegueries') {
+            data_parceles %>%
+              filter(vegueria == click$id)
+          } else {
+            if (click$group == 'Comarques') {
+              data_parceles %>%
+                filter(comarca == click$id)
+            } else {
+              if (click$group == 'Municipis') {
+                data_parceles %>%
+                  filter(municipi == click$id)
+              }
+            }
+          }
         }
       }
     }
@@ -132,14 +132,18 @@ mod_shapeCondPanel <- function(
       )
     } else {
       tagList(
-        h4(paste0('Parcel·les en ', click$id))
+        h4(paste0(
+          length(unique(data_sel_site[['idparcela']])),
+          ' parcel·les en ', click$id
+        ))
+        
       )
     }
     
   })
   
   output$debug <- renderPrint({
-    map_inputs$map_click
+    map_inputs$shape_mouseout
   })
   
   # observer to toggle the "conditional shape panel"
@@ -151,14 +155,14 @@ mod_shapeCondPanel <- function(
     )
   })
   
-  # observer to hide the cond panel if baseMap is clicked
-  observeEvent(
-    eventExpr = map_inputs$map_click,
-    handlerExpr = {
-      shinyjs::hideElement(
-        "cond_shape", anim = TRUE, animType = 'fade', time = 0.5
-      )
-    }
-  )
+  # # observer to hide the cond panel if baseMap is clicked
+  # observeEvent(
+  #   eventExpr = map_inputs$map_click,
+  #   handlerExpr = {
+  #     shinyjs::hideElement(
+  #       "cond_shape", anim = TRUE, animType = 'fade', time = 0.5
+  #     )
+  #   }
+  # )
   
 }
