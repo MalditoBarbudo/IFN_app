@@ -46,11 +46,11 @@ mod_mapControlsInput <- function(id) {
       radioButtons(
         ns('territori'), '',
         choices = c(
-          Provincies = 'provincies', Vegueries = 'vegueries',
-          Comarques = 'comarques', Municipis = 'municipis'
+          Provincies = 'provincia', Vegueries = 'vegueria',
+          Comarques = 'comarca', Municipis = 'municipi'
         ),
         inline = TRUE,
-        selected = 'provincies'
+        selected = 'provincia'
       )
     ),
     

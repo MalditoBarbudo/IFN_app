@@ -103,7 +103,7 @@ mod_baseMap <- function(
       return()
     }
     
-    if (territori_val == 'provincies') {
+    if (territori_val == 'provincia') {
       leafletProxy('baseMap') %>%
         clearGroup('Vegueries') %>%
         clearGroup('Comarques') %>%
@@ -125,7 +125,7 @@ mod_baseMap <- function(
           )
         )
     } else {
-      if (territori_val == 'vegueries') {
+      if (territori_val == 'vegueria') {
         leafletProxy('baseMap') %>%
           clearGroup('Provincies') %>%
           clearGroup('Comarques') %>%
@@ -147,7 +147,7 @@ mod_baseMap <- function(
             )
         )
       } else {
-        if (territori_val == 'comarques') {
+        if (territori_val == 'comarca') {
           leafletProxy('baseMap') %>%
             clearGroup('Vegueries') %>%
             clearGroup('Provincies') %>%

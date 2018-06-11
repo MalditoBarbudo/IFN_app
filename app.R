@@ -112,9 +112,23 @@ server <- function(input, output, session) {
     mod_mapControls, 'map_controls'
   )
   
+  # filter and select module
+  fill_and_sel <- callModule(
+    mod_filterAndSel, 'fil_and_sel',
+    control_inputs = map_controls,
+    noms = list(
+      comarca = c('Totes', sort(as.character(polygons_comarques@data$NOM_COMAR))),
+      municipi = c('Tots', sort(as.character(polygons_municipis@data$NOM_MUNI))),
+      vegueria = c('Totes', sort(as.character(polygons_vegueries@data$NOMVEGUE))),
+      provincia = c('Totes', sort(as.character(polygons_provincies@data$NOM_PROV)))
+    )
+  )
+  
   # data module
   data_parcelas <- callModule(
-    mod_dataReactive, 'data_parcelas', ifn = reactive(map_controls$ifn)
+    mod_dataReactive, 'data_parcelas', map_controls = map_controls,
+    filterAndSel_inputs = fill_and_sel
+    
   )
   
   # see mod_baseMapOutput.R file for more info about map widget
@@ -129,18 +143,6 @@ server <- function(input, output, session) {
   callModule(
     mod_shapeCondPanel, 'info_shape',
     map_inputs = ifn_map, data = data_parcelas
-  )
-  
-  # filter and select module
-  callModule(
-    mod_filterAndSel, 'fil_and_sel',
-    control_inputs = map_controls,
-    noms = list(
-      comarques = c('Totes', sort(as.character(polygons_comarques@data$NOM_COMAR))),
-      municipis = c('Tots', sort(as.character(polygons_municipis@data$NOM_MUNI))),
-      vegueries = c('Totes', sort(as.character(polygons_vegueries@data$NOMVEGUE))),
-      provincies = c('Totes', sort(as.character(polygons_provincies@data$NOM_PROV)))
-    )
   )
 }
 
