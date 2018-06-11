@@ -61,53 +61,46 @@ mod_dataReactive <- function(
       #   3. popups
       data_par <- tbl(oracle_ifn, clima_name) %>%
         inner_join(tbl(oracle_ifn, sig_name), by = 'idparcela') %>%
-        inner_join(tbl(oracle_ifn, cec_name), by = 'idparcela')
+        inner_join(tbl(oracle_ifn, cec_name), by = 'idparcela') %>%
+        collect()
       
       if (filterAndSel_inputs$apply_btn == 0) {
         return(data_par %>% collect())
       } else {
         
         # return all data by default or when totes is selected
+        territori <- isolate(map_controls$territori)
         territoris <- isolate(filterAndSel_inputs$admin_divs)
-        proteccio_fils <- isolate(filterAndSel_inputs$proteccio_divs)
+        proteccions <- isolate(filterAndSel_inputs$proteccio_divs)
         
-        if (is.null(territoris)) {
-          return(data_par %>% collect())
-        } else {
-          if (any(territoris %in% c('Totes', 'Tots'))) {
-            return(data_par %>% collect())
+        territori_filter <- quo(!! rlang::sym(territori) %in% territoris)
+        proteccio_filter <- quo(proteccio %in% proteccions)
+        
+        
+        if (any(territoris %in% c('Totes', 'Tots'))) {
+          if (any(proteccions == 'Tots')) {
+            # todos los territorios y las protecciones
+            return(data_par)
           } else {
-            # filter if only some territorises are selected
-            if (isolate(map_controls$territori) == 'provincia') {
-              return(
-                data_par %>%
-                  filter(provincia %in% territoris &&
-                           proteccio %in% proteccio_fils) %>%
-                  collect()
-              )
-            }
-            
-            if (isolate(map_controls$territori) == 'vegueria') {
-              return(data_par %>%
-                       filter(vegueria %in% territoris) %>%
-                       collect())
-            }
-            
-            if (isolate(map_controls$territori) == 'comarca') {
-              return(
-                data_par %>%
-                  filter(comarca %in% territoris) %>%
-                  collect()
-              )
-            }
-            
-            if (isolate(map_controls$territori) == 'municipi') {
-              return(
-                data_par %>%
-                  filter(municipi %in% territoris) %>%
-                  collect()
-              )
-            }
+            # todos los territorios pero las protecciones seleccionadas
+            return(
+              data_par %>%
+                filter(!!!proteccio_filter)
+            )
+          }
+        } else {
+          if (any(proteccions == 'Tots')) {
+            # todas las protecciones pero los territorios seleccionados
+            return(
+              data_par %>%
+                filter(!!!territori_filter)
+            )
+          } else {
+            # las proteccions AND los territorios seleccionados
+            return(
+              data_par %>%
+                filter(!!!territori_filter, !!!proteccio_filter)
+            )
           }
         }
       }
