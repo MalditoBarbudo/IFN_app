@@ -15,6 +15,7 @@ source('modules/mod_baseMapOutput.R')
 source('modules/mod_shapeCondPanelUI.R')
 source('modules/mod_mapControlsInput.R')
 source('modules/mod_dataReactiveOutput.R')
+source('modules/mod_filterAndSelUI.R')
 
 ## VARS ####
 # vars <- c(
@@ -60,6 +61,7 @@ ui <- tagList(
           # includeScript("resources/gomap.js")
         ),
         
+        # input controls
         absolutePanel(
           id = 'controls', class = 'panel panel-default', fixed = TRUE,
           draggable = TRUE, top = 100, left = 100, rigth = 'auto', bottom = 'auto',
@@ -78,6 +80,19 @@ ui <- tagList(
         
         # map module
         mod_baseMapOutput('ifn_map'),
+        
+        # filter and select module
+        absolutePanel(
+          id = 'filandsel', class = 'panel, panel-default', fixed = TRUE,
+          draggable = TRUE, top = 'auto', left = 'auto', right = 100, bottom = 100,
+          width = 650, height = 'auto',
+          
+          h2('Filtra i selecciona'),
+          
+          # module
+          mod_filterAndSelUI('fil_and_sel')
+          
+        ),
         
         tags$div(
           id = 'cite',
@@ -114,6 +129,18 @@ server <- function(input, output, session) {
   callModule(
     mod_shapeCondPanel, 'info_shape',
     map_inputs = ifn_map, data = data_parcelas
+  )
+  
+  # filter and select module
+  callModule(
+    mod_filterAndSel, 'fil_and_sel',
+    control_inputs = map_controls,
+    noms = list(
+      comarques = c('Totes', sort(as.character(polygons_comarques@data$NOM_COMAR))),
+      municipis = c('Tots', sort(as.character(polygons_municipis@data$NOM_MUNI))),
+      vegueries = c('Totes', sort(as.character(polygons_vegueries@data$NOMVEGUE))),
+      provincies = c('Totes', sort(as.character(polygons_provincies@data$NOM_PROV)))
+    )
   )
 }
 
