@@ -65,7 +65,7 @@ mod_dataReactive <- function(
         collect()
       
       if (filterAndSel_inputs$apply_btn == 0) {
-        return(data_par %>% collect())
+        return(data_par)
       } else {
         
         # return all data by default or when totes is selected
@@ -77,30 +77,45 @@ mod_dataReactive <- function(
         proteccio_filter <- quo(proteccio %in% proteccions)
         
         
-        if (any(territoris %in% c('Totes', 'Tots'))) {
-          if (any(proteccions == 'Tots')) {
+        if (any(is.null(territoris), territoris %in% c('Totes', 'Tots'))) {
+          if (any(is.null(proteccions), proteccions == 'Tots')) {
             # todos los territorios y las protecciones
             return(data_par)
           } else {
             # todos los territorios pero las protecciones seleccionadas
-            return(
-              data_par %>%
-                filter(!!!proteccio_filter)
-            )
+            data_fil <- data_par %>%
+              filter(!!!proteccio_filter)
+            
+            # checkeamos si tiene rows
+            if (nrow(data_fil) < 1) {
+              return(data_fil %>% add_row())
+            } else {
+              return(data_fil)
+            }
           }
         } else {
-          if (any(proteccions == 'Tots')) {
+          if (any(is.null(proteccions), proteccions == 'Tots')) {
             # todas las protecciones pero los territorios seleccionados
-            return(
-              data_par %>%
-                filter(!!!territori_filter)
-            )
+            data_fil <- data_par %>%
+              filter(!!!territori_filter)
+            
+            # checkeamos si tiene rows
+            if (nrow(data_fil) < 1) {
+              return(data_fil %>% add_row())
+            } else {
+              return(data_fil)
+            }
           } else {
             # las proteccions AND los territorios seleccionados
-            return(
-              data_par %>%
-                filter(!!!territori_filter, !!!proteccio_filter)
-            )
+            data_fil <- data_par %>%
+              filter(!!!territori_filter, !!!proteccio_filter)
+            
+            # checkeamos si tiene rows
+            if (nrow(data_fil) < 1) {
+              return(data_fil %>% add_row())
+            } else {
+              return(data_fil)
+            }
           }
         }
       }
