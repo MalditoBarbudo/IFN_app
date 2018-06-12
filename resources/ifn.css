@@ -100,6 +100,28 @@ div.outer {
   transition-delay: 0;
 }
 
+/* Info panel */
+#info_panel {
+ /* Appearance */
+  background-color: white;
+  padding: 5px 10px 10px 10px;
+  cursor: move;
+  /* Fade out while not hovering */
+  opacity: 0.65;
+  zoom: 0.9;
+  transition: opacity 500ms 1s;
+  z-index: 998;
+}
+#info_panel:hover {
+  /* Fade in while hovering */
+  opacity: 0.95;
+  transition-delay: 0;
+}
+
+#tururu > li > a {
+  width: 263px;
+}
+
 /* divisiones administrativas input (radioButtons) */
 /*
 #map_controls-territori.form-group {

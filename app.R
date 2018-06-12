@@ -67,21 +67,23 @@ ui <- tagList(
           draggable = TRUE, width = 330, height = 'auto',
           # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
           # top = 'auto', left = 'auto', right = 100, bottom = 100,
-          top = 55, left = 'auto', right = 250, bottom = 'auto',
+          top = 250, left = 'auto', right = 15, bottom = 'auto',
           
           # panel title
           h2('Juega con el mapa'),
           
           # modules to include
           # controls
-          mod_mapControlsInput('map_controls'),
+          mod_mapControlsInput('map_controls')
           
-          # conditional panel for shape info
-          mod_shapeCondPanelUI('info_shape')
         ),
         
         # map module
         mod_baseMapOutput('ifn_map'),
+        
+        # info panel
+        # conditional panel for shape info
+        mod_shapeCondPanelUI('info_shape'),
         
         # filter and select module
         hidden(

@@ -9,20 +9,66 @@ mod_shapeCondPanelUI <- function(id) {
   
   ns <- NS(id)
   
-  hidden(
-    div(
-      id = ns('cond_shape'),
-      tagList(
-        uiOutput(ns('info_shape')),
-        br(),
-        plotOutput(ns('donut'), height = '250px'),
-        br(),
-        "Qué más va aqui???",
-        br(),
-        textOutput(ns('debug'))
+  # A slider-like but with tabs, to show:
+  #   a) all points selected and filtered in the map
+  #   b) a joined-plot based on the shape map click. For plots:
+  #     1. donut plot (idcadescleconif)
+  #     2. density with location for some trait (maybe % pies vivos)
+  #     3. a radial plot ("rol playing character stats"-like)
+  #   c) a joined-plot based on the shape map click. For polygons:
+  #     1. Some plot?
+  #     2. Some plot?
+  #     3. Some plot?
+  
+  tagList(
+    hidden(
+      div(
+        id = ns('cond_shape'),
+        absolutePanel(
+          id = 'info_panel', class = 'panel panel-default', fixed = TRUE,
+          draggable = TRUE, width = 550, height = 350,
+          # top = 'auto', left = 'auto', right = 100, bottom = 100,
+          top = 'auto', left = 100, rigth = 'auto', bottom = 15,
+          
+          tabsetPanel(
+            id = "tururu", type = 'pills',
+            
+            # tab with all the info
+            tabPanel(
+              "Mapa completo"
+            ),
+            
+            # tab with the shape info
+            tabPanel(
+              "Click",
+              uiOutput(ns('info_shape')),
+              br(),
+              plotOutput(ns('donut'), height = '185px'),
+              br(),
+              "Qué más va aqui???",
+              br(),
+              textOutput(ns('debug'))
+            )
+          )
+        )
       )
     )
   )
+  
+  # hidden(
+  #   div(
+  #     id = ns('cond_shape'),
+  #     tagList(
+  #       uiOutput(ns('info_shape')),
+  #       br(),
+  #       plotOutput(ns('donut'), height = '250px'),
+  #       br(),
+  #       "Qué más va aqui???",
+  #       br(),
+  #       textOutput(ns('debug'))
+  #     )
+  #   )
+  # )
 }
 
 #' mod_shapeCondPanel server function
@@ -147,13 +193,14 @@ mod_shapeCondPanel <- function(
   })
   
   # observer to toggle the "conditional shape panel"
-  observe({
-    shinyjs::toggleElement(
-      id = "cond_shape", anim = TRUE, animType = 'fade', time = 0.5,
-      condition = !is.null(map_inputs$shape_click) &&
-        map_inputs$shape_click$id != ""
-    )
-  })
+  observeEvent(
+    eventExpr = map_inputs$shape_click,
+    handlerExpr = {
+      shinyjs::show(
+        id = "cond_shape", anim = TRUE, animType = 'fade', time = 0.5
+      )
+    }
+  )
   
   # # observer to hide the cond panel if baseMap is clicked
   # observeEvent(
