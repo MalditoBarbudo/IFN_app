@@ -64,6 +64,17 @@ mod_dataReactive <- function(
         inner_join(tbl(oracle_ifn, cec_name), by = 'idparcela') #%>%
         # collect()
       
+      # we also need an empty data frame prepared for when filter generates
+      # 0 rows 0 columns tables (from collect() which generates errors in other
+      # modules expecting a data frame with rows and some variable names)
+      empty <- data_frame(
+        # vars for the map
+        idparcela = NA, latitude = NA_real_, longitude = NA_real_,
+        # vars for the conditional info panel
+        provincia = NA, vegueria = NA, comarca = NA, municipi = NA,
+        idcaducesclerconif = NA, percdens = NA_real_
+      )
+      
       if (filterAndSel_inputs$apply_btn == 0) {
         return(data_par %>%
                  collect())
@@ -72,14 +83,20 @@ mod_dataReactive <- function(
         # return all data by default or when totes is selected
         territori <- isolate(map_controls$territori)
         territoris <- isolate(filterAndSel_inputs$admin_divs)
-        proteccions <- isolate(filterAndSel_inputs$proteccio_divs)
+        proteccion <- isolate(filterAndSel_inputs$proteccion_divs)
+        protecciones <- isolate(filterAndSel_inputs$proteccion_levels)
         
         territori_filter <- quo(!! rlang::sym(territori) %in% territoris)
-        proteccio_filter <- quo(proteccio %in% proteccions)
-        
+        if (any(protecciones %in% c("Només protegits"))) {
+          proteccio_filter <- quo(
+            !(!! rlang::sym(proteccion) %in% c("Sense Pein", "Sense protecció", "SenseXarxa"))
+          )
+        } else {
+          proteccio_filter <- quo(!! rlang::sym(proteccion) %in% protecciones)
+        }
         
         if (any(is.null(territoris), territoris %in% c('Totes', 'Tots'))) {
-          if (any(is.null(proteccions), proteccions == 'Tots')) {
+          if (any(is.null(protecciones), protecciones %in% c('Tots'))) {
             # todos los territorios y las protecciones
             return(data_par %>%
                      collect())
@@ -91,17 +108,13 @@ mod_dataReactive <- function(
             
             # checkeamos si tiene rows
             if (nrow(data_fil) < 1) {
-              return(
-                data_fil %>%
-                  mutate(idparcela = NA, latitude = NA_real_, longitude = NA_real_) %>% 
-                  add_row()
-              )
+              return(empty)
             } else {
               return(data_fil)
             }
           }
         } else {
-          if (any(is.null(proteccions), proteccions == 'Tots')) {
+          if (any(is.null(protecciones), protecciones %in% c('Tots'))) {
             # todas las protecciones pero los territorios seleccionados
             data_fil <- data_par %>%
               filter(!!!territori_filter) %>%
@@ -109,27 +122,19 @@ mod_dataReactive <- function(
             
             # checkeamos si tiene rows
             if (nrow(data_fil) < 1) {
-              return(
-                data_fil %>%
-                  mutate(idparcela = NA, latitude = NA_real_, longitude = NA_real_) %>% 
-                  add_row()
-              )
+              return(empty)
             } else {
               return(data_fil)
             }
           } else {
-            # las proteccions AND los territorios seleccionados
+            # las protecciones AND los territorios seleccionados
             data_fil <- data_par %>%
               filter(!!!territori_filter, !!!proteccio_filter) %>%
               collect()
             
             # checkeamos si tiene rows
             if (nrow(data_fil) < 1) {
-              return(
-                data_fil %>%
-                  mutate(idparcela = NA, latitude = NA_real_, longitude = NA_real_) %>% 
-                  add_row()
-              )
+              return(empty)
             } else {
               return(data_fil)
             }

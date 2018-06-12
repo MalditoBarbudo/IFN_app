@@ -11,56 +11,55 @@ mod_filterAndSelUI <- function(id) {
  ns <- NS(id)
  
  tagList(
-   # we create several divs with id to work with shinyjs in case we need it
+   
+   # two rows, one for administrative divisions selection and another one for
+   # the protection levels selection
+   
+   # 1st row, full width to avoid growing in height whenever is possible
    fluidRow(
-     # administrative divisions
      column(
-       6,
-       div(
-         id = 'admin_divs',
-         selectInput(
-           ns('admin_divs'), '', 'Totes', selected = 'Totes', multiple = TRUE
-         )
-       ),
-       div(
-         id = 'proteccio_divs',
-         selectInput(
-           ns('proteccio_divs'), 'Filtrar por nivell de protecció',
-           c(
-             "Tots",
-             sort(
-               c(
-                 "Parc Natural", "Paratge Natural d'Interès Nacional",
-                 "Sense protecció", "Reserva Natural Parcial", "Zona de Protecció",
-                 "Parc Nacional", "Reserva Natural de Fauna Salvatge"
-               )
-             )
-           ),
-           selected = 'Tots', multiple = TRUE
+       12,
+       selectInput(
+         ns('admin_divs'), '', 'Totes', selected = 'Totes', multiple = TRUE,
+         width = '100%'
+       )
+     )
+   ),
+   
+   # 2nd rowm two columns, the right one as an input updated depending on the
+   # selection in the left one
+   fluidRow(
+     column(
+       5,
+       radioButtons(
+         ns('proteccion_divs'), "Tipus d'espai protegit",
+         choices = c(
+           'Nivell de protecció' = 'proteccio',
+           "Espai d'interès Nacional" = 'nomein',
+           "Espai de protecció especial" = 'enpes',
+           "Xarxa Natura 2000" = 'nomxarxa2000'
          )
        )
      ),
+     
      column(
-       6,
-       br(),
-       div(
-         id = 'fil_btns', inline = TRUE,
-         actionButton(ns('apply_btn'), 'Aplicar filtres')
-         # actionButton(ns('clear_btn'), 'Reset filtre')
+       7,
+       selectInput(
+         ns('proteccion_levels'), '',
+         'Totes', selected = 'Totes', multiple = TRUE, width = '100%'
        )
      )
-     
    ),
-   
    div(
      id = 'input2',
      textOutput(ns('debug_fil'))
+   ),
+   div(
+     id = 'fil_btns', inline = TRUE,
+     actionButton(ns('apply_btn'), 'Aplicar filtres')
+     # actionButton(ns('clear_btn'), 'Reset filtre')
    )
-   
-   
-   
  )
- 
 }
 
 #' mod_filterAndSel server function
@@ -99,6 +98,22 @@ mod_filterAndSel <- function(
     )
   })
   
+  # observer for update the proteccion levels
+  observe({
+    # get the protection division and create the choices based on the dic
+    tipo_espai <- input$proteccion_divs
+    choices <- proteccion_dictionary[[tipo_espai]]
+    
+    # update the input
+    updateSelectInput(
+      session, 'proteccion_levels',
+      label = paste0(" Filtra per ", tipo_espai),
+      choices = choices,
+      selected = choices[1]
+    )
+    
+  })
+  
   # reactive values to return from the module
   filterAndSel_reactives <- reactiveValues()
   
@@ -106,12 +121,13 @@ mod_filterAndSel <- function(
     filterAndSel_reactives$apply_btn <- input$apply_btn
     # filterAndSel_reactives$clear_btn <- input$clear_btn
     filterAndSel_reactives$admin_divs <- input$admin_divs
-    filterAndSel_reactives$proteccio_divs <- input$proteccio_divs
+    filterAndSel_reactives$proteccion_levels <- input$proteccion_levels
+    filterAndSel_reactives$proteccion_divs <- input$proteccion_divs
   })
   
   # debug output
   output$debug_fil <- renderPrint({
-    filterAndSel_reactives$proteccio_divs
+    filterAndSel_reactives$proteccion_divs
   })
   
   return(filterAndSel_reactives)

@@ -64,8 +64,10 @@ ui <- tagList(
         # input controls
         absolutePanel(
           id = 'controls', class = 'panel panel-default', fixed = TRUE,
-          draggable = TRUE, top = 100, left = 100, rigth = 'auto', bottom = 'auto',
-          width = 330, height = 'auto',
+          draggable = TRUE, width = 330, height = 'auto',
+          # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+          # top = 'auto', left = 'auto', right = 100, bottom = 100,
+          top = 55, left = 'auto', right = 250, bottom = 'auto',
           
           # panel title
           h2('Juega con el mapa'),
@@ -82,16 +84,19 @@ ui <- tagList(
         mod_baseMapOutput('ifn_map'),
         
         # filter and select module
-        absolutePanel(
-          id = 'filandsel', class = 'panel, panel-default', fixed = TRUE,
-          draggable = TRUE, top = 'auto', left = 'auto', right = 100, bottom = 100,
-          width = 650, height = 'auto',
-          
-          h2('Filtra i selecciona'),
-          
-          # module
-          mod_filterAndSelUI('fil_and_sel')
-          
+        hidden(
+          absolutePanel(
+            id = 'filandsel', class = 'panel, panel-default', fixed = TRUE,
+            draggable = TRUE, width = 550, height = 'auto',
+            # top = 'auto', left = 'auto', right = 100, bottom = 100,
+            top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+            
+            h2('Selecciona les parcel·les a analitzar'),
+            
+            # module
+            mod_filterAndSelUI('fil_and_sel')
+            
+          )
         ),
         
         tags$div(
@@ -143,6 +148,14 @@ server <- function(input, output, session) {
   callModule(
     mod_shapeCondPanel, 'info_shape',
     map_inputs = ifn_map, data = data_parcelas
+  )
+  
+  # observer to toggle the select module panel
+  observeEvent(
+    eventExpr = map_controls$show_sel,
+    handlerExpr = {
+      toggle('filandsel')
+    }
   )
 }
 

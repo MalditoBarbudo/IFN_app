@@ -49,7 +49,7 @@ mod_mapControlsInput <- function(id) {
           Provincies = 'provincia', Vegueries = 'vegueria',
           Comarques = 'comarca', Municipis = 'municipi'
         ),
-        inline = TRUE,
+        inline = TRUE, width = '80%',
         selected = 'provincia'
       )
     ),
@@ -64,6 +64,15 @@ mod_mapControlsInput <- function(id) {
       ),
       checkboxInput(ns('inverse_pal'), 'Invertir colors', value = FALSE),
       selectInput(ns('size'), 'Mida', vars, selected = 'Cap')
+    ),
+    
+    # show/hide selection panel button
+    div(
+      id = 'controls_button',
+      h4('Commutar les eines de selecció de parcel·les'),
+      actionButton(
+        ns('show_sel'), 'Mostra / Amaga'
+      )
     )
   )
   
@@ -91,6 +100,7 @@ mod_mapControls <- function(
     mapControls_reactives$size <- input$size
     mapControls_reactives$inverse_pal <- input$inverse_pal
     mapControls_reactives$territori <- input$territori
+    mapControls_reactives$show_sel <- input$show_sel
   })
   
   # return the 
