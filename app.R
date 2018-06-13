@@ -16,6 +16,7 @@ source('modules/mod_shapeCondPanelUI.R')
 source('modules/mod_mapControlsInput.R')
 source('modules/mod_dataReactiveOutput.R')
 source('modules/mod_filterAndSelUI.R')
+source('modules/mod_tableControlsInput.R')
 
 ## VARS ####
 # vars <- c(
@@ -106,6 +107,14 @@ ui <- tagList(
           "Dades compilats pel CREAF & CTFC basats en l'IFN"
         )
       )
+    ),
+    
+    # data tab
+    tabPanel(
+      "Explora les dades",
+      
+      # row for inputs, already in the module
+      mod_tableControlsInput('table_controls')
     )
   )
 )
@@ -150,6 +159,12 @@ server <- function(input, output, session) {
   callModule(
     mod_shapeCondPanel, 'info_shape',
     map_inputs = ifn_map, data = data_parcelas
+  )
+  
+  # module for tables inputs
+  tableControls <- callModule(
+    mod_tableControls, 'table_controls',
+    mapControls = map_controls
   )
   
   # observer to toggle the select module panel
