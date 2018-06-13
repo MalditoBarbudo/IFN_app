@@ -8,6 +8,7 @@ library(dbplyr)
 library(RPostgreSQL)
 library(pool)
 library(viridis)
+library(DT)
 
 ## SOURCES ####
 source('global.R')
@@ -17,6 +18,7 @@ source('modules/mod_mapControlsInput.R')
 source('modules/mod_dataReactiveOutput.R')
 source('modules/mod_filterAndSelUI.R')
 source('modules/mod_tableControlsInput.R')
+source('modules/mod_baseTableOutput.R')
 
 ## VARS ####
 # vars <- c(
@@ -114,7 +116,10 @@ ui <- tagList(
       "Explora les dades",
       
       # row for inputs, already in the module
-      mod_tableControlsInput('table_controls')
+      mod_tableControlsInput('table_controls'),
+      
+      # rows for tables
+      mod_baseTableOutput('tables_outputs')
     )
   )
 )
@@ -162,9 +167,15 @@ server <- function(input, output, session) {
   )
   
   # module for tables inputs
-  tableControls <- callModule(
+  table_controls <- callModule(
     mod_tableControls, 'table_controls',
     mapControls = map_controls
+  )
+  
+  tableBase <- callModule(
+    mod_baseTable, 'tables_outputs',
+    mapControls = map_controls, tableControls = table_controls,
+    dataReactive = data_parcelas
   )
   
   # observer to toggle the select module panel

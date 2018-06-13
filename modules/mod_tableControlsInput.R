@@ -90,14 +90,22 @@ mod_tableControls <- function(
     )
   })
   
-  # observer to populate the tipus_selector input
-  observe({
+  # reactives for table names and id_var
+  table_name <- reactive({
     ifn <- mapControls$ifn
     tipu_funcional <- input$tipu_fun
     clases_diametricas <- if (input$clas_diam) {'cd'} else {''}
     
     # build the table name
     table_name <- paste0('r_', tipu_funcional, clases_diametricas, '_', ifn)
+    
+    return(table_name)
+  })
+  
+  id_var <- reactive({
+    
+    ifn <- mapControls$ifn
+    tipu_funcional <- input$tipu_fun
     
     # get the id column name
     id_var <- c(
@@ -114,10 +122,16 @@ mod_tableControls <- function(
     )[[paste0(tipu_funcional, '_', ifn)]]
     
     id_var <- quo(!! rlang::sym(id_var))
+    return(id_var)
+  })
+  
+  # observer to populate the tipus_selector input
+  observe({
     
     # get the ids
-    tipu_fun_ids <- tbl(oracle_ifn, table_name) %>%
-      pull(!! id_var) %>%
+    id_var_ex <- id_var()
+    tipu_fun_ids <- tbl(oracle_ifn, table_name()) %>%
+      pull(!! id_var_ex) %>%
       unique() %>%
       sort()
     
@@ -138,6 +152,8 @@ mod_tableControls <- function(
     tableControls_inputs$clas_diam <- input$clas_diam
     tableControls_inputs$tipu_fun <- input$tipu_fun
     tableControls_inputs$tipus_selector <- input$tipus_selector
+    tableControls_inputs$table_name <- table_name
+    tableControls_inputs$id_var <- id_var
     
   })
   
