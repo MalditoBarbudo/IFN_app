@@ -46,8 +46,9 @@ mod_baseTableOutput <- function(id) {
 #' @param output internal
 #' @param session internal
 #' @param mapControls reactives with the inputs from the mapControls module
-#' @param tableControls reactives with the inputs from the tableControls inputs
+#' @param aggregation reactives with the inputs from the aggregation module
 #' @param dataReactive reactive data with the map points 
+#' @param filterAndSel reactive with the inputs from filterAndSel module
 #' 
 #' 
 #' @export
@@ -55,26 +56,48 @@ mod_baseTableOutput <- function(id) {
 #' @rdname mod_baseTable
 mod_baseTable <- function(
   input, output, session,
-  mapControls, tableControls, dataReactive
+  mapControls, aggregation, dataReactive, filterAndSel, parcelas
 ) {
   
-  # retrieve table, based on selections
-  table_dades <- reactive({
-    table_name <- tableControls$table_name()
-    id_var <- tableControls$id_var()
-    tipus_selector <- tableControls$tipus_selector
-    filter_arg <- quo(!! id_var %in% tipus_selector)
+  # reactive for table name creation
+  table_name <- reactive({
     
-    table_dades <- tbl(oracle_ifn, table_name) %>%
-      filter(!!! filter_arg)
+    # inputs
+    ifn <- mapControls$ifn
+    agg <- aggregation$aggregation_level
+    cd <- if (aggregation$diameter_classes) {'cd'} else {''}
+    
+    # real time calculations TODO!!
+    if (stringr::str_detect(agg, '_rt')) {
+      return() # TODO
+    } else {
+      
+      # parcela (especial case, as there is no aggregation level)
+      if (agg == 'parcela') {
+        table_name <- paste0('r_', cd, ifn)
+        return(table_name)
+      } else {
+        table_name <- paste0('r_', agg, cd, '_', ifn)
+        return(table_name)
+      }
+    }
   })
   
-  # tabla dades
+  # reactive for table data
+  tbl_call <- reactive({
+    tbl(oracle_ifn, table_name())
+  })
+  
+  # DT render
   output$table_dades <- renderDT(
     server = TRUE,
     expr = {
       
-      table_dades() %>%
+      parcelas <- dataReactive() %>%
+        pull('idparcela')
+      
+      tbl_call() %>%
+        filter(idparcela %in% parcelas) %>%
         collect() %>%
         datatable(
           filter = list(position = 'top', clear = TRUE, plain = FALSE),
@@ -82,16 +105,65 @@ mod_baseTable <- function(
           fillContainer = TRUE, autoHideNavigation = TRUE,
           extensions = c('Buttons', 'Scroller'),
           options = list(
-            dom = 'tB',
+            dom = 'tBi',
             extend = 'collection',
-            buttons = c('csv', 'pdf'),
+            buttons = c('csv', 'colvis'),
             text = 'Descàrrega',
             autoWidth = TRUE,
-            deferRender = TRUE, scrollY = 250, scroller = TRUE
+            deferRender = TRUE, scrollY = 450, scroller = TRUE
           )
         )
     }
   )
+  
+  
+  # reactiveValues to return
+  baseTable_reactives <- reactiveValues()
+  
+  observe({
+    
+    baseTable_reactives$table_name <- table_name
+    
+  })
+  
+  return(baseTable_reactives)
+  
+  
+  
+  # # retrieve table, based on selections
+  # table_dades <- reactive({
+  #   table_name <- tableControls$table_name()
+  #   id_var <- tableControls$id_var()
+  #   tipus_selector <- tableControls$tipus_selector
+  #   filter_arg <- quo(!! id_var %in% tipus_selector)
+  #   
+  #   table_dades <- tbl(oracle_ifn, table_name) %>%
+  #     filter(!!! filter_arg)
+  # })
+  # 
+  # # tabla dades
+  # output$table_dades <- renderDT(
+  #   server = TRUE,
+  #   expr = {
+  #     
+  #     table_dades() %>%
+  #       collect() %>%
+  #       datatable(
+  #         filter = list(position = 'top', clear = TRUE, plain = FALSE),
+  #         style = 'default', rownames = FALSE,
+  #         fillContainer = TRUE, autoHideNavigation = TRUE,
+  #         extensions = c('Buttons', 'Scroller'),
+  #         options = list(
+  #           dom = 'tB',
+  #           extend = 'collection',
+  #           buttons = c('csv', 'pdf'),
+  #           text = 'Descàrrega',
+  #           autoWidth = TRUE,
+  #           deferRender = TRUE, scrollY = 250, scroller = TRUE
+  #         )
+  #       )
+  #   }
+  # )
   
   
   # debug!!!

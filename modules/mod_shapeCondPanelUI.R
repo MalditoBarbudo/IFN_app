@@ -21,54 +21,27 @@ mod_shapeCondPanelUI <- function(id) {
   #     3. Some plot?
   
   tagList(
-    hidden(
-      div(
-        id = ns('cond_shape'),
-        absolutePanel(
-          id = 'info_panel', class = 'panel panel-default', fixed = TRUE,
-          draggable = TRUE, width = 550, height = 350,
-          # top = 'auto', left = 'auto', right = 100, bottom = 100,
-          top = 'auto', left = 100, rigth = 'auto', bottom = 15,
-          
-          tabsetPanel(
-            id = "tururu", type = 'pills',
-            
-            # tab with all the info
-            tabPanel(
-              "Mapa completo"
-            ),
-            
-            # tab with the shape info
-            tabPanel(
-              "Click",
-              uiOutput(ns('info_shape')),
-              br(),
-              plotOutput(ns('donut'), height = '185px'),
-              br(),
-              "Qué más va aqui???",
-              br(),
-              textOutput(ns('debug'))
-            )
-          )
-        )
+    tabsetPanel(
+      id = "tururu", type = 'pills',
+      
+      # tab with the shape info
+      tabPanel(
+        "Click",
+        uiOutput(ns('info_shape')),
+        br(),
+        plotOutput(ns('donut'), height = '185px'),
+        br(),
+        "Qué más va aqui???",
+        br(),
+        textOutput(ns('debug'))
+      ),
+      
+      # tab with all the info
+      tabPanel(
+        "Mapa completo"
       )
     )
   )
-  
-  # hidden(
-  #   div(
-  #     id = ns('cond_shape'),
-  #     tagList(
-  #       uiOutput(ns('info_shape')),
-  #       br(),
-  #       plotOutput(ns('donut'), height = '250px'),
-  #       br(),
-  #       "Qué más va aqui???",
-  #       br(),
-  #       textOutput(ns('debug'))
-  #     )
-  #   )
-  # )
 }
 
 #' mod_shapeCondPanel server function
@@ -189,18 +162,8 @@ mod_shapeCondPanel <- function(
   })
   
   output$debug <- renderPrint({
-    map_inputs$shape_mouseout
+    map_inputs$shape_click
   })
-  
-  # observer to toggle the "conditional shape panel"
-  observeEvent(
-    eventExpr = map_inputs$shape_click,
-    handlerExpr = {
-      shinyjs::show(
-        id = "cond_shape", anim = TRUE, animType = 'fade', time = 0.5
-      )
-    }
-  )
   
   # # observer to hide the cond panel if baseMap is clicked
   # observeEvent(

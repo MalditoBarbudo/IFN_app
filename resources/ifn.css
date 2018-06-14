@@ -29,7 +29,7 @@ div.outer {
 }
 
 /* Controls */
-#controls {
+#mapControls {
   /* Appearance */
   background-color: white;
   padding: 0 20px 20px 20px;
@@ -40,35 +40,17 @@ div.outer {
   transition: opacity 500ms 1s;
   z-index: 1000;
 }
-#controls:hover {
-  /* Fade in while hovering */
-  opacity: 0.95;
-  transition-delay: 0;
-}
-
-/* IFN selector */
-#ifnsel {
-  /* Appearance */
-  background-color: white;
-  padding: 0 20px 20px 20px;
-  cursor: move;
-  /* Fade out while not hovering */
-  opacity: 0.65;
-  zoom: 0.9;
-  transition: opacity 500ms 1s;
-  z-index: 999;
-}
-#ifnsel:hover {
+#mapControls:hover {
   /* Fade in while hovering */
   opacity: 0.95;
   transition-delay: 0;
 }
 
 /* Shape conditional selector */
-#shape_control {
+#infoPanel {
   /* Appearance */
   background-color: white;
-  padding: 0 20px 20px 20px;
+  padding: 5px 10px 10px 10px;
   cursor: move;
   /* Fade out while not hovering */
   opacity: 0.65;
@@ -76,14 +58,14 @@ div.outer {
   transition: opacity 500ms 1s;
   z-index: 999;
 }
-#shape_control:hover {
+#infoPanel:hover {
   /* Fade in while hovering */
   opacity: 0.95;
   transition-delay: 0;
 }
 
 /* Filter and sel panel */
-#filandsel {
+#filterAndSel {
  /* Appearance */
   background-color: white;
   padding: 0 20px 20px 20px;
@@ -94,14 +76,14 @@ div.outer {
   transition: opacity 500ms 1s;
   z-index: 998;
 }
-#filandsel:hover {
+#filterAndSel:hover {
   /* Fade in while hovering */
   opacity: 0.95;
   transition-delay: 0;
 }
 
 /* Info panel */
-#info_panel {
+#aggregation {
  /* Appearance */
   background-color: white;
   padding: 5px 10px 10px 10px;
@@ -112,7 +94,7 @@ div.outer {
   transition: opacity 500ms 1s;
   z-index: 998;
 }
-#info_panel:hover {
+#aggregation:hover {
   /* Fade in while hovering */
   opacity: 0.95;
   transition-delay: 0;
@@ -120,6 +102,10 @@ div.outer {
 
 #tururu > li > a {
   width: 263px;
+}
+
+#controls_buttons {
+  padding-left: 12px;
 }
 
 /* divisiones administrativas input (radioButtons) */

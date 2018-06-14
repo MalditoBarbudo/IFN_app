@@ -17,7 +17,7 @@ source('modules/mod_shapeCondPanelUI.R')
 source('modules/mod_mapControlsInput.R')
 source('modules/mod_dataReactiveOutput.R')
 source('modules/mod_filterAndSelUI.R')
-source('modules/mod_tableControlsInput.R')
+source('modules/mod_aggregationInput.R')
 source('modules/mod_baseTableOutput.R')
 
 ## UI ####
@@ -46,44 +46,80 @@ ui <- tagList(
         
         # input controls
         absolutePanel(
-          id = 'controls', class = 'panel panel-default', fixed = TRUE,
-          draggable = TRUE, width = 330, height = 'auto',
+          id = 'mapControls', class = 'panel panel-default', fixed = TRUE,
+          draggable = TRUE, width = 640, height = 'auto',
           # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
           # top = 'auto', left = 'auto', right = 100, bottom = 100,
-          top = 250, left = 'auto', right = 15, bottom = 'auto',
+          top = 100, right = 'auto', left = 15, bottom = 'auto',
 
           # panel title
-          h2('Juega con el mapa'),
+          h3('Visualització'),
 
           # modules to include
           # controls
           mod_mapControlsInput('map_controls')
 
         ),
-
-        # map module
-        mod_baseMapOutput('ifn_map'),
-
-        # info panel
-        # conditional panel for shape info
-        mod_shapeCondPanelUI('info_shape'),
-
-        # filter and select module
+        
         hidden(
           absolutePanel(
-            id = 'filandsel', class = 'panel, panel-default', fixed = TRUE,
-            draggable = TRUE, width = 550, height = 'auto',
-            # top = 'auto', left = 'auto', right = 100, bottom = 100,
-            top = 100, left = 100, rigth = 'auto', bottom = 'auto',
-
-            h2('Selecciona les parcel·les a analitzar'),
-
-            # module
-            mod_filterAndSelUI('fil_and_sel')
-
+            id = 'infoPanel', class = 'panel panel-default', fixed = TRUE,
+            draggable = TRUE, width = 640, height = 350,
+            top = 'auto', left = 'auto', right = 100, bottom = 15,
+            
+            # info panel
+            # conditional panel for shape info
+            mod_shapeCondPanelUI('info_panel')
           )
         ),
         
+        # filter and select module
+        hidden(
+          absolutePanel(
+            id = 'filterAndSel', class = 'panel, panel-default', fixed = TRUE,
+            draggable = TRUE, width = 640, height = 'auto',
+            # top = 'auto', left = 'auto', right = 100, bottom = 100,
+            top = 400, right = 'auto', left = 15, bottom = 'auto',
+            
+            h3('Selecció y filtrat'),
+            
+            # module
+            mod_filterAndSelUI('fil_and_sel')
+            
+          )
+        ),
+        
+        # aggregation module
+        hidden(
+          absolutePanel(
+            id = 'aggregation', class = 'panel, panel-default', fixed = TRUE,
+            draggable = TRUE, width = 640, height = 'auto',
+            # top = 'auto', left = 'auto', right = 100, bottom = 100,
+            top = 700, right = 'auto', left = 15, bottom = 'auto',
+            
+            h3("Selecciona els nivells d'agregació"),
+            mod_aggregationInput('aggreg')
+          )
+        ),
+
+        # map module
+        mod_baseMapOutput('ifn_map'),
+        
+        
+        # debug
+        absolutePanel(
+          id = 'debug', class = 'panel, panel-default', fixed = TRUE,
+          draggable = TRUE, width = 640, height = 'auto',
+          # top = 'auto', left = 'auto', right = 100, bottom = 100,
+          top = 400, left = 'auto', right = 15, bottom = 'auto',
+          h3('debug'),
+          textOutput('debug1'),
+          textOutput('debug2'),
+          textOutput('debug3')
+        ),
+
+        
+
         tags$div(
           id = 'cite',
           "Dades compilats pel CREAF & CTFC basats en l'IFN"
@@ -96,7 +132,7 @@ ui <- tagList(
       "Explora les dades",
       
       # row for inputs, already in the module
-      mod_tableControlsInput('table_controls'),
+      # mod_aggregationInput('aggregation'),
       
       # rows for tables
       mod_baseTableOutput('tables_outputs')
@@ -142,29 +178,67 @@ server <- function(input, output, session) {
   
   # conditional panel for shapes info (parcelas y territorios)
   callModule(
-    mod_shapeCondPanel, 'info_shape',
+    mod_shapeCondPanel, 'info_panel',
     map_inputs = ifn_map, data = data_parcelas
   )
   
-  # module for tables inputs
-  table_controls <- callModule(
-    mod_tableControls, 'table_controls',
+  # module for aggregation inputs
+  aggregation_controls <- callModule(
+    mod_aggregation, 'aggreg',
     mapControls = map_controls
   )
   
+  # module for the table
   tableBase <- callModule(
     mod_baseTable, 'tables_outputs',
-    mapControls = map_controls, tableControls = table_controls,
-    dataReactive = data_parcelas
+    mapControls = map_controls, aggregation = aggregation_controls,
+    dataReactive = data_parcelas, filterAndSel = fill_and_sel
   )
   
-  # observer to toggle the select module panel
+  # observers to toggle the ancillary panels
   observeEvent(
     eventExpr = map_controls$show_sel,
     handlerExpr = {
-      toggle('filandsel')
+      toggle('filterAndSel')
     }
   )
+  
+  observeEvent(
+    eventExpr = map_controls$show_agg,
+    handlerExpr = {
+      toggle('aggregation')
+    }
+  )
+  
+  observeEvent(
+    eventExpr = map_controls$show_inf,
+    handlerExpr = {
+      toggle('infoPanel')
+    }
+    
+  )
+  
+  # observer to toggle the "conditional shape panel"
+  observeEvent(
+    eventExpr = ifn_map$shape_click,
+    handlerExpr = {
+      shinyjs::show(
+        id = "infoPanel", anim = TRUE, animType = 'fade', time = 0.5
+      )
+    }
+  )
+  
+  
+  ### debug #####
+  output$debug1 <- renderPrint({
+    aggregation_controls$aggregation_level
+  })
+  output$debug2 <- renderPrint({
+   tableBase$table_name()
+  })
+  output$debug3 <- renderPrint({
+    # map_controls$show_inf
+  })
 }
 
 # Run the application 

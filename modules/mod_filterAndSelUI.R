@@ -22,43 +22,42 @@ mod_filterAndSelUI <- function(id) {
        selectInput(
          ns('admin_divs'), '', 'Totes', selected = 'Totes', multiple = TRUE,
          width = '100%'
-       )
-     )
-   ),
-   
-   # 2nd rowm two columns, the right one as an input updated depending on the
-   # selection in the left one
-   fluidRow(
-     column(
-       5,
-       selectInput(
-         ns('proteccion_divs'), "Tipus d'espai protegit",
-         choices = c(
-           'Nivell de protecció' = 'proteccio',
-           "Espai d'interès Nacional" = 'nomein',
-           "Espai de protecció especial" = 'enpes',
-           "Xarxa Natura 2000" = 'nomxarxa2000'
+       ),
+       # 2nd rowm two columns, the right one as an input updated depending on the
+       # selection in the left one
+       fluidRow(
+         column(
+           5,
+           selectInput(
+             ns('proteccion_divs'), "Tipus d'espai protegit",
+             choices = c(
+               'Nivell de protecció' = 'proteccio',
+               "Espai d'interès Nacional" = 'nomein',
+               "Espai de protecció especial" = 'enpes',
+               "Xarxa Natura 2000" = 'nomxarxa2000'
+             )
+           )
+         ),
+         
+         column(
+           7,
+           selectInput(
+             ns('proteccion_levels'), '',
+             'Totes', selected = 'Totes', multiple = TRUE, width = '100%'
+           )
          )
-       )
-     ),
-     
-     column(
-       7,
-       selectInput(
-         ns('proteccion_levels'), '',
-         'Totes', selected = 'Totes', multiple = TRUE, width = '100%'
+       ),
+       div(
+         id = 'fil_btns', inline = TRUE,
+         actionButton(ns('apply_btn'), 'Aplicar filtres')
+         # actionButton(ns('clear_btn'), 'Reset filtre')
        )
      )
-   ),
+   )
    # div(
    #   id = 'input2',
    #   textOutput(ns('debug_fil'))
    # ),
-   div(
-     id = 'fil_btns', inline = TRUE,
-     actionButton(ns('apply_btn'), 'Aplicar filtres')
-     # actionButton(ns('clear_btn'), 'Reset filtre')
-   )
  )
 }
 
