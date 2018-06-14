@@ -20,26 +20,6 @@ source('modules/mod_filterAndSelUI.R')
 source('modules/mod_tableControlsInput.R')
 source('modules/mod_baseTableOutput.R')
 
-## VARS ####
-# vars <- c(
-#   'Cap' = '',
-#   'Precipitació Anual' = 'precipitacioanual',
-#   'Temperatura Minima Anual' = 'temperaturaminimaanual',
-#   'Temperatura Mitjana Anual' = 'temperaturamitjanaanual',
-#   'Temperatura Maxima Anual' = 'temperaturamaximaanual',
-#   'Radiació Anual' = 'radiacioanual',
-#   'Altitud' = 'altitud',
-#   'Orientació' = 'orientacio',
-#   'Pendent (%)' = 'pendentpercentatge'
-# )
-
-# ifns <- c(
-#   'IFN 2' = 'ifn2',
-#   'IFN 3' = 'ifn3'#,
-#   # 'IFN 4' = 'ifn4',
-#   
-# )
-
 ## UI ####
 ui <- tagList(
   
@@ -64,45 +44,92 @@ ui <- tagList(
           # includeScript("resources/gomap.js")
         ),
         
-        # input controls
-        absolutePanel(
-          id = 'controls', class = 'panel panel-default', fixed = TRUE,
-          draggable = TRUE, width = 330, height = 'auto',
-          # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
-          # top = 'auto', left = 'auto', right = 100, bottom = 100,
-          top = 250, left = 'auto', right = 15, bottom = 'auto',
-          
-          # panel title
-          h2('Juega con el mapa'),
-          
-          # modules to include
-          # controls
-          mod_mapControlsInput('map_controls')
-          
-        ),
+        # fluidRow with two columns, one for inputs and another one for the map,
+        # like a sidebar layout, but I want more control in the left column, so
+        # we build it from scratch with the following design:
         
-        # map module
-        mod_baseMapOutput('ifn_map'),
-        
-        # info panel
-        # conditional panel for shape info
-        mod_shapeCondPanelUI('info_shape'),
-        
-        # filter and select module
-        hidden(
-          absolutePanel(
-            id = 'filandsel', class = 'panel, panel-default', fixed = TRUE,
-            draggable = TRUE, width = 550, height = 'auto',
-            # top = 'auto', left = 'auto', right = 100, bottom = 100,
-            top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+        fluidRow(
+          column(
+            width = 5,
             
-            h2('Selecciona les parcel·les a analitzar'),
+            # here, two rows, the first one with two columns, the second column
+            # with two rows ;)
+            fluidRow(
+              column(
+                width = 5,
+                # map controls
+                h2('Juega con el mapa'),
+                mod_mapControlsInput('map_controls')
+              ),
+              
+              column(
+                width = 7,
+                fluidRow(
+                  # fil and sel module
+                  h2('Selecciona les parcel·les a analitzar'),
+                  mod_filterAndSelUI('fil_and_sel')
+                ),
+                
+                fluidRow(
+                  # aggregation module
+                )
+              )
+            ),
             
-            # module
-            mod_filterAndSelUI('fil_and_sel')
+            fluidRow(
+              # cond_shape panel
+              mod_shapeCondPanelUI('info_shape')
+            )
             
+          ),
+          
+          column(
+            width = 7,
+            # baseMap
+            mod_baseMapOutput('ifn_map')
           )
+          
         ),
+        
+        # # input controls
+        # absolutePanel(
+        #   id = 'controls', class = 'panel panel-default', fixed = TRUE,
+        #   draggable = TRUE, width = 330, height = 'auto',
+        #   # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+        #   # top = 'auto', left = 'auto', right = 100, bottom = 100,
+        #   top = 250, left = 'auto', right = 15, bottom = 'auto',
+        #   
+        #   # panel title
+        #   h2('Juega con el mapa'),
+        #   
+        #   # modules to include
+        #   # controls
+        #   mod_mapControlsInput('map_controls')
+        #   
+        # ),
+        # 
+        # # map module
+        # mod_baseMapOutput('ifn_map'),
+        # 
+        # # info panel
+        # # conditional panel for shape info
+        # mod_shapeCondPanelUI('info_shape'),
+        # 
+        # # filter and select module
+        # hidden(
+        #   absolutePanel(
+        #     id = 'filandsel', class = 'panel, panel-default', fixed = TRUE,
+        #     draggable = TRUE, width = 550, height = 'auto',
+        #     # top = 'auto', left = 'auto', right = 100, bottom = 100,
+        #     top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+        #     
+        #     h2('Selecciona les parcel·les a analitzar'),
+        #     
+        #     # module
+        #     mod_filterAndSelUI('fil_and_sel')
+        #     
+        #   )
+        # ),
         
         tags$div(
           id = 'cite',
