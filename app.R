@@ -67,13 +67,13 @@ ui <- tagList(
         # input controls
         absolutePanel(
           id = 'controls', class = 'panel panel-default', fixed = TRUE,
-          draggable = TRUE, width = 330, height = 'auto',
+          draggable = TRUE, width = 280, height = 'auto',
           # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
           # top = 'auto', left = 'auto', right = 100, bottom = 100,
           top = 250, left = 'auto', right = 15, bottom = 'auto',
           
           # panel title
-          h2('Juega con el mapa'),
+          h3('Visualització'),
           
           # modules to include
           # controls
@@ -96,7 +96,7 @@ ui <- tagList(
             # top = 'auto', left = 'auto', right = 100, bottom = 100,
             top = 100, left = 100, rigth = 'auto', bottom = 'auto',
             
-            h2('Selecciona les parcel·les a analitzar'),
+            h3('Selecciona les parcel·les a analitzar'),
             
             # module
             mod_filterAndSelUI('fil_and_sel')

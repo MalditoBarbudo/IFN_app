@@ -31,7 +31,7 @@ mod_filterAndSelUI <- function(id) {
    fluidRow(
      column(
        5,
-       radioButtons(
+       selectInput(
          ns('proteccion_divs'), "Tipus d'espai protegit",
          choices = c(
            'Nivell de protecció' = 'proteccio',
@@ -50,10 +50,10 @@ mod_filterAndSelUI <- function(id) {
        )
      )
    ),
-   div(
-     id = 'input2',
-     textOutput(ns('debug_fil'))
-   ),
+   # div(
+   #   id = 'input2',
+   #   textOutput(ns('debug_fil'))
+   # ),
    div(
      id = 'fil_btns', inline = TRUE,
      actionButton(ns('apply_btn'), 'Aplicar filtres')
@@ -126,9 +126,9 @@ mod_filterAndSel <- function(
   })
   
   # debug output
-  output$debug_fil <- renderPrint({
-    filterAndSel_reactives$proteccion_divs
-  })
+  # output$debug_fil <- renderPrint({
+  #   filterAndSel_reactives$proteccion_divs
+  # })
   
   return(filterAndSel_reactives)
  
