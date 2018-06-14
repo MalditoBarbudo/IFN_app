@@ -10,35 +10,22 @@ mod_baseTableOutput <- function(id) {
   ns <- NS(id)
   
   # What we need here?
-  # We need two rows, the second one with two columns for three tables in
-  # total, the data table (1st row) and the filtering tables (2nd row) which will
-  # be used to filter sites by some things
+  # We need two columns, one for the table, other one for the settings
   tagList(
     
-    # first row, data table
-    # fluidRow(
-    #   column(
-    #     12,
-    #     DTOutput(ns('table_dades'), height = 350)
-    #   )
-    # )#,
-    
-    DTOutput(ns('table_dades'))
-    
-    # second row, filtering tables
-    # fluidRow(
-    #   column(
-    #     6,
-    #     DTOutput(ns('table_filtering_one'))
-    #   ),
-    #   column(
-    #     6,
-    #     DTOutput(ns('table_filtering_two')),
-    #     textOutput(ns('debug_tables'))
-    #   )
-    # )
+    fluidRow(
+      # data table column
+      column(
+        8,
+        DTOutput(ns('table_dades'))
+      ),
+      # settings column
+      column(
+        4
+        # inputs, buttons, configs
+      )
+    )
   )
-  
 }
 
 #' mod_baseTable server function
@@ -74,13 +61,17 @@ mod_baseTable <- function(
       
       # parcela (especial case, as there is no aggregation level)
       if (agg == 'parcela') {
-        table_name <- paste0('r_', cd, ifn)
-        return(table_name)
+        if (cd == '') {
+          table_name <- paste0('r_', ifn)
+        } else {
+          table_name <- paste0('r_', cd, '_', ifn)
+        }
       } else {
         table_name <- paste0('r_', agg, cd, '_', ifn)
-        return(table_name)
       }
     }
+    
+    return(table_name)
   })
   
   # reactive for table data
@@ -110,7 +101,7 @@ mod_baseTable <- function(
             buttons = c('csv', 'colvis'),
             text = 'Descàrrega',
             autoWidth = TRUE,
-            deferRender = TRUE, scrollY = 450, scroller = TRUE
+            deferRender = TRUE, scrollY = '70vh', scroller = TRUE
           )
         )
     }

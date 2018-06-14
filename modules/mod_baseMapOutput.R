@@ -42,7 +42,7 @@ mod_baseMap <- function(
     
     leaflet() %>%
       # addProviderTiles(providers$Hydda.Base, group = 'Base') %>%
-      setView(1.519410, 41.720509, zoom = 8) %>%
+      setView(0.8, 41.67, zoom = 8) %>%
       # map panes to put the polygons and plots
       addMapPane('territoris', zIndex = 410) %>%
       addMapPane('parceles', zIndex = 420)

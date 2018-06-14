@@ -50,7 +50,7 @@ ui <- tagList(
           draggable = TRUE, width = 640, height = 'auto',
           # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
           # top = 'auto', left = 'auto', right = 100, bottom = 100,
-          top = 100, right = 'auto', left = 15, bottom = 'auto',
+          top = 60, right = 'auto', left = 50, bottom = 'auto',
 
           # panel title
           h3('Visualització'),
@@ -65,7 +65,7 @@ ui <- tagList(
           absolutePanel(
             id = 'infoPanel', class = 'panel panel-default', fixed = TRUE,
             draggable = TRUE, width = 640, height = 350,
-            top = 'auto', left = 'auto', right = 100, bottom = 15,
+            top = 'auto', left = 'auto', right = 15, bottom = 0,
             
             # info panel
             # conditional panel for shape info
@@ -79,7 +79,7 @@ ui <- tagList(
             id = 'filterAndSel', class = 'panel, panel-default', fixed = TRUE,
             draggable = TRUE, width = 640, height = 'auto',
             # top = 'auto', left = 'auto', right = 100, bottom = 100,
-            top = 400, right = 'auto', left = 15, bottom = 'auto',
+            top = 430, right = 'auto', left = 50, bottom = 'auto',
             
             h3('Selecció y filtrat'),
             
@@ -95,7 +95,7 @@ ui <- tagList(
             id = 'aggregation', class = 'panel, panel-default', fixed = TRUE,
             draggable = TRUE, width = 640, height = 'auto',
             # top = 'auto', left = 'auto', right = 100, bottom = 100,
-            top = 700, right = 'auto', left = 15, bottom = 'auto',
+            top = 705, right = 'auto', left = 50, bottom = 'auto',
             
             h3("Selecciona els nivells d'agregació"),
             mod_aggregationInput('aggreg')
@@ -237,7 +237,7 @@ server <- function(input, output, session) {
    tableBase$table_name()
   })
   output$debug3 <- renderPrint({
-    # map_controls$show_inf
+    map_controls$shape_click
   })
 }
 
