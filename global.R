@@ -173,6 +173,36 @@ proteccion_dictionary <- list(
   )
 )
 
+clima_vars_dictionary <- c(
+  'radiacioanual', "radiaciogener", "radiaciofebrer", "radiaciomarç", "radiacioabril",
+  "radiaciomaig", "radiaciojuny", "radiaciojuliol", "radiacioagost", "radiaciosetembre",
+  "radiaciooctubre", "radiacionovembre", "radiaciodesembre", "temperaturaminimaanual",
+  "temperaturaminimagener", "temperaturaminimafebrer", "temperaturaminimamarç",
+  "temperaturaminimaabril", "temperaturaminimamaig", "temperaturaminimajuny",
+  "temperaturaminimajuliol", "temperaturaminimaagost", "temperaturaminimasetembre",
+  "temperaturaminimaoctubre", "temperaturaminimanovembre", "temperaturaminimadesembre",
+  "temperaturamitjanaanual", "temperaturamitjanagener", "temperaturamitjanafebrer",
+  "temperaturamitjanamarç", "temperaturamitjanaabril", "temperaturamitjanamaig",
+  "temperaturamitjanajuny", "temperaturamitjanajuliol", "temperaturamitjanaagost",
+  "temperaturamitjanasetembre", "temperaturamitjanaoctubre", "temperaturamitjananovembre",
+  "temperaturamitjanadesembre", "temperaturamaximaanual", "temperaturamaximagener",
+  "temperaturamaximafebrer", "temperaturamaximamarç", "temperaturamaximaabril",
+  "temperaturamaximamaig", "temperaturamaximajuny", "temperaturamaximajuliol",
+  "temperaturamaximaagost", "temperaturamaximasetembre", "temperaturamaximaoctubre",
+  "temperaturamaximanovembre", "temperaturamaximadesembre", "precipitacioanual",
+  "precipitaciogener", "precipitaciofebrer", "precipitaciomarç", "precipitacioabril",
+  "precipitaciomaig", "precipitaciojuny", "precipitaciojuliol", "precipitacioagost",
+  "precipitaciosetembre", "precipitaciooctubre", "precipitacionovembre",
+  "precipitaciodesembre", "etp_gener", "etp_febrer", "etp_març", "etp_abril",
+  "etp_maig", "etp_juny", "etp_juliol", "etp_agost", "etp_setembre", "etp_octubre",
+  "etp_novembre", "etp_desembre", "etr_p_gener", "etr_p_febrer", "etr_p_març",
+  "etr_p_abril", "etr_p_maig", "etr_p_juny", "etr_p_juliol", "etr_p_agost",
+  "etr_p_setembre", "etr_p_octubre", "etr_p_novembre", "etr_p_desembre",
+  "npp_p", "etr_s_gener", "etr_s_febrer", "etr_s_març", "etr_s_abril", "etr_s_maig",
+  "etr_s_juny", "etr_s_juliol", "etr_s_agost", "etr_s_setembre", "etr_s_octubre",
+  "etr_s_novembre", "etr_s_desembre", "npp_s"
+)
+
 
 ################################################################################
 

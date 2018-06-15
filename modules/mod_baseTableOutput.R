@@ -21,8 +21,67 @@ mod_baseTableOutput <- function(id) {
       ),
       # settings column
       column(
-        4
-        # inputs, buttons, configs
+        4,
+        wellPanel(
+          # filtratge per clima , lo hacemos en el server con una UI
+          fluidRow(
+            # var sel
+            selectInput(
+              ns('clima_var_sel'), 'Clima filter',
+              choices = clima_vars_dictionary, multiple = TRUE
+            ),
+            
+            uiOutput(
+              ns('clim_filters')
+            ),
+            
+            column(3, offset = 9, actionButton(ns('fil_clim_btn'), 'Filtra'))
+          ),
+          
+          # horizontal ruler
+          hr(),
+          
+          # custom plots creator
+          fluidRow(
+            column(
+              4, offset = 4,
+              actionButton(
+                ns('custom_plot_activator'), 'Gràfiques personalitzades'
+              )
+            )
+          ),
+          
+          # horizontal ruler
+          hr(),
+          
+          # download config and buttons
+          fluidRow(
+            # información extra
+            column(
+              4, offset = 2,
+              checkboxGroupInput(
+                ns('joined_tbls'), 'Annexar més informació',
+                choices = c(
+                  "informació SIG" = 'sig_etrs89',
+                  "informació climàtica" = 'clima'
+                )
+              )
+            ),
+            # buttons
+            column(
+              4,
+              p(strong('Descarregar dades')),
+              actionButton(
+                ns('csv_dwnl'), 'Guardar CSV', icon = icon('file-alt')
+              ),
+              actionButton(
+                ns('xlsx_dwnl'), 'Guardar xlsx', icon = icon('file-excel')
+              )
+            )
+          ),
+          
+          textOutput(ns('debug_table'))
+        )
       )
     )
   )
@@ -46,7 +105,8 @@ mod_baseTable <- function(
   mapControls, aggregation, dataReactive, filterAndSel, parcelas
 ) {
   
-  # reactive for table name creation
+  # reactives for table names creation
+  # general table
   table_name <- reactive({
     
     # inputs
@@ -74,9 +134,39 @@ mod_baseTable <- function(
     return(table_name)
   })
   
-  # reactive for table data
-  tbl_call <- reactive({
+  # sig table
+  sig_name <- reactive({
+    
+    # inputs
+    ifn <- mapControls$ifn
+    # name
+    sig_name <- paste0('parcela', ifn, '_sig_etrs89')
+    return(sig_name)
+  })
+  
+  # clima table
+  clima_name <- reactive({
+    
+    # inputs
+    ifn <- mapControls$ifn
+    # name
+    clima_name <- paste0('parcela', ifn, '_clima')
+  })
+  
+  # reactives for the data tables callers
+  # reactive for general table data
+  general_tbl_call <- reactive({
     tbl(oracle_ifn, table_name())
+  })
+  
+  # reactive for sig table
+  sig_tbl_call <- reactive({
+    tbl(oracle_ifn, sig_name())
+  })
+  
+  # reactive for clima table
+  clima_tbl_call <- reactive({
+    tbl(oracle_ifn, clima_name())
   })
   
   # DT render
@@ -87,7 +177,7 @@ mod_baseTable <- function(
       parcelas <- dataReactive() %>%
         pull('idparcela')
       
-      tbl_call() %>%
+      general_tbl_call() %>%
         filter(idparcela %in% parcelas) %>%
         collect() %>%
         datatable(
@@ -107,6 +197,45 @@ mod_baseTable <- function(
     }
   )
   
+  # Clima filter inputs as UI
+  output$clim_filters <- renderUI({
+    
+    ns <- session$ns
+    clima_data <- clima_tbl_call() %>%
+      select_if(is.numeric) %>%
+      collect()
+    # clima_vars <- names(clima_data)
+    
+    inputs_list <- reactive({
+      lapply(
+        input$clima_var_sel, function(var) {
+          sliderInput(
+            ns(var), label = var,
+            min = min(clima_data[[var]]), max = max(clima_data[[var]]),
+            value = c(min(clima_data[[var]]), max = max(clima_data[[var]]))
+          )
+        }
+      )
+    })
+    
+    tagList(inputs_list())
+    
+    # for (var in input$clima_var_sel) {
+    #   
+    #   sliderInput(
+    #     ns(var), label = var,
+    #     min = min(clima_data[[var]]), max = min(clima_data[[var]]),
+    #     value = c(min(clima_data[[var]]), max = min(clima_data[[var]]))
+    #   )
+    #   
+    # }
+    
+  })
+  
+  output$debug_table <- renderPrint({
+    input$clima_var_sel
+  })
+  
   
   # reactiveValues to return
   baseTable_reactives <- reactiveValues()
@@ -118,47 +247,4 @@ mod_baseTable <- function(
   })
   
   return(baseTable_reactives)
-  
-  
-  
-  # # retrieve table, based on selections
-  # table_dades <- reactive({
-  #   table_name <- tableControls$table_name()
-  #   id_var <- tableControls$id_var()
-  #   tipus_selector <- tableControls$tipus_selector
-  #   filter_arg <- quo(!! id_var %in% tipus_selector)
-  #   
-  #   table_dades <- tbl(oracle_ifn, table_name) %>%
-  #     filter(!!! filter_arg)
-  # })
-  # 
-  # # tabla dades
-  # output$table_dades <- renderDT(
-  #   server = TRUE,
-  #   expr = {
-  #     
-  #     table_dades() %>%
-  #       collect() %>%
-  #       datatable(
-  #         filter = list(position = 'top', clear = TRUE, plain = FALSE),
-  #         style = 'default', rownames = FALSE,
-  #         fillContainer = TRUE, autoHideNavigation = TRUE,
-  #         extensions = c('Buttons', 'Scroller'),
-  #         options = list(
-  #           dom = 'tB',
-  #           extend = 'collection',
-  #           buttons = c('csv', 'pdf'),
-  #           text = 'Descàrrega',
-  #           autoWidth = TRUE,
-  #           deferRender = TRUE, scrollY = 250, scroller = TRUE
-  #         )
-  #       )
-  #   }
-  # )
-  
-  
-  # debug!!!
-  # renderPrint(
-  #   list(table_name, id_var, tipus_selector)
-  # )
 }

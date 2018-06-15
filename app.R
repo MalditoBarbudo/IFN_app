@@ -107,16 +107,16 @@ ui <- tagList(
         
         
         # debug
-        absolutePanel(
-          id = 'debug', class = 'panel, panel-default', fixed = TRUE,
-          draggable = TRUE, width = 640, height = 'auto',
-          # top = 'auto', left = 'auto', right = 100, bottom = 100,
-          top = 400, left = 'auto', right = 15, bottom = 'auto',
-          h3('debug'),
-          textOutput('debug1'),
-          textOutput('debug2'),
-          textOutput('debug3')
-        ),
+        # absolutePanel(
+        #   id = 'debug', class = 'panel, panel-default', fixed = TRUE,
+        #   draggable = TRUE, width = 640, height = 'auto',
+        #   # top = 'auto', left = 'auto', right = 100, bottom = 100,
+        #   top = 400, left = 'auto', right = 15, bottom = 'auto',
+        #   h3('debug'),
+        #   textOutput('debug1'),
+        #   textOutput('debug2'),
+        #   textOutput('debug3')
+        # ),
 
         
 
@@ -230,15 +230,15 @@ server <- function(input, output, session) {
   
   
   ### debug #####
-  output$debug1 <- renderPrint({
-    aggregation_controls$aggregation_level
-  })
-  output$debug2 <- renderPrint({
-   tableBase$table_name()
-  })
-  output$debug3 <- renderPrint({
-    map_controls$shape_click
-  })
+  # output$debug1 <- renderPrint({
+  #   aggregation_controls$aggregation_level
+  # })
+  # output$debug2 <- renderPrint({
+  #  tableBase$table_name()
+  # })
+  # output$debug3 <- renderPrint({
+  #   map_controls$shape_click
+  # })
 }
 
 # Run the application 
