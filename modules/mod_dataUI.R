@@ -24,6 +24,13 @@ mod_dataUI <- function(id) {
     Comarques = 'comarca', Municipis = 'municipi'
   )
   
+  noms_divs = list(
+    comarca = c('Totes', sort(as.character(polygons_comarques@data$NOM_COMAR))),
+    municipi = c('Tots', sort(as.character(polygons_municipis@data$NOM_MUNI))),
+    vegueria = c('Totes', sort(as.character(polygons_vegueries@data$NOMVEGUE))),
+    provincia = c('Totes', sort(as.character(polygons_provincies@data$NOM_PROV)))
+  )
+  
   espai_tipus <- c(
     'Nivell de protecció' = 'proteccio',
     "Espai d'interès Nacional" = 'nomein',
@@ -165,5 +172,54 @@ mod_data <- function(
   input, output, session
 ) {
   
+  # observers to update the dataFil inputs
+  observe({
+    # create the input choices based on the administrative division input
+    admin_div_sel <- input$admin_div
+    if (is.null(admin_div_sel)) {
+      admin_div_fil_choices <- list(
+        catalunya = '', provincia = '', vegueria = '',
+        comarca = '', municipi = ''
+      )
+    } else {
+      admin_div_fil_choices <- noms_divs
+    }
+    
+    updateSelectInput(
+      session, 'admin_div_fil', label = paste0('Filtra per ', admin_div_sel),
+      choices = admin_div_fil_choices,
+      selected = admin_div_fil_choices[[admin_div_sel]][1]
+    )
+  })
   
+  observe({
+    # get the protection level and create the choices based on the dic
+    espai_tipus_sel <- input$espai_tipus
+    espai_tipus_fil_choices <- proteccion_dictionary[[espai_tipus_sel]]
+    
+    updateSelectInput(
+      session, 'espai_tipus_fil', label = paste0('Filtra per ', espai_tipus_sel),
+      choices = espai_tipus_fil_choices,
+      selected = espai_tipus_fil_choices[1]
+    )
+  })
+  
+  # data reactives to create (sig, clima and core)
+  
+  # reactive values to return for use in other modules
+  data_reactives <- reactiveValues()
+  
+  observe({
+    # inputs
+    data_reactives$ifn <- input$ifn
+    data_reactives$admin_div <- input$admin_div
+    data_reactives$espai_tipus <- input$espai_tipus
+    data_reactives$admin_div_fil <- input$admin_div_fil
+    data_reactives$espai_tipus_fil <- input$espai_tipus_fil
+    data_reactives$agg_level <- input$agg_level
+    data_reactives$diam_class <- input$diam_class
+    
+    # data
+    
+  })
 }
