@@ -105,11 +105,11 @@ mod_baseMap <- function(
     
     if (territori_val == 'provincia') {
       leafletProxy('baseMap') %>%
-        clearGroup('Vegueries') %>%
-        clearGroup('Comarques') %>%
-        clearGroup('Municipis') %>%
+        clearGroup('vegueria') %>%
+        clearGroup('comarca') %>%
+        clearGroup('municipi') %>%
         addPolygons(
-          data = provincies, group = 'Provincies',
+          data = provincies, group = 'provincia',
           weight = 1, smoothFactor = 0.5,
           opacity = 1.0, fill = TRUE,
           label = ~NOM_PROV,
@@ -127,11 +127,11 @@ mod_baseMap <- function(
     } else {
       if (territori_val == 'vegueria') {
         leafletProxy('baseMap') %>%
-          clearGroup('Provincies') %>%
-          clearGroup('Comarques') %>%
-          clearGroup('Municipis') %>%
+          clearGroup('provincia') %>%
+          clearGroup('comarca') %>%
+          clearGroup('municipi') %>%
           addPolygons(
-            data = vegueries, group = 'Vegueries',
+            data = vegueries, group = 'vegueria',
             weight = 1, smoothFactor = 0.5,
             opacity = 1.0, fill = TRUE,
             label = ~NOMVEGUE,
@@ -149,11 +149,11 @@ mod_baseMap <- function(
       } else {
         if (territori_val == 'comarca') {
           leafletProxy('baseMap') %>%
-            clearGroup('Vegueries') %>%
-            clearGroup('Provincies') %>%
-            clearGroup('Municipis') %>%
+            clearGroup('vegueria') %>%
+            clearGroup('provincia') %>%
+            clearGroup('municipi') %>%
             addPolygons(
-              data = comarques, group = 'Comarques',
+              data = comarques, group = 'comarca',
               weight = 1, smoothFactor = 0.5,
               opacity = 1.0, fill = TRUE,
               label = ~NOM_COMAR,
@@ -170,11 +170,11 @@ mod_baseMap <- function(
             )
         } else {
           leafletProxy('baseMap') %>%
-            clearGroup('Vegueries') %>%
-            clearGroup('Comarques') %>%
-            clearGroup('Provincies') %>%
+            clearGroup('vegueria') %>%
+            clearGroup('comarca') %>%
+            clearGroup('provincia') %>%
             addPolygons(
-              data = municipis, group = 'Municipis',
+              data = municipis, group = 'municipi',
               weight = 1, smoothFactor = 0.5,
               opacity = 1.0, fill = TRUE,
               label = ~NOM_MUNI,
@@ -221,9 +221,9 @@ mod_baseMap <- function(
     
     # update map
     leafletProxy('baseMap', data = data_par) %>%
-      clearGroup('Parcelas') %>%
+      clearGroup('idparcela') %>%
       addCircles(
-        group = 'Parcelas', lng = ~longitude, lat = ~latitude,
+        group = 'idparcela', lng = ~longitude, lat = ~latitude,
         label = ~idparcela, layerId = ~idparcela,
         stroke = FALSE, fillOpacity = 0.4,
         fillColor = pal(color_vector), radius = size_vector,

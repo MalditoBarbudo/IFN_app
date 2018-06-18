@@ -48,15 +48,20 @@ mod_shapeCondPanelUI <- function(id) {
 #' @param input internal
 #' @param output internal
 #' @param session internal
-#' @param data reactive with the data from dataReactive module
+#' @param data_sig reactive with the data from sigTable module
+#' @param data_clima reactive with the data from climaTable module
+#' @param data_core reactive with the data from dataTable module
 #' @param map_inputs reactive input values from mod_baseMap module
+#' @param aggregation reactive values from mod_aggregation module
+#' @param data
 #' 
 #' @export
 #' 
 #' @rdname mod_shapeCondPanel
 mod_shapeCondPanel <- function(
   input, output, session,
-  data, map_inputs
+  map_inputs, aggregation,
+  data_sig, data_clima, data_core, data
 ) {
   
   # reactive to get the data to generate the conditional panel

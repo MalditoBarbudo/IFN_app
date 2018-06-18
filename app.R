@@ -16,6 +16,9 @@ source('modules/mod_baseMapOutput.R')
 source('modules/mod_shapeCondPanelUI.R')
 source('modules/mod_mapControlsInput.R')
 source('modules/mod_dataReactiveOutput.R')
+source('modules/mod_sigTableRectiveOutput.R')
+source('modules/mod_climaTableRectiveOutput.R')
+source('modules/mod_dataTableRectiveOutput.R')
 source('modules/mod_filterAndSelUI.R')
 source('modules/mod_aggregationInput.R')
 source('modules/mod_baseTableOutput.R')
@@ -161,11 +164,30 @@ server <- function(input, output, session) {
     )
   )
   
-  # data module
+  # data modules
+  
+  # data parcelas para el mapa (próximo a ser deprecated)
   data_parcelas <- callModule(
     mod_dataReactive, 'data_parcelas', map_controls = map_controls,
     filterAndSel_inputs = fill_and_sel
-    
+  )
+  
+  # sig table, no collect
+  data_sig <- callModule(
+    mod_sigTableReactive, 'data_sig', map_controls = map_controls,
+    filterAndSel_inputs = fill_and_sel
+  )
+  
+  # clima table, no collect
+  data_clima <- callModule(
+    mod_climaTableReactive, 'data_clima', map_controls = map_controls,
+    filterAndSel_inputs = fill_and_sel
+  )
+  
+  # core table, no collect
+  data_core <- callModule(
+    mod_dataTableReactive, 'data_core', map_controls = map_controls,
+    filterAndSel_inputs = fill_and_sel
   )
   
   # see mod_baseMapOutput.R file for more info about map widget
@@ -179,7 +201,8 @@ server <- function(input, output, session) {
   # conditional panel for shapes info (parcelas y territorios)
   callModule(
     mod_shapeCondPanel, 'info_panel',
-    map_inputs = ifn_map, data = data_parcelas
+    map_inputs = ifn_map, data = data_parcelas,
+    data_sig = data_sig, data_clima = data_clima, data_core = data_core
   )
   
   # module for aggregation inputs
