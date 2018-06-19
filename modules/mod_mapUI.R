@@ -280,6 +280,19 @@ mod_map <- function(
       )
   })
   
+  # reactive with the map events
+  map_reactives <- reactiveValues()
   
+  observe({
+    map_reactives$map_shape_click <- input$map_shape_click
+    # map_reactives$shape_mouseover <- input$map_shape_mouseover
+    # map_reactives$shape_mouseout <- input$map_shape_mouseout
+    # map_reactives$map_click <- input$map_click
+    # map_reactives$map_bounds <- input$map_bounds
+    # map_reactives$map_zoom <- input$map_zoom
+    # map_reactives$map_center <- input$map_center
+  })
+  
+  return(map_reactives)
   
 }
