@@ -235,8 +235,51 @@ mod_map <- function(
         }
       }
     }
-    
-    
   })
+  
+  # observer for visual candy in the map (color and size of parceles)
+  observe({
+    
+    color_var <- mod_viz$color
+    mida_var <- mod_viz$mida
+    inverse_pal <- mod_viz$inverse_pal
+    
+    data_parceles <- mod_data$data_core() %>%
+      inner_join(mod_data$data_sig()) %>%
+      inner_join(mod_data$data_clima()) %>%
+      collect()
+    
+    # color palette
+    if (color_var == '') {
+      color_vector <- rep('parcel·la', nrow(data_parceles))
+      pal <- colorFactor('viridis', color_vector)
+    } else {
+      color_vector <- data_parceles[[color_var]]
+    }
+    
+    # size vector
+    if (mida_var == '') {
+      mida_vector <- rep(750, nrow(data_parceles))
+    } else {
+      mida_vector <- data_parceles[[mida_var]] / max(data_parceles[[mida_var]]) * 3000
+    }
+    
+    # update map
+    leafletProxy('map', data = data_parceles) %>%
+      clearGroup('Parcelas') %>%
+      addCircles(
+        group = 'Parcelas', lng = ~longitude, lat = ~latitude,
+        label = ~idparcela, layerId = ~idparcela,
+        stroke = FALSE, fillOpacity = 0.4, fillColor = pal(color_vector),
+        radius = mida_vector,
+        options = pathOptions(pane = 'parceles')
+      ) %>%
+      addLegend(
+        position = 'topright', pal = pal, values = color_vector,
+        title = color_var, layerId = 'color_legend'
+      )
+  })
+  
+  
   
 }
