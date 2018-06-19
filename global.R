@@ -21,9 +21,22 @@
 #                                GDAL1_integer64_policy = FALSE) %>%
 #   spTransform(CRS("+proj=longlat +datum=WGS84"))
 # 
+# polygons_enpe <- readOGR('shapefiles', 'enpe_2017',
+#                          GDAL1_integer64_policy = FALSE) %>%
+#   spTransform(CRS("+proj=longlat +datum=WGS84"))
+# 
+# polygons_pein <- readOGR('shapefiles', 'pein_2017',
+#                          GDAL1_integer64_policy = FALSE) %>%
+#   spTransform(CRS("+proj=longlat +datum=WGS84"))
+# 
+# polygons_xn2000 <- readOGR('shapefiles', 'xn2000_2017',
+#                          GDAL1_integer64_policy = FALSE) %>%
+#   spTransform(CRS("+proj=longlat +datum=WGS84"))
+# 
 # save(
 #   polygons_municipis, polygons_comarques,
 #   polygons_vegueries, polygons_provincies,
+#   polygons_enpe, polygons_pein, polygons_xn2000,
 #   file = 'shapefiles/polygons.RData'
 # )
 ################################################################################
