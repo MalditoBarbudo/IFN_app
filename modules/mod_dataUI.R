@@ -50,11 +50,11 @@ mod_dataUI <- function(id) {
     ),
     
     "Grups funcionals" = list(
-      'Espècie' = 'especie_rt',
-      'Espècie simplificat' = 'espsimple_rt',
-      'Gènere' = 'genere_rt',
-      'Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon_rt',
-      'Conífera/Planifoli' = 'plancon_rt'
+      'Espècie dominant' = 'especie_rt',
+      'Espècie simplificat dominant' = 'espsimple_rt',
+      'Gènere dominant' = 'genere_rt',
+      'Conífera/Caducifoli/Esclerofil·le dominant' = 'cadesclcon_rt',
+      'Conífera/Planifoli dominant' = 'plancon_rt'
     ),
     'Administratiu' = list("Divisions seleccionats" = 'territori_rt')
   )
@@ -205,6 +205,46 @@ mod_data <- function(
   })
   
   # data reactives to create (sig, clima and core)
+  data_sig <- reactive({
+    
+    sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
+    tbl(oracle_ifn, sig_name)
+    
+  })
+  
+  data_clima <- reactive({
+    
+    clima_name <- paste0('parcela', input$ifn, '_clima')
+    tbl(oracle_ifn, clima_name)
+    
+  })
+  
+  data_core <- reactive({
+    
+    ifn <- input$ifn
+    agg <- input$agg_level
+    cd <- if (input$diam_class) {'cd'} else {''}
+    
+    # real time calculations
+    if (stringr::str_detect(agg, '_rt')) {
+      return() #TODO
+    } else {
+      
+      # parcela, no aggregation level
+      if (agg == 'parcela') {
+        if (cd == '') {
+          core_name <- paste0('r_', ifn)
+        } else {
+          core_name <- paste0('r_', cd, '_', ifn)
+        }
+      } else {
+        core_name <- paste0('r_', agg, cd, '_', ifn)
+      }
+    }
+    
+    tbl(oracle_ifn, core_name)
+    
+  })
   
   # reactive values to return for use in other modules
   data_reactives <- reactiveValues()
@@ -220,6 +260,11 @@ mod_data <- function(
     data_reactives$diam_class <- input$diam_class
     
     # data
+    data_reactives$data_sig <- data_sig
+    data_reactives$data_clima <- data_clima
+    data_reactives$data_core <- data_core
     
   })
+  
+  return(data_reactives)
 }
