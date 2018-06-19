@@ -266,9 +266,9 @@ mod_map <- function(
     
     # update map
     leafletProxy('map', data = data_parceles) %>%
-      clearGroup('Parcelas') %>%
+      clearGroup('idparcela') %>%
       addCircles(
-        group = 'Parcelas', lng = ~longitude, lat = ~latitude,
+        group = 'idparcela', lng = ~longitude, lat = ~latitude,
         label = ~idparcela, layerId = ~idparcela,
         stroke = FALSE, fillOpacity = 0.4, fillColor = pal(color_vector),
         radius = mida_vector,
