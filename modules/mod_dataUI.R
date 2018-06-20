@@ -208,14 +208,25 @@ mod_data <- function(
   data_sig <- reactive({
     
     sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
-    tbl(oracle_ifn, sig_name)
+    # filters based on the dataFil inputs
+    filter_exprs <- quos(
+      !!admin_div %in% !!input$admin_div_fil,
+      !!espai_tipus %in% !!input$espai_tipus_fil
+    )
+    
+    tbl(oracle_ifn, sig_name) %>%
+      dplyr::filter(!!! filter_exprs)
     
   })
   
   data_clima <- reactive({
     
     clima_name <- paste0('parcela', input$ifn, '_clima')
-    tbl(oracle_ifn, clima_name)
+    # idparcelas to filter based on data_sig()
+    idparcelas <- data_sig() %>% pull(idespecie)
+    
+    tbl(oracle_ifn, clima_name) %>%
+      filter(idparcela %in% idparcelas)
     
   })
   
@@ -223,7 +234,8 @@ mod_data <- function(
     
     ifn <- input$ifn
     agg <- input$agg_level
-    cd <- if (input$diam_class) {'cd'} else {''}
+    cd <- if (isTRUE(input$diam_class)) {'cd'} else {''}
+    idparcelas <- data_sig() %>% pull(idespecie)
     
     # real time calculations
     if (stringr::str_detect(agg, '_rt')) {
@@ -242,7 +254,8 @@ mod_data <- function(
       }
     }
     
-    tbl(oracle_ifn, core_name)
+    tbl(oracle_ifn, core_name) %>%
+      filter(idespecie %in% idespecies)
     
   })
   
