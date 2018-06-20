@@ -65,7 +65,7 @@ mod_infoPanel <- function(
       click <- mod_map$map_shape_click
       
       # filter expression
-      filter_expr <- quo(!! click$group == click$id)
+      filter_expr <- quo(!!click$group == click$id)
       
       # data
       mod_data$data_sig() %>%
@@ -82,34 +82,311 @@ mod_infoPanel <- function(
     data_plot <- data_shape()
     click <- mod_map$map_shape_click
     cd <- mod_data$diam_class
+    agg_level <- mod_data$agg_level
     
     # if we click on parceles
     if (click$group == 'idparcela') {
       
-      # diameter classes??
-      if (cd) {
-        plot_densitat <- ggplot(aes(
-          x = forcats::as_factor(idcd), y = densitat
-        )) +
-          geom_col(fill = '#440154FF') +
-          labs(
-            title = 'Densitat per classe diamètrica'
-          ) +
-          theme_void() + theme(legend.position = 'none')
+      # now, we navigate for each aggregation level in the parcele level. Not
+      # optimal but it will work. Also in each aggregation level we need to
+      # check for diameter classes, as the plots are completly different.
+      
+      # parcele level
+      if (agg_level == 'parcela') {
         
-        plot_ab <- ggplot(aes(
-          x = forcats::as_factor(idcd), y = ab
-        )) +
-          geom_col(fill = '#440154FF') +
-          labs(
-            title = 'Àrea basal per classe diamètrica'
-          ) +
-          theme_void() + theme(legend.position = 'none')
-      } else {
-        # if not diameter classes
-        # plot_densitat <- ggplot(aes(
-        #   x = 
-        # ))
+        if (isTRUE(cd)) {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = densitat
+          )) +
+            geom_col(fill = '#440154FF') +
+            labs(
+              title = 'Densitat per classe diamètrica'
+            ) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = ab
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal per classe diamètrica'
+            ) +
+            theme_void() + theme(legend.position = 'none')
+          
+        } else {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = planifconifdens, y = percdensplanifconif
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat (%) del grup funcional dominant'
+            ) +
+            scale_fill_manual(name = '', values = c(
+              "Conífera" = "#440154FF",
+              "Planifoli" = "#21908CFF"
+            )) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = planifconifab, y = percabplanifconif
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal (%) del grup funcional dominant'
+            ) +
+            scale_fill_manual(name = '', values = c(
+              "Conífera" = "#440154FF",
+              "Planifoli" = "#21908CFF"
+            )) +
+            theme_void() + theme(legend.position = 'none')
+        }
+      }
+      
+      # parcela desglossat per especie
+      if (agg_level == 'especie') {
+        
+        if (isTRUE(cd)) {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = densitat, fill = idespecieifn2
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat per classe diamètrica y espècie'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = ab, fill = idespecieifn2
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal per classe diamètrica y espècie'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+        } else {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = idespecieifn2, y = percdens, fill = idespecieifn2
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat (%) per espècie'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = idespecieifn2, y = percab, fill = idespecieifn2
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal (%) per espècie'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+        }
+      }
+      
+      # parcela desglossat per espsimple
+      if (agg_level == 'espsimple') {
+        
+        if (isTRUE(cd)) {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = densitat, fill = idespeciesimple
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat per classe diamètrica y espècie simplificat'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = ab, fill = idespeciesimple
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal per classe diamètrica y espècie simplificat'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+        } else {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = idespecieifn2, y = percdens, fill = idespeciesimple
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat (%) per espècie simplificat'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = idespeciesimple, y = percab, fill = idespeciesimple
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal (%) per espècie simplificat'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+        }
+      }
+      
+      # parcela desglossat per genere
+      if (agg_level == 'genere') {
+        
+        if (isTRUE(cd)) {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = densitat, fill = idgenere
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat per classe diamètrica y gènere'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = ab, fill = idgenere
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal per classe diamètrica y gènere'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+        } else {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = idgenere, y = percdens, fill = idgenere
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat (%) per gènere'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = idgenere, y = percab, fill = idgenere
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal (%) per gènere'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+        }
+      }
+      
+      # parcele desglossat per cadesclcon
+      if (agg_level == 'cadesclcon') {
+        
+        if (isTRUE(cd)) {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = densitat, fill = idcaducesclerconif
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat per classe diamètrica y grup funcional'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = ab, fill = idcaducesclerconif
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal per classe diamètrica y grup funcional'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+        } else {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = idcaducesclerconif, y = percdens, fill = idcaducesclerconif
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat (%) per grup funcional'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = idcaducesclerconif, y = percab, fill = idcaducesclerconif
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal (%) per grup funcional'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+        }
+      }
+      
+      # parcele desglossat per plancon
+      if (agg_level == 'plancon') {
+        
+        if (isTRUE(cd)) {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = densitat, fill = idplanifconif
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat per classe diamètrica y grup funcional'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = forcats::as_factor(idcd), y = ab, fill = idplanifconif
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal per classe diamètrica y grup funcional'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+        } else {
+          
+          plot_densitat <- ggplot(data_plot, aes(
+            x = idplanifconif, y = percdens, fill = idplanifconif
+          )) +
+            geom_col() +
+            labs(
+              title = 'Densitat (%) per grup funcional'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+          
+          plot_ab <- ggplot(data_plot, aes(
+            x = idplanifconif, y = percab, fill = idplanifconif
+          )) +
+            geom_col() +
+            labs(
+              title = 'Àrea basal (%) per grup funcional'
+            ) +
+            scale_fill_viridis(discrete = TRUE) +
+            theme_void() + theme(legend.position = 'none')
+        }
       }
     }
     
