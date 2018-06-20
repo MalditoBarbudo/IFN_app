@@ -10,55 +10,6 @@ mod_dataUI <- function(id) {
   # ns
   ns <- NS(id)
   
-  # inputs choices
-  ifns <- c(
-    'IFN 2' = 'ifn2',
-    'IFN 3' = 'ifn3',
-    'IFN 4' = 'ifn4',
-    'IFN 3 respecte a IFN 2' = 'ifn3_ifn2',
-    'IFN 4 respecte a IFN 3' = 'ifn3_ifn4'
-  )
-  
-  admin_divs <- c(
-    Catalunya = 'catalunya', Provincies = 'provincia', Vegueries = 'vegueria',
-    Comarques = 'comarca', Municipis = 'municipi'
-  )
-  
-  noms_divs = list(
-    comarca = c('Totes', sort(as.character(polygons_comarques@data$NOM_COMAR))),
-    municipi = c('Tots', sort(as.character(polygons_municipis@data$NOM_MUNI))),
-    vegueria = c('Totes', sort(as.character(polygons_vegueries@data$NOMVEGUE))),
-    provincia = c('Totes', sort(as.character(polygons_provincies@data$NOM_PROV)))
-  )
-  
-  espai_tipus <- c(
-    'Nivell de protecció' = 'proteccio',
-    "Espai d'interès Nacional" = 'nomein',
-    "Espai de protecció especial" = 'enpes',
-    "Xarxa Natura 2000" = 'nomxarxa2000'
-  )
-  
-  agg_levels <- list(
-    
-    "Parcel·les" = list(
-      'Parcel·la' = 'parcela',
-      'Parcel·la desglossat per Espècie' = 'especie',
-      'Parcel·la desglossat per Espècie simplificat' = 'espsimple',
-      'Parcel·la desglossat per Gènere' = 'genere',
-      'Parcel·la desglossat per Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon',
-      'Parcel·la desglossat per Conífera/Planifoli' = 'plancon'
-    ),
-    
-    "Grups funcionals" = list(
-      'Espècie dominant' = 'especie_rt',
-      'Espècie simplificat dominant' = 'espsimple_rt',
-      'Gènere dominant' = 'genere_rt',
-      'Conífera/Caducifoli/Esclerofil·le dominant' = 'cadesclcon_rt',
-      'Conífera/Planifoli dominant' = 'plancon_rt'
-    ),
-    'Administratiu' = list("Divisions seleccionats" = 'territori_rt')
-  )
-  
   # UI
   tagList(
     
@@ -210,12 +161,12 @@ mod_data <- function(
     sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
     # filters based on the dataFil inputs
     filter_exprs <- quos(
-      !!admin_div %in% !!input$admin_div_fil,
-      !!espai_tipus %in% !!input$espai_tipus_fil
+      !!sym(input$admin_div) %in% !!input$admin_div_fil,
+      !!sym(input$espai_tipus) %in% !!input$espai_tipus_fil
     )
     
     tbl(oracle_ifn, sig_name) %>%
-      dplyr::filter(!!! filter_exprs)
+      filter(!!! filter_exprs)
     
   })
   
@@ -223,7 +174,7 @@ mod_data <- function(
     
     clima_name <- paste0('parcela', input$ifn, '_clima')
     # idparcelas to filter based on data_sig()
-    idparcelas <- data_sig() %>% pull(idespecie)
+    idparcelas <- data_sig() %>% pull(idparcela)
     
     tbl(oracle_ifn, clima_name) %>%
       filter(idparcela %in% idparcelas)
@@ -235,7 +186,7 @@ mod_data <- function(
     ifn <- input$ifn
     agg <- input$agg_level
     cd <- if (isTRUE(input$diam_class)) {'cd'} else {''}
-    idparcelas <- data_sig() %>% pull(idespecie)
+    idparcelas <- data_sig() %>% pull(idparcela)
     
     # real time calculations
     if (stringr::str_detect(agg, '_rt')) {
@@ -255,7 +206,7 @@ mod_data <- function(
     }
     
     tbl(oracle_ifn, core_name) %>%
-      filter(idespecie %in% idespecies)
+      filter(idparcela %in% idparcelas)
     
   })
   

@@ -216,6 +216,55 @@ clima_vars_dictionary <- c(
   "etr_s_novembre", "etr_s_desembre", "npp_s"
 )
 
+### inputs choices #############################################################
+# inputs choices
+ifns <- c(
+  'IFN 2' = 'ifn2',
+  'IFN 3' = 'ifn3',
+  'IFN 4' = 'ifn4',
+  'IFN 3 respecte a IFN 2' = 'ifn3_ifn2',
+  'IFN 4 respecte a IFN 3' = 'ifn3_ifn4'
+)
+
+admin_divs <- c(
+  Provincies = 'provincia', Vegueries = 'vegueria',
+  Comarques = 'comarca', Municipis = 'municipi'
+)
+
+noms_divs = list(
+  comarca = c('Totes', sort(as.character(polygons_comarques@data$NOM_COMAR))),
+  municipi = c('Tots', sort(as.character(polygons_municipis@data$NOM_MUNI))),
+  vegueria = c('Totes', sort(as.character(polygons_vegueries@data$NOMVEGUE))),
+  provincia = c('Totes', sort(as.character(polygons_provincies@data$NOM_PROV)))
+)
+
+espai_tipus <- c(
+  'Nivell de protecció' = 'proteccio',
+  "Espai d'interès Nacional" = 'nomein',
+  "Espai de protecció especial" = 'enpes',
+  "Xarxa Natura 2000" = 'nomxarxa2000'
+)
+
+agg_levels <- list(
+  
+  "Parcel·les" = list(
+    'Parcel·la' = 'parcela',
+    'Parcel·la desglossat per Espècie' = 'especie',
+    'Parcel·la desglossat per Espècie simplificat' = 'espsimple',
+    'Parcel·la desglossat per Gènere' = 'genere',
+    'Parcel·la desglossat per Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon',
+    'Parcel·la desglossat per Conífera/Planifoli' = 'plancon'
+  ),
+  
+  "Grups funcionals" = list(
+    'Espècie dominant' = 'especie_rt',
+    'Espècie simplificat dominant' = 'espsimple_rt',
+    'Gènere dominant' = 'genere_rt',
+    'Conífera/Caducifoli/Esclerofil·le dominant' = 'cadesclcon_rt',
+    'Conífera/Planifoli dominant' = 'plancon_rt'
+  ),
+  'Administratiu' = list("Divisions seleccionats" = 'territori_rt')
+)
 
 ################################################################################
 

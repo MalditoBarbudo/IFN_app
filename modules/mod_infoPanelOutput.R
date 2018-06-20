@@ -65,7 +65,7 @@ mod_infoPanel <- function(
       click <- mod_map$map_shape_click
       
       # filter expression
-      filter_expr <- quo(!!click$group == click$id)
+      filter_expr <- quo(!!sym(click$group) == click$id)
       
       # data
       mod_data$data_sig() %>%
