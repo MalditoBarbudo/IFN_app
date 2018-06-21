@@ -227,15 +227,15 @@ ifns <- c(
 )
 
 admin_divs <- c(
-  Provincies = 'provincia', Vegueries = 'vegueria',
+  Catalunya = '', Provincies = 'provincia', Vegueries = 'vegueria',
   Comarques = 'comarca', Municipis = 'municipi'
 )
 
 noms_divs = list(
-  comarca = c('Totes', sort(as.character(polygons_comarques@data$NOM_COMAR))),
-  municipi = c('Tots', sort(as.character(polygons_municipis@data$NOM_MUNI))),
-  vegueria = c('Totes', sort(as.character(polygons_vegueries@data$NOMVEGUE))),
-  provincia = c('Totes', sort(as.character(polygons_provincies@data$NOM_PROV)))
+  comarca = c('Totes' = '', sort(as.character(polygons_comarques@data$NOM_COMAR))),
+  municipi = c('Tots' = '', sort(as.character(polygons_municipis@data$NOM_MUNI))),
+  vegueria = c('Totes' = '', sort(as.character(polygons_vegueries@data$NOMVEGUE))),
+  provincia = c('Totes' = '', sort(as.character(polygons_provincies@data$NOM_PROV)))
 )
 
 espai_tipus <- c(

@@ -61,43 +61,24 @@ mod_map <- function(
     
     admin_div <- mod_data$admin_div
     
-    if (is.null(admin_div)) {
-      return()
-    }
-    
-    if (admin_div == 'provincia') {
+    if (admin_div == '') {
       leafletProxy('map') %>%
         clearGroup('vegueria') %>%
         clearGroup('comarca') %>%
         clearGroup('municipi') %>%
-        addPolygons(
-          data = polygons_provincies, group = 'provincia',
-          weight = 1, smoothFactor = 0.5,
-          opacity = 1.0, fill = TRUE,
-          label = ~NOM_PROV,
-          layerId = nom_provincies,
-          color = '#6C7A89FF', fillColor = "#CF000F00",
-          highlightOptions = highlightOptions(
-            color = "#CF000F", weight = 2,
-            bringToFront = FALSE,
-            fill = TRUE, fillColor = "#CF000F00"
-          ),
-          options = pathOptions(
-            pane = 'admin_divs'
-          )
-        )
+        clearGroup('provincia')
     } else {
-      if (admin_div == 'vegueria') {
+      if (admin_div == 'provincia') {
         leafletProxy('map') %>%
-          clearGroup('provincia') %>%
+          clearGroup('vegueria') %>%
           clearGroup('comarca') %>%
           clearGroup('municipi') %>%
           addPolygons(
-            data = polygons_vegueries, group = 'vegueria',
+            data = polygons_provincies, group = 'provincia',
             weight = 1, smoothFactor = 0.5,
             opacity = 1.0, fill = TRUE,
-            label = ~NOMVEGUE,
-            layerId = nom_vegueries,
+            label = ~NOM_PROV,
+            layerId = nom_provincies,
             color = '#6C7A89FF', fillColor = "#CF000F00",
             highlightOptions = highlightOptions(
               color = "#CF000F", weight = 2,
@@ -109,17 +90,17 @@ mod_map <- function(
             )
           )
       } else {
-        if (admin_div == 'comarca') {
+        if (admin_div == 'vegueria') {
           leafletProxy('map') %>%
-            clearGroup('vegueria') %>%
             clearGroup('provincia') %>%
+            clearGroup('comarca') %>%
             clearGroup('municipi') %>%
             addPolygons(
-              data = polygons_comarques, group = 'comarca',
+              data = polygons_vegueries, group = 'vegueria',
               weight = 1, smoothFactor = 0.5,
               opacity = 1.0, fill = TRUE,
-              label = ~NOM_COMAR,
-              layerId = nom_comarques,
+              label = ~NOMVEGUE,
+              layerId = nom_vegueries,
               color = '#6C7A89FF', fillColor = "#CF000F00",
               highlightOptions = highlightOptions(
                 color = "#CF000F", weight = 2,
@@ -131,17 +112,17 @@ mod_map <- function(
               )
             )
         } else {
-          if (admin_div == 'municipi') {
+          if (admin_div == 'comarca') {
             leafletProxy('map') %>%
               clearGroup('vegueria') %>%
-              clearGroup('comarca') %>%
               clearGroup('provincia') %>%
+              clearGroup('municipi') %>%
               addPolygons(
-                data = polygons_municipis, group = 'municipi',
+                data = polygons_comarques, group = 'comarca',
                 weight = 1, smoothFactor = 0.5,
                 opacity = 1.0, fill = TRUE,
-                label = ~NOM_MUNI,
-                layerId = nom_municipis,
+                label = ~NOM_COMAR,
+                layerId = nom_comarques,
                 color = '#6C7A89FF', fillColor = "#CF000F00",
                 highlightOptions = highlightOptions(
                   color = "#CF000F", weight = 2,
@@ -152,10 +133,35 @@ mod_map <- function(
                   pane = 'admin_divs'
                 )
               )
+          } else {
+            if (admin_div == 'municipi') {
+              leafletProxy('map') %>%
+                clearGroup('vegueria') %>%
+                clearGroup('comarca') %>%
+                clearGroup('provincia') %>%
+                addPolygons(
+                  data = polygons_municipis, group = 'municipi',
+                  weight = 1, smoothFactor = 0.5,
+                  opacity = 1.0, fill = TRUE,
+                  label = ~NOM_MUNI,
+                  layerId = nom_municipis,
+                  color = '#6C7A89FF', fillColor = "#CF000F00",
+                  highlightOptions = highlightOptions(
+                    color = "#CF000F", weight = 2,
+                    bringToFront = FALSE,
+                    fill = TRUE, fillColor = "#CF000F00"
+                  ),
+                  options = pathOptions(
+                    pane = 'admin_divs'
+                  )
+                )
+            }
           }
         }
       }
     }
+    
+    
   })
   
   # observer for proteccions polygons, same as above
@@ -167,7 +173,10 @@ mod_map <- function(
     }
     
     if (espai_tipus == 'proteccio') {
-      return()
+      leafletProxy('map') %>%
+        clearGroup('enpes') %>%
+        clearGroup('nomxarxa2000') %>%
+        clearGroup('nomein')
     } else {
       if (espai_tipus == 'nomein') {
         leafletProxy('map') %>%
@@ -179,14 +188,14 @@ mod_map <- function(
             opacity = 1.0, fill = TRUE,
             label = ~nom,
             layerId = nom_pein,
-            color = '#6C7A89FF', fillColor = "#CF000F00",
+            color = '#6C7A89FF', fillColor = "#6C7A89FF",
             highlightOptions = highlightOptions(
               color = "#CF000F", weight = 2,
               bringToFront = FALSE,
               fill = TRUE, fillColor = "#CF000F00"
             ),
             options = pathOptions(
-              pane = 'admin_divs'
+              pane = 'proteccions'
             )
           )
       } else {
@@ -200,14 +209,14 @@ mod_map <- function(
               opacity = 1.0, fill = TRUE,
               label = ~nom,
               layerId = nom_enpe,
-              color = '#6C7A89FF', fillColor = "#CF000F00",
+              color = '#6C7A89FF', fillColor = "#6C7A89FF",
               highlightOptions = highlightOptions(
                 color = "#CF000F", weight = 2,
                 bringToFront = FALSE,
                 fill = TRUE, fillColor = "#CF000F00"
               ),
               options = pathOptions(
-                pane = 'admin_divs'
+                pane = 'proteccions'
               )
             )
         } else {
@@ -221,14 +230,14 @@ mod_map <- function(
                 opacity = 1.0, fill = TRUE,
                 label = ~nom_n2,
                 layerId = nom_xn2000,
-                color = '#6C7A89FF', fillColor = "#CF000F00",
+                color = '#6C7A89FF', fillColor = "#6C7A89FF",
                 highlightOptions = highlightOptions(
                   color = "#CF000F", weight = 2,
                   bringToFront = FALSE,
                   fill = TRUE, fillColor = "#CF000F00"
                 ),
                 options = pathOptions(
-                  pane = 'admin_divs'
+                  pane = 'proteccions'
                 )
               )
           }
@@ -250,7 +259,7 @@ mod_map <- function(
       collect()
     
     # color palette
-    if (color_var == '') {
+    if (is.null(color_var)) {
       color_vector <- rep('parcel·la', nrow(data_parceles))
       pal <- colorFactor('viridis', color_vector)
     } else {
@@ -258,7 +267,7 @@ mod_map <- function(
     }
     
     # size vector
-    if (mida_var == '') {
+    if (is.null(mida_var)) {
       mida_vector <- rep(750, nrow(data_parceles))
     } else {
       mida_vector <- data_parceles[[mida_var]] / max(data_parceles[[mida_var]]) * 3000

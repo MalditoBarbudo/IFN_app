@@ -49,6 +49,19 @@ ui <- tagList(
           # includeScript("resources/gomap.js")
         ),
         
+        absolutePanel(
+          id = 'debug', class = 'panel panel-default', fixed = TRUE,
+          draggable = TRUE, width = 640, height = 'auto',
+          # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+          # top = 'auto', left = 'auto', right = 100, bottom = 100,
+          top = 60, left = 'auto', right = 50, bottom = 'auto',
+          
+          textOutput('debug1'),
+          textOutput('debug2'),
+          textOutput('debug3')
+        ),
+        
+        
         # mod_data module, it includes the dataSel, dataFil and dataAgg inputs
         mod_dataUI('mod_dataUI'),
 
@@ -192,16 +205,16 @@ server <- function(input, output, session) {
   # )
   # 
   # 
-  # ### debug #####
-  # # output$debug1 <- renderPrint({
-  # #   aggregation_controls$aggregation_level
-  # # })
-  # # output$debug2 <- renderPrint({
-  # #  tableBase$table_name()
-  # # })
-  # # output$debug3 <- renderPrint({
-  # #   map_controls$shape_click
-  # # })
+  ## debug #####
+  output$debug1 <- renderPrint({
+    data_reactives$admin_div
+  })
+  output$debug2 <- renderPrint({
+    data_reactives$admin_div_fil
+  })
+  output$debug3 <- renderPrint({
+    data_reactives$espai_tipus
+  })
 }
 
 # Run the application 

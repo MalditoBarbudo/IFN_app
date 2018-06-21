@@ -41,7 +41,7 @@ mod_dataUI <- function(id) {
             4,
             selectInput(
               ns('admin_div'), 'Divisions administratatives', admin_divs,
-              selected = 'catalunya'
+              selected = ''
             )
           ),
           column(
@@ -67,16 +67,23 @@ mod_dataUI <- function(id) {
           column(
             6,
             selectInput(
-              ns('admin_div_fil'), '', 'Totes',
-              selected = 'Totes', multiple = TRUE, width = '100%'
+              ns('admin_div_fil'), 'Filtra per division administrative',
+              choices = c('Tota Catalunya' = ''),
+              selected = '', multiple = TRUE, width = '100%'
             )
           ),
           column(
             6,
             selectInput(
-              ns('espai_tipus_fil'), '', 'Totes',
-              selected = 'Totes', multiple = TRUE, width = '100%'
+              ns('espai_tipus_fil'), "Filtra per tipus d'espai",
+              choices = c('Totes' = ''),
+              selected = '', multiple = TRUE, width = '100%'
             )
+          )
+        ),
+        fluidRow(
+          actionButton(
+            ns('apply_filters'), 'Aplicar filtres', width = '35%' 
           )
         )
       ),
@@ -127,20 +134,32 @@ mod_data <- function(
   observe({
     # create the input choices based on the administrative division input
     admin_div_sel <- input$admin_div
-    if (is.null(admin_div_sel)) {
-      admin_div_fil_choices <- list(
-        catalunya = '', provincia = '', vegueria = '',
-        comarca = '', municipi = ''
+    if (is.null(admin_div_sel) | admin_div_sel == '') {
+      
+      # admin_div_fil_choices <- list(
+      #   catalunya = ''
+      # )
+      
+      # if catalunya is selected, the filter has no sense (there is nothing
+      # to filter by), so we disable the input with shinyjs, but before that
+      # we update the input to show the original title (if not, the title is
+      # stuck with the last admin div selected)
+      updateSelectInput(
+        session, 'admin_div_fil', 'Filtra per division administrative',
+        choices = c('Tota Catalunya' = ''),
+        selected = ''
       )
+      
+      disable('admin_div_fil')
+      
     } else {
       admin_div_fil_choices <- noms_divs
+      updateSelectInput(
+        session, 'admin_div_fil', label = paste0('Filtra per ', admin_div_sel),
+        choices = admin_div_fil_choices,
+        selected = admin_div_fil_choices[[admin_div_sel]][1]
+      )
     }
-    
-    updateSelectInput(
-      session, 'admin_div_fil', label = paste0('Filtra per ', admin_div_sel),
-      choices = admin_div_fil_choices,
-      selected = admin_div_fil_choices[[admin_div_sel]][1]
-    )
   })
   
   observe({
@@ -155,20 +174,89 @@ mod_data <- function(
     )
   })
   
-  # data reactives to create (sig, clima and core)
-  data_sig <- reactive({
-    
-    sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
-    # filters based on the dataFil inputs
-    filter_exprs <- quos(
-      !!sym(input$admin_div) %in% !!input$admin_div_fil,
-      !!sym(input$espai_tipus) %in% !!input$espai_tipus_fil
-    )
-    
-    tbl(oracle_ifn, sig_name) %>%
-      filter(!!! filter_exprs)
-    
-  })
+  # data reactives to create (sig, clima and core). The sig data is the key
+  # as it can be filtered by admin divs and espais. Also, is really costy, so
+  # it must be only recalculated when the user selection is completly done,
+  # so we have to add a button to signal the filtering step. Even more, we need
+  # to create an empty data frame in the case of filtering returns no data.
+  data_sig <- eventReactive(
+    ignoreNULL = FALSE, ignoreInit = FALSE,
+    eventExpr = {
+      
+      # we need to update the data when ifn is changed or when filterings are
+      # applied, so we look up for two inputs:
+      input$apply_filters
+      input$ifn
+      
+    },
+    valueExpr = {
+      
+      # stuff needed
+      sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
+      
+      empty <- data_frame(
+        # vars for the map
+        idparcela = NA, latitude = NA_real_, longitude = NA_real_,
+        # vars for the conditional info panel
+        provincia = NA, vegueria = NA, comarca = NA, municipi = NA
+      )
+      
+      data_sig_init <- tbl(oracle_ifn, sig_name)
+      
+      # if apply_filters button is not pressed, then return the initial data
+      if (input$apply_filters == 0) {
+        return(data_sig_init)
+      } else {
+        
+        # when button is pressed, then all the logic start working
+        if (is.null(input$admin_div_fil)) {
+          filter_expr_admin <- quo(TRUE)
+        } else {
+          filter_expr_admin <- quo(!!sym(input$admin_div) %in% !!input$admin_div_fil)
+        }
+        
+        if (is.null(input$espai_tipus_fil)) {
+          filter_expr_espai <- quo(TRUE)
+        } else {
+          filter_expr_espai <- quo(!!sym(input$espai_tipus) %in% !!input$espai_tipus_fil)
+        }
+        
+        tbl(oracle_ifn, sig_name) %>%
+          filter(!!! filter_expr_admin, !!! filter_expr_espai)
+        
+      }
+      
+      
+    }
+  )
+  
+  
+  # data_sig <- reactive({
+  #   
+  #   sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
+  #   
+  #   # filters based on the dataFil inputs
+  #   # filter_exprs <- quos(
+  #   #   !!sym(input$admin_div) %in% !!input$admin_div_fil,
+  #   #   !!sym(input$espai_tipus) %in% !!input$espai_tipus_fil
+  #   # )
+  #   # if the admin_div is '' then there is no filter by admin_div
+  #   if (is.null(input$admin_div_fil)) {
+  #     filter_expr_admin <- quo(TRUE)
+  #   } else {
+  #     filter_expr_admin <- quo(!!sym(input$admin_div) %in% !!input$admin_div_fil)
+  #   }
+  #   
+  #   if (is.null(input$espai_tipus_fil)) {
+  #     filter_expr_espai <- quo(TRUE)
+  #   } else {
+  #     filter_expr_espai <- quo(!!sym(input$espai_tipus) %in% !!input$espai_tipus_fil)
+  #   }
+  #   
+  #   tbl(oracle_ifn, sig_name) %>%
+  #     filter(!!! filter_expr_admin, !!! filter_expr_espai)
+  #   
+  # })
   
   data_clima <- reactive({
     

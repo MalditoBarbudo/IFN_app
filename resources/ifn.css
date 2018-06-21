@@ -29,7 +29,7 @@ div.outer {
 }
 
 /* Controls */
-#mapControls {
+#dataControls {
   /* Appearance */
   background-color: white;
   padding: 0 20px 20px 20px;
@@ -40,7 +40,7 @@ div.outer {
   transition: opacity 500ms 1s;
   z-index: 1000;
 }
-#mapControls:hover {
+#dataControls:hover {
   /* Fade in while hovering */
   opacity: 0.95;
   transition-delay: 0;
@@ -64,42 +64,6 @@ div.outer {
   transition-delay: 0;
 }
 
-/* Filter and sel panel */
-#filterAndSel {
- /* Appearance */
-  background-color: white;
-  padding: 0 20px 20px 20px;
-  cursor: move;
-  /* Fade out while not hovering */
-  opacity: 0.65;
-  zoom: 0.9;
-  transition: opacity 500ms 1s;
-  z-index: 1001;
-}
-#filterAndSel:hover {
-  /* Fade in while hovering */
-  opacity: 0.95;
-  transition-delay: 0;
-}
-
-/* Info panel */
-#aggregation {
- /* Appearance */
-  background-color: white;
-  padding: 5px 10px 10px 10px;
-  cursor: move;
-  /* Fade out while not hovering */
-  opacity: 0.65;
-  zoom: 0.9;
-  transition: opacity 500ms 1s;
-  z-index: 998;
-}
-#aggregation:hover {
-  /* Fade in while hovering */
-  opacity: 0.95;
-  transition-delay: 0;
-}
-
 #tururu > li > a {
   width: 263px;
 }
@@ -108,9 +72,7 @@ div.outer {
   padding-left: 12px;
 }
 
-/* divisiones administrativas input (radioButtons) */
-/*
-#map_controls-territori.form-group {
-  background-color: 'black';
+/* debug panel */
+#debug {
+  z-index: 1200;
 }
-*/
