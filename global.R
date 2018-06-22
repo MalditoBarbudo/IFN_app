@@ -66,7 +66,7 @@ proteccion_dictionary <- list(
   ),
   nomein = list(
     general = c(
-      "Tots", "Només protegits", "Sense Pein"
+      "Tots", "Només espais d'interès nacional", "Sense Pein"
     ),
     espais = c(
       "Aiguabarreig Segre-Noguera Pallaresa", "Aiguabarreig Segre-Noguera Ribagorçana",
@@ -104,7 +104,7 @@ proteccion_dictionary <- list(
   ),
   enpes = list(
     general = c(
-      "Tots", "Només protegits", "Sense protecció"
+      "Tots", "Només espai de protecció especial", "Sense protecció"
     ),
     espais = c(
       "Paratge natural d'interès nacional de cap Gros-cap de Creus",
@@ -148,7 +148,7 @@ proteccion_dictionary <- list(
   ),
   nomxarxa2000 = list(
     general = c(
-      "Tots", "Només protegits", "SenseXarxa"
+      "Tots", "Només en Xarxa Natura 2000", "SenseXarxa"
     ),
     espais = c(
       "Aiguabarreig Segre- Noguera Pallaresa", "Aiguabarreig Segre-Noguera Ribagorçana",

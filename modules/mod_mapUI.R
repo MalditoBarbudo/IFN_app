@@ -259,15 +259,16 @@ mod_map <- function(
       collect()
     
     # color palette
-    if (is.null(color_var)) {
+    if (is.null(color_var) || color_var == '') {
       color_vector <- rep('parcel·la', nrow(data_parceles))
       pal <- colorFactor('viridis', color_vector)
     } else {
       color_vector <- data_parceles[[color_var]]
+      pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
     }
     
     # size vector
-    if (is.null(mida_var)) {
+    if (is.null(mida_var) || mida_var == '') {
       mida_vector <- rep(750, nrow(data_parceles))
     } else {
       mida_vector <- data_parceles[[mida_var]] / max(data_parceles[[mida_var]]) * 3000

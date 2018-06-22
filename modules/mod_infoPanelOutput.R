@@ -26,7 +26,10 @@ mod_infoPanelOutput <- function(id) {
           'Mapa click',
           uiOutput(ns('shape_click_info')),
           br(),
-          plotOutput(ns('shape_click_plot'), width = 540),
+          plotOutput(ns('shape_click_plot'), width = 540) %>%
+            withSpinner(
+              type = 4, color = '#D2527F'
+            ),
           br(),
           textOutput(ns('infoPanel_debug'))
         ),
@@ -47,17 +50,20 @@ mod_infoPanelOutput <- function(id) {
 #' 
 #' @param mod_data reactive with the reactive data and the data inputs
 #' @param mod_map reactive with the map events from the map module
+#' @param mod_viz reactive with the viz inputs
 #' 
 #' @export
 #' 
 #' @rdname mod_infoPanelOutput
 mod_infoPanel <- function(
   input, output, session,
-  mod_data, mod_map
+  mod_data, mod_map, mod_viz
 ) {
   
   # shape data, we need an eventReactive
   data_shape <- eventReactive(
+    ignoreInit = TRUE,
+    
     eventExpr = mod_map$map_shape_click,
     valueExpr = {
       
@@ -691,5 +697,8 @@ mod_infoPanel <- function(
         }
       }
     }
+    
+    plot_densitat + plot_ab
   })
+  
 }

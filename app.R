@@ -9,6 +9,8 @@ library(RPostgreSQL)
 library(pool)
 library(viridis)
 library(DT)
+library(patchwork)
+library(shinycssloaders)
 
 ## SOURCES ####
 source('global.R')
@@ -49,6 +51,7 @@ ui <- tagList(
           # includeScript("resources/gomap.js")
         ),
         
+        ########################################################### debug ######
         absolutePanel(
           id = 'debug', class = 'panel panel-default', fixed = TRUE,
           draggable = TRUE, width = 640, height = 'auto',
@@ -60,18 +63,37 @@ ui <- tagList(
           textOutput('debug2'),
           textOutput('debug3')
         ),
+        ########################################################### end debug ##
         
+        ## vizControls ####
+        absolutePanel(
+          id = 'vizControls', class = 'panel panel-default', fixed = TRUE,
+          draggable = TRUE, width = 320, height = 'auto',
+          top = 360, right = 'auto', left = 50, bottom = 'auto',
+          
+          mod_vizInput('mod_vizInput')
+        ),
         
+        ## mod_data ####
         # mod_data module, it includes the dataSel, dataFil and dataAgg inputs
         mod_dataUI('mod_dataUI'),
 
+        ## mod_map ####
         # mod_map, it includes the map
         mod_mapUI('mod_mapUI'),
         
+        ## mod_infoPanel ####
         # mod_infoPanel, it includes the map events info panel
-        mod_infoPanelOutput('mod_infoPanelOutput'),
+        disabled(
+          hidden(
+            div(
+              id = 'hiddeable_pan',
+              mod_infoPanelOutput('mod_infoPanelOutput')
+            )
+          )
+        ),
         
-        # cite div
+        ## cite div ####
         tags$div(
           id = 'cite',
           "Dades compilats pel CREAF & CTFC basats en l'IFN"
@@ -95,7 +117,7 @@ ui <- tagList(
 ## SERVER ####
 server <- function(input, output, session) {
   
-  # module calling
+  ## module calling ####
   # data
   data_reactives <- callModule(
     mod_data, 'mod_dataUI'
@@ -116,104 +138,50 @@ server <- function(input, output, session) {
   # info panel
   callModule(
     mod_infoPanel, 'mod_infoPanelOutput',
-    data_reactives, map_reactives
+    data_reactives, map_reactives, viz_reactives
   )
   
-  # #### interactive map ####
-  # # controls module, see mod_mapControlsInput.R file for more info
-  # map_controls <- callModule(
-  #   mod_mapControls, 'map_controls'
-  # )
-  # 
-  # # filter and select module
-  # fill_and_sel <- callModule(
-  #   mod_filterAndSel, 'fil_and_sel',
-  #   control_inputs = map_controls,
-  #   noms = list(
-  #     comarca = c('Totes', sort(as.character(polygons_comarques@data$NOM_COMAR))),
-  #     municipi = c('Tots', sort(as.character(polygons_municipis@data$NOM_MUNI))),
-  #     vegueria = c('Totes', sort(as.character(polygons_vegueries@data$NOMVEGUE))),
-  #     provincia = c('Totes', sort(as.character(polygons_provincies@data$NOM_PROV)))
-  #   )
-  # )
-  # 
-  # # data module
-  # data_parcelas <- callModule(
-  #   mod_dataReactive, 'data_parcelas', map_controls = map_controls,
-  #   filterAndSel_inputs = fill_and_sel
-  #   
-  # )
-  # 
-  # # see mod_baseMapOutput.R file for more info about map widget
-  # ifn_map <- callModule(
-  #   mod_baseMap, 'ifn_map',
-  #   municipis = polygons_municipis, comarques = polygons_comarques,
-  #   vegueries = polygons_vegueries, provincies = polygons_provincies,
-  #   map_controls = map_controls, data = data_parcelas
-  # )
-  # 
-  # # conditional panel for shapes info (parcelas y territorios)
-  # callModule(
-  #   mod_shapeCondPanel, 'info_panel',
-  #   map_inputs = ifn_map, data = data_parcelas
-  # )
-  # 
-  # # module for aggregation inputs
-  # aggregation_controls <- callModule(
-  #   mod_aggregation, 'aggreg',
-  #   mapControls = map_controls
-  # )
-  # 
-  # # module for the table
-  # tableBase <- callModule(
-  #   mod_baseTable, 'tables_outputs',
-  #   mapControls = map_controls, aggregation = aggregation_controls,
-  #   dataReactive = data_parcelas, filterAndSel = fill_and_sel
-  # )
-  # 
-  # # observers to toggle the ancillary panels
-  # observeEvent(
-  #   eventExpr = map_controls$show_sel,
-  #   handlerExpr = {
-  #     toggle('filterAndSel')
-  #   }
-  # )
-  # 
-  # observeEvent(
-  #   eventExpr = map_controls$show_agg,
-  #   handlerExpr = {
-  #     toggle('aggregation')
-  #   }
-  # )
-  # 
-  # observeEvent(
-  #   eventExpr = map_controls$show_inf,
-  #   handlerExpr = {
-  #     toggle('infoPanel')
-  #   }
-  #   
-  # )
-  # 
-  # # observer to toggle the "conditional shape panel"
-  # observeEvent(
-  #   eventExpr = ifn_map$shape_click,
-  #   handlerExpr = {
-  #     shinyjs::show(
-  #       id = "infoPanel", anim = TRUE, animType = 'fade', time = 0.5
-  #     )
-  #   }
-  # )
-  # 
-  # 
+  ## hide infoPanel ####
+  observeEvent(
+    eventExpr = {
+      # all the inputs
+      # data inputs
+      data_reactives$ifn
+      data_reactives$admin_divs
+      data_reactives$espai_tipus
+      data_reactives$apply_filters
+      data_reactives$agg_level
+      data_reactives$diam_class
+      # viz inputs
+      viz_reactives$color
+      viz_reactives$mida
+      viz_reactives$inverse_pal
+      #
+    },
+    handlerExpr = {
+      shinyjs::disable('hiddeable_pan')
+      shinyjs::hide('hiddeable_pan')
+    }
+  )
+  
+  # observeEvent to showw the panel when a shape is clicked
+  observeEvent(
+    map_reactives$map_shape_click,
+    {
+      shinyjs::enable('hiddeable_pan')
+      shinyjs::show('hiddeable_pan')
+    }
+  )
+  
   ## debug #####
   output$debug1 <- renderPrint({
-    data_reactives$admin_div
+    viz_reactives$color
   })
   output$debug2 <- renderPrint({
-    data_reactives$admin_div_fil
+    viz_reactives$mida
   })
   output$debug3 <- renderPrint({
-    data_reactives$espai_tipus
+    viz_reactives$inverse_pal
   })
 }
 

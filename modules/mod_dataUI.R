@@ -31,21 +31,23 @@ mod_dataUI <- function(id) {
         
         fluidRow(
           column(
-            4,
+            4, offset = 4,
             selectInput(
               ns('ifn'), 'Versió de les dades', ifns,
               selected = 'ifn2'
             )
-          ),
+          )
+        ),
+        fluidRow(
           column(
-            4,
+            6,
             selectInput(
               ns('admin_div'), 'Divisions administratatives', admin_divs,
               selected = ''
             )
           ),
           column(
-            4,
+            6,
             selectInput(
               ns('espai_tipus'), "Tipus d'espai", espai_tipus,
               selected = 'proteccio'
@@ -82,8 +84,11 @@ mod_dataUI <- function(id) {
           )
         ),
         fluidRow(
-          actionButton(
-            ns('apply_filters'), 'Aplicar filtres', width = '35%' 
+          column(
+            4, offset = 4,
+            actionButton(
+              ns('apply_filters'), 'Aplicar filtres', width = '100%' 
+            )
           )
         )
       ),
@@ -112,7 +117,6 @@ mod_dataUI <- function(id) {
           )
         )
       )
-      
     ) # absolute panel end
     
   ) # end of tagList
@@ -156,9 +160,11 @@ mod_data <- function(
       admin_div_fil_choices <- noms_divs
       updateSelectInput(
         session, 'admin_div_fil', label = paste0('Filtra per ', admin_div_sel),
-        choices = admin_div_fil_choices,
+        choices = admin_div_fil_choices[[admin_div_sel]],
         selected = admin_div_fil_choices[[admin_div_sel]][1]
       )
+      
+      enable('admin_div_fil')
     }
   })
   
@@ -194,13 +200,6 @@ mod_data <- function(
       # stuff needed
       sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
       
-      empty <- data_frame(
-        # vars for the map
-        idparcela = NA, latitude = NA_real_, longitude = NA_real_,
-        # vars for the conditional info panel
-        provincia = NA, vegueria = NA, comarca = NA, municipi = NA
-      )
-      
       data_sig_init <- tbl(oracle_ifn, sig_name)
       
       # if apply_filters button is not pressed, then return the initial data
@@ -215,14 +214,30 @@ mod_data <- function(
           filter_expr_admin <- quo(!!sym(input$admin_div) %in% !!input$admin_div_fil)
         }
         
-        if (is.null(input$espai_tipus_fil)) {
+        if (is.null(input$espai_tipus_fil) || any(input$espai_tipus_fil == 'Tots')) {
           filter_expr_espai <- quo(TRUE)
         } else {
-          filter_expr_espai <- quo(!!sym(input$espai_tipus) %in% !!input$espai_tipus_fil)
+          # here we need also to check for nomes protegits and sense proteccio
+          # to be able to filter these cases
+          if (any(input$espai_tipus_fil %in% c(
+            'Només protegits',
+            "Només espais d'interès nacional",
+            "Només espai de protecció especial",
+            "Només en Xarxa Natura 2000"
+          ))) {
+            filter_expr_espai <- quo(
+              !(!!sym(input$espai_tipus) %in% c(
+                "Sense Pein", "Sense protecció", "SenseXarxa"
+              ))
+            )
+          } else {
+            filter_expr_espai <- quo(!!sym(input$espai_tipus) %in% !!input$espai_tipus_fil)
+          }
         }
         
         tbl(oracle_ifn, sig_name) %>%
-          filter(!!! filter_expr_admin, !!! filter_expr_espai)
+          filter(!!! filter_expr_admin) %>%
+          filter(!!! filter_expr_espai)
         
       }
       
@@ -308,6 +323,7 @@ mod_data <- function(
     data_reactives$espai_tipus <- input$espai_tipus
     data_reactives$admin_div_fil <- input$admin_div_fil
     data_reactives$espai_tipus_fil <- input$espai_tipus_fil
+    data_reactives$apply_filters <- input$apply_filters
     data_reactives$agg_level <- input$agg_level
     data_reactives$diam_class <- input$diam_class
     

@@ -20,13 +20,13 @@ mod_vizInput <- function(id) {
       
       wellPanel(
         selectInput(
-          ns('color'), '', '', width = '100%'
+          ns('color'), 'Color', c(Cap = ''), width = '100%'
         ),
         checkboxInput(
           ns('inverse_pal'), 'Invertir colors', value = FALSE
         ),
         selectInput(
-          ns('mida'), '', '', width = '100%'
+          ns('mida'), 'Mida', c(Cap = ''), width = '100%'
         )
       )
     )
@@ -51,10 +51,13 @@ mod_viz <- function(
   # update inputs with variables present in data
   observe({
     
-    vars_clima <- names(mod_data$data_clima())
-    vars_core <- names(mod_data$data_core())
+    vars_clima <- names(mod_data$data_clima() %>% collect())
+    vars_core <- names(mod_data$data_core() %>% collect())
     
-    vars_to_use <- c(vars_core, vars_clima)
+    vars_to_use <- list(
+      "Variables parcel·la" = vars_core,
+      "Variables climàtiques" = vars_clima
+    )
     
     updateSelectInput(
       session, 'color', label = 'Color',
