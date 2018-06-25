@@ -73,11 +73,18 @@ mod_infoPanel <- function(
       # filter expression
       filter_expr <- quo(!!sym(click$group) == click$id)
       
+      # selected vars
+      vars_sel <- c('idcd', 'densitat', 'ab', 'planifconifdens', 'planifconifab',
+                    'percdensplanifconif', 'percabplanifconif', 'idespecie',
+                    'percdens', 'percab', 'idespeciesimple', 'idgenere',
+                    'idcaducesclerconif', 'idpanifconif')
+      
       # data
       mod_data$data_sig() %>%
         filter(!!! filter_expr) %>%
         inner_join(mod_data$data_clima(), by = 'idparcela') %>%
         inner_join(mod_data$data_core(), by = 'idparcela') %>%
+        dplyr::select(one_of(vars_sel)) %>%
         collect()
     }
   )
@@ -109,7 +116,8 @@ mod_infoPanel <- function(
             labs(
               title = 'Densitat per classe diamètrica'
             ) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = forcats::as_factor(as.character(idcd)), y = ab
@@ -118,7 +126,8 @@ mod_infoPanel <- function(
             labs(
               title = 'Àrea basal per classe diamètrica'
             ) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
@@ -133,7 +142,8 @@ mod_infoPanel <- function(
               "Conífera" = "#440154FF",
               "Planifoli" = "#21908CFF"
             )) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = planifconifab, y = percabplanifconif
@@ -142,11 +152,12 @@ mod_infoPanel <- function(
             labs(
               title = 'Àrea basal (%) del grup funcional dominant'
             ) +
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
             scale_fill_manual(name = '', values = c(
               "Conífera" = "#440154FF",
               "Planifoli" = "#21908CFF"
             )) +
-            theme_void() + theme(legend.position = 'none')
+            theme_infoPanel
         }
       }
       
@@ -156,46 +167,50 @@ mod_infoPanel <- function(
         if (isTRUE(cd)) {
           
           plot_densitat <- ggplot(data_plot, aes(
-            x = forcats::as_factor(as.character(idcd)), y = densitat, fill = idespecieifn2
+            x = forcats::as_factor(as.character(idcd)), y = densitat, fill = idespecie
           )) +
             geom_col() +
             labs(
               title = 'Densitat per classe diamètrica y espècie'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
-            x = forcats::as_factor(as.character(idcd)), y = ab, fill = idespecieifn2
+            x = forcats::as_factor(as.character(idcd)), y = ab, fill = idespecie
           )) +
             geom_col() +
             labs(
               title = 'Àrea basal per classe diamètrica y espècie'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
           plot_densitat <- ggplot(data_plot, aes(
-            x = idespecieifn2, y = percdens, fill = idespecieifn2
+            x = idespecie, y = percdens, fill = idespecie
           )) +
             geom_col() +
             labs(
               title = 'Densitat (%) per espècie'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
-            x = idespecieifn2, y = percab, fill = idespecieifn2
+            x = idespecie, y = percab, fill = idespecie
           )) +
             geom_col() +
             labs(
               title = 'Àrea basal (%) per espècie'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
       
@@ -212,7 +227,8 @@ mod_infoPanel <- function(
               title = 'Densitat per classe diamètrica y espècie simplificat'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = forcats::as_factor(as.character(idcd)), y = ab, fill = idespeciesimple
@@ -222,19 +238,21 @@ mod_infoPanel <- function(
               title = 'Àrea basal per classe diamètrica y espècie simplificat'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
           plot_densitat <- ggplot(data_plot, aes(
-            x = idespecieifn2, y = percdens, fill = idespeciesimple
+            x = idespeciesimple, y = percdens, fill = idespeciesimple
           )) +
             geom_col() +
             labs(
               title = 'Densitat (%) per espècie simplificat'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = idespeciesimple, y = percab, fill = idespeciesimple
@@ -244,7 +262,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal (%) per espècie simplificat'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
       
@@ -261,7 +280,8 @@ mod_infoPanel <- function(
               title = 'Densitat per classe diamètrica y gènere'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = forcats::as_factor(as.character(idcd)), y = ab, fill = idgenere
@@ -271,7 +291,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal per classe diamètrica y gènere'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
@@ -283,7 +304,8 @@ mod_infoPanel <- function(
               title = 'Densitat (%) per gènere'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = idgenere, y = percab, fill = idgenere
@@ -293,7 +315,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal (%) per gènere'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
       
@@ -310,7 +333,8 @@ mod_infoPanel <- function(
               title = 'Densitat per classe diamètrica y grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = forcats::as_factor(as.character(idcd)), y = ab, fill = idcaducesclerconif
@@ -320,7 +344,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal per classe diamètrica y grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
@@ -332,7 +357,8 @@ mod_infoPanel <- function(
               title = 'Densitat (%) per grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = idcaducesclerconif, y = percab, fill = idcaducesclerconif
@@ -342,7 +368,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal (%) per grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
       
@@ -359,7 +386,8 @@ mod_infoPanel <- function(
               title = 'Densitat per classe diamètrica y grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = forcats::as_factor(as.character(idcd)), y = ab, fill = idplanifconif
@@ -369,7 +397,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal per classe diamètrica y grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
@@ -381,7 +410,8 @@ mod_infoPanel <- function(
               title = 'Densitat (%) per grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = idplanifconif, y = percab, fill = idplanifconif
@@ -391,7 +421,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal (%) per grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
     } else {
@@ -411,7 +442,8 @@ mod_infoPanel <- function(
             labs(
               title = 'Densitat per classe diamètrica'
             ) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = forcats::as_factor(as.character(idcd)), y = ab
@@ -420,7 +452,8 @@ mod_infoPanel <- function(
             labs(
               title = 'Àrea basal per classe diamètrica'
             ) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
@@ -435,7 +468,8 @@ mod_infoPanel <- function(
               "Conífera" = "#440154FF",
               "Planifoli" = "#21908CFF"
             )) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel<
           
           plot_ab <- ggplot(data_plot, aes(
             x = planifconifab, y = ab
@@ -448,7 +482,8 @@ mod_infoPanel <- function(
               "Conífera" = "#440154FF",
               "Planifoli" = "#21908CFF"
             )) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
       
@@ -458,46 +493,50 @@ mod_infoPanel <- function(
         if (isTRUE(cd)) {
           
           plot_densitat <- ggplot(data_plot, aes(
-            x = forcats::as_factor(as.character(idcd)), y = densitat, fill = idespecieifn2
+            x = forcats::as_factor(as.character(idcd)), y = densitat, fill = idespecie
           )) +
             geom_boxplot() +
             labs(
               title = 'Densitat per classe diamètrica y espècie'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
-            x = forcats::as_factor(as.character(idcd)), y = ab, fill = idespecieifn2
+            x = forcats::as_factor(as.character(idcd)), y = ab, fill = idespecie
           )) +
             geom_boxplot() +
             labs(
               title = 'Àrea basal per classe diamètrica y espècie'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
           plot_densitat <- ggplot(data_plot, aes(
-            x = idespecieifn2, y = densitat, fill = idespecieifn2
+            x = idespecie, y = densitat, fill = idespecie
           )) +
             geom_boxplot() +
             labs(
               title = 'Densitat per espècie'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
-            x = idespecieifn2, y = ab, fill = idespecieifn2
+            x = idespecie, y = ab, fill = idespecie
           )) +
             geom_boxplot() +
             labs(
               title = 'Àrea basal per espècie'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
       
@@ -514,7 +553,8 @@ mod_infoPanel <- function(
               title = 'Densitat per classe diamètrica y espècie simplificat'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = forcats::as_factor(as.character(idcd)), y = ab, fill = idespeciesimple
@@ -524,19 +564,21 @@ mod_infoPanel <- function(
               title = 'Àrea basal per classe diamètrica y espècie simplificat'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
           plot_densitat <- ggplot(data_plot, aes(
-            x = idespecieifn2, y = densitat, fill = idespeciesimple
+            x = idespecie, y = densitat, fill = idespeciesimple
           )) +
             geom_boxplot() +
             labs(
               title = 'Densitat per espècie simplificat'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = idespeciesimple, y = ab, fill = idespeciesimple
@@ -546,7 +588,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal per espècie simplificat'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
       
@@ -563,7 +606,8 @@ mod_infoPanel <- function(
               title = 'Densitat per classe diamètrica y gènere'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = forcats::as_factor(as.character(idcd)), y = ab, fill = idgenere
@@ -573,7 +617,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal per classe diamètrica y gènere'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
@@ -585,7 +630,8 @@ mod_infoPanel <- function(
               title = 'Densitat per gènere'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = idgenere, y = ab, fill = idgenere
@@ -595,7 +641,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal per gènere'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
       
@@ -612,7 +659,8 @@ mod_infoPanel <- function(
               title = 'Densitat per classe diamètrica y grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = forcats::as_factor(as.character(idcd)), y = ab, fill = idcaducesclerconif
@@ -622,7 +670,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal per classe diamètrica y grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
@@ -634,7 +683,8 @@ mod_infoPanel <- function(
               title = 'Densitat per grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = idcaducesclerconif, y = ab, fill = idcaducesclerconif
@@ -644,7 +694,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal per grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
       
@@ -661,7 +712,8 @@ mod_infoPanel <- function(
               title = 'Densitat per classe diamètrica y grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = forcats::as_factor(as.character(idcd)), y = ab, fill = idplanifconif
@@ -671,7 +723,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal per classe diamètrica y grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
         } else {
           
@@ -683,7 +736,8 @@ mod_infoPanel <- function(
               title = 'Densitat per grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = idplanifconif, y = ab, fill = idplanifconif
@@ -693,7 +747,8 @@ mod_infoPanel <- function(
               title = 'Àrea basal per grup funcional'
             ) +
             scale_fill_viridis(discrete = TRUE) +
-            theme_void() + theme(legend.position = 'none')
+            scale_y_continuous(limits = c(0,NA), expand = expand_scale(0,0)) +
+            theme_infoPanel
         }
       }
     }
