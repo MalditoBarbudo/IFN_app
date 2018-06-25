@@ -190,9 +190,12 @@ mod_data <- function(
     eventExpr = {
       
       # we need to update the data when ifn is changed or when filterings are
-      # applied, so we look up for two inputs:
+      # applied, or when admin_div or espi_tipus are changed, so we look up for
+      # these inputs:
       input$apply_filters
       input$ifn
+      input$tipus_espai
+      input$admin_div
       
     },
     valueExpr = {

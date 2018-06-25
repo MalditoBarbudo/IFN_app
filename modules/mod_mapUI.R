@@ -248,14 +248,24 @@ mod_map <- function(
   
   # observer for visual candy in the map (color and size of parceles)
   observe({
-    
+
+    # stuff needed
     color_var <- mod_viz$color
     mida_var <- mod_viz$mida
     inverse_pal <- mod_viz$inverse_pal
     
+    vars_sel <- quos(
+      !!sym(color_var), !!sym(mida_var),
+      !!sym('latitude'), !!sym('longitude'), !!sym('idparcela')
+    )
+
+    # check for any empty (color or mida) and remove it from the quosures
+    vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
+    
     data_parceles <- mod_data$data_core() %>%
-      inner_join(mod_data$data_sig()) %>%
-      inner_join(mod_data$data_clima()) %>%
+      inner_join(mod_data$data_sig(), by = 'idparcela') %>%
+      inner_join(mod_data$data_clima(), by = 'idparcela') %>%
+      dplyr::select(!!! vars_sel) %>%
       collect()
     
     # color palette
@@ -263,15 +273,29 @@ mod_map <- function(
       color_vector <- rep('parcel·la', nrow(data_parceles))
       pal <- colorFactor('viridis', color_vector)
     } else {
+      
+      # We must take into account if the variable is categorical or
+      # numerical
       color_vector <- data_parceles[[color_var]]
-      pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+      if (is.numeric(color_vector)) {
+        pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+      } else {
+        pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+      }
     }
     
     # size vector
     if (is.null(mida_var) || mida_var == '') {
       mida_vector <- rep(750, nrow(data_parceles))
     } else {
-      mida_vector <- data_parceles[[mida_var]] / max(data_parceles[[mida_var]]) * 3000
+      # We must take into account if the variable is categorical or
+      # numerical
+      mida_var_values <- data_parceles[[mida_var]]
+      if (is.numeric(mida_var_values)) {
+        mida_vector <- mida_var_values / max(mida_var_values) * 3000
+      } else {
+        mida_vector <- rep(750, nrow(data_parceles))
+      }
     }
     
     # update map
