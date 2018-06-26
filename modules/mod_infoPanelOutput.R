@@ -26,7 +26,7 @@ mod_infoPanelOutput <- function(id) {
           'Mapa click',
           uiOutput(ns('shape_click_info')),
           br(),
-          plotOutput(ns('shape_click_plot'), width = 540) %>%
+          plotOutput(ns('shape_click_plot'), width = 600, height = 350) %>%
             withSpinner(
               type = 4, color = '#D2527F'
             ),
@@ -77,7 +77,7 @@ mod_infoPanel <- function(
       vars_sel <- c('idcd', 'densitat', 'ab', 'planifconifdens', 'planifconifab',
                     'percdensplanifconif', 'percabplanifconif', 'idespecie',
                     'percdens', 'percab', 'idespeciesimple', 'idgenere',
-                    'idcaducesclerconif', 'idpanifconif')
+                    'idcaducesclerconif', 'idplanifconif')
       
       # data
       mod_data$data_sig() %>%
@@ -523,7 +523,7 @@ mod_infoPanel <- function(
               "Planifoli" = "#21908CFF"
             )) +
             scale_y_continuous(limits = c(0,3500), expand = expand_scale(0,0)) +
-            theme_infoPanel<
+            theme_infoPanel
           
           plot_ab <- ggplot(data_plot, aes(
             x = planifconifab, y = ab, fill = planifconifab

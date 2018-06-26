@@ -304,14 +304,14 @@ theme_infoPanel <- theme_void() + theme(
   # plot title and subtitle
   plot.title = element_text(
     family = 'sans', face = 'bold', colour = 'black',
-    size = rel(1.2), hjust = 0, vjust = 1.0,
+    size = rel(1.2), hjust = 0.4, vjust = 1.0,
     angle = 0, lineheight = 0.9, margin = margin(0, 0, 5.5, 0),
     inherit.blank = FALSE
   ),
   
   plot.subtitle = element_text(
     family = 'sans', face = 'plain', colour = 'black',
-    size = rel(1), hjust = 0, vjust = 0.5,
+    size = rel(1), hjust = 0.4, vjust = 0.8,
     angle = 0, lineheight = 0.9, margin = margin(0, 0, 3.2, 0),
     inherit.blank = FALSE
   )
