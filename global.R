@@ -266,7 +266,7 @@ agg_levels <- list(
   'Administratiu' = list("Divisions seleccionats" = 'territori_rt')
 )
 
-###c ggplot theme for infoPanel ################################################
+#### ggplot theme for infoPanel ################################################
 theme_infoPanel <- theme_void() + theme(
   
   # line general
@@ -301,11 +301,18 @@ theme_infoPanel <- theme_void() + theme(
   # legend position none by default
   legend.position = 'none',
   
-  # plot title
+  # plot title and subtitle
   plot.title = element_text(
     family = 'sans', face = 'bold', colour = 'black',
     size = rel(1.2), hjust = 0, vjust = 1.0,
     angle = 0, lineheight = 0.9, margin = margin(0, 0, 5.5, 0),
+    inherit.blank = FALSE
+  ),
+  
+  plot.subtitle = element_text(
+    family = 'sans', face = 'plain', colour = 'black',
+    size = rel(1), hjust = 0, vjust = 0.5,
+    angle = 0, lineheight = 0.9, margin = margin(0, 0, 3.2, 0),
     inherit.blank = FALSE
   )
   
