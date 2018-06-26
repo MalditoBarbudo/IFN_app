@@ -262,11 +262,34 @@ mod_map <- function(
     # check for any empty (color or mida) and remove it from the quosures
     vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
     
-    data_parceles <- mod_data$data_core() %>%
-      inner_join(mod_data$data_sig(), by = 'idparcela') %>%
-      inner_join(mod_data$data_clima(), by = 'idparcela') %>%
-      dplyr::select(!!! vars_sel) %>%
-      collect()
+    # data core alternative if diameter classes is selected. This is due to the
+    # fact that cd tables are not suitable for plotting the parceles in the map
+    # as there is several values for each parcele (one per diamtere class).
+    if (isTRUE(mod_data$diam_class)) {
+      
+      ifn <- mod_data$ifn
+      agg <- mod_data$agg_level
+      idparcelas <- mod_data$data_sig() %>% pull(idparcela)
+      
+      if (agg == 'parcela') {
+        core_name <- paste0('r_', ifn)
+      } else {
+        core_name <- paste0('r_', agg, '_', ifn)
+      }
+      
+      data_parceles <- tbl(oracle_ifn, core_name) %>%
+        filter(idparcela %in% idparcelas) %>%
+        inner_join(mod_data$data_sig(), by = 'idparcela') %>%
+        inner_join(mod_data$data_clima(), by = 'idparcela') %>%
+        dplyr::select(!!! vars_sel) %>%
+        collect()
+    } else {
+      data_parceles <- mod_data$data_core() %>%
+        inner_join(mod_data$data_sig(), by = 'idparcela') %>%
+        inner_join(mod_data$data_clima(), by = 'idparcela') %>%
+        dplyr::select(!!! vars_sel) %>%
+        collect()
+    }
     
     # color palette
     if (is.null(color_var) || color_var == '') {
