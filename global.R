@@ -248,22 +248,30 @@ espai_tipus <- c(
 agg_levels <- list(
   
   "Parcel·les" = list(
-    'Parcel·la' = 'parcela',
-    'Parcel·la desglossat per Espècie' = 'especie',
-    'Parcel·la desglossat per Espècie simplificat' = 'espsimple',
-    'Parcel·la desglossat per Gènere' = 'genere',
-    'Parcel·la desglossat per Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon',
-    'Parcel·la desglossat per Conífera/Planifoli' = 'plancon'
+    'Parcel·les' = 'parcela',
+    'Parcel·les desglossat per Espècie' = 'especie',
+    'Parcel·les desglossat per Espècie simplificat' = 'espsimple',
+    'Parcel·les desglossat per Gènere' = 'genere',
+    'Parcel·les desglossat per Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon',
+    'Parcel·les desglossat per Conífera/Planifoli' = 'plancon'
   ),
   
   "Grups funcionals" = list(
-    'Espècie dominant' = 'especie_rt',
-    'Espècie simplificat dominant' = 'espsimple_rt',
-    'Gènere dominant' = 'genere_rt',
-    'Conífera/Caducifoli/Esclerofil·le dominant' = 'cadesclcon_rt',
-    'Conífera/Planifoli dominant' = 'plancon_rt'
+    'Espècie' = 'especie_rt',
+    'Espècie simplificat' = 'espsimple_rt',
+    'Gènere' = 'genere_rt',
+    'Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon_rt',
+    'Conífera/Planifoli' = 'plancon_rt'
   ),
-  'Administratiu' = list("Divisions seleccionats" = 'territori_rt')
+  
+  'Administratiu' = list(
+    "Divisions seleccionats" = 'territori_rt',
+    "Divisions desglossat per Espècie" = 'territori_especie_rt',
+    "Divisions desglossat per Espècie simplificat" = 'territori_espsimple_rt',
+    "Divisions desglossat per Génere" = 'territori_genere_rt',
+    "Divisions desglossat per Conífera/Caducifoli/Esclerofil·le" = 'territori_cadesclcon_rt',
+    "Divisions desglossat per Conífera/Planifoli" = 'terrirori_plancon_rt'
+  )
 )
 
 #### ggplot theme for infoPanel ################################################

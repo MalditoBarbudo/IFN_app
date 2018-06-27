@@ -296,7 +296,68 @@ mod_data <- function(
     
     # real time calculations
     if (stringr::str_detect(agg, '_rt')) {
-      return() #TODO
+      
+      ## territoris
+      if (stringr::str_detect(agg, 'territori_')) {
+        
+        # get the correct aggregation name removing the _rt and the territori_
+        # parts
+        agg <- stringr::str_remove(agg, '_rt') %>%
+          stringr::str_remove('territori_')
+        
+        # get the core data name
+        if (agg == 'parcela') {
+          core_name <- paste0('r_', cd, '_', ifn)
+          
+          res <- tbl(oracle_ifn, core_name) %>%
+            inner_join(
+              {data_sig() %>%
+                  select(idparcela, !!sym(input$admin_div))},
+              by = 'idparcela'
+            ) %>%
+            group_by(!!sym(input$admin_div)) %>%
+            filter(idparcela %in% idparcelas) %>%
+            summarise_if(is.numeric, funs(min, max, n, mean, median),
+                         na.rm = TRUE)
+          
+        } else {
+          core_name <- paste0('r_', agg, cd, '_', ifn)
+          agg_tipfun_var <- paste0('id', agg)
+          
+          res <- tbl(oracle_ifn, core_name) %>%
+            inner_join(
+              {data_sig() %>%
+                  select(idparcela, !!sym(input$admin_div))},
+              by = 'idparcela'
+            ) %>%
+            filter(idparcela %in% idparcelas) %>%
+            group_by(!!sym(input$admin_div), !!sym(agg_tipfun_var)) %>%
+            summarise_if(is.numeric, funs(min, max, n, mean, median),
+                         na.rm = TRUE)
+        }
+        
+      } else {
+        
+        ## tipus funcionales
+        # get the correct aggregation name removing the _rt part
+        agg <- stringr::str_remove(agg, '_rt')
+        
+        # get the core data name
+        core_name <- paste0('r_', agg, cd, '_', ifn)
+        
+        # data
+        temp_table <- tbl(oracle_ifn, core_name) %>%
+          filter(idparcela %in% idparcelas)
+        
+        agg_tipfun_var <- paste0('id', agg)
+        
+        res <- temp_table %>%
+          group_by(!!sym(agg_tipfun_var)) %>% 
+          summarise_if(is.numeric, funs(min, max, n, mean, median),
+                       na.rm = TRUE)
+        
+      }
+      
     } else {
       
       # parcela, no aggregation level
@@ -309,10 +370,13 @@ mod_data <- function(
       } else {
         core_name <- paste0('r_', agg, cd, '_', ifn)
       }
+      
+      res <- tbl(oracle_ifn, core_name) %>%
+        filter(idparcela %in% idparcelas)
+      
     }
     
-    tbl(oracle_ifn, core_name) %>%
-      filter(idparcela %in% idparcelas)
+    return(res)
     
   })
   
