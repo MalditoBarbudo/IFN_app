@@ -216,6 +216,63 @@ clima_vars_dictionary <- c(
   "etr_s_novembre", "etr_s_desembre", "npp_s"
 )
 
+polygons_dictionary <- list(
+  
+  ## admin divs
+  
+  provincia = list(
+    polygon = 'polygons_provincies',
+    group = 'provincia',
+    label = ~NOM_PROV,
+    layerId = 'nom_provincies'
+  ),
+  
+  vegueria = list(
+    polygon = 'polygons_vegueries',
+    group = 'vegueria',
+    label = ~NOMVEGUE,
+    layerId = 'nom_vegueries'
+  ),
+  
+  comarca = list(
+    polygon = 'polygons_comarques',
+    group = 'comarca',
+    label = ~NOM_COMAR,
+    layerId = 'nom_comarques'
+  ),
+  
+  municipi = list(
+    polygon = 'polygons_municipis',
+    group = 'municipi',
+    label = ~NOM_MUNI,
+    layerId = 'nom_municipis'
+  ),
+  
+  ## espai tipus
+  
+  nomein = list(
+    polygon = 'polygons_pein',
+    group = 'nomein',
+    label = ~nom,
+    layerId = 'nom_pein'
+  ),
+  
+  enpes = list(
+    polygon = 'polygons_enpe',
+    group = 'enpes',
+    label = ~nom,
+    layerId = 'nom_enpe'
+  ),
+  
+  nomxarxa2000 = list(
+    polygon = 'polygons_xn2000',
+    group = 'nomxarxa2000',
+    label = ~nom_n2,
+    layerId = 'nom_xn2000'
+  )
+  
+)
+
 ### inputs choices #############################################################
 # inputs choices
 ifns <- c(

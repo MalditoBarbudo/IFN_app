@@ -41,6 +41,7 @@ mod_map <- function(
   nom_xn2000 <- as.character(polygons_xn2000@data$nom_n2)
   
   # basic map
+  # here we only set the view, zoom and the panes for managing the zIndex)
   output$map <- renderLeaflet({
     
     leaflet() %>%
@@ -68,100 +69,29 @@ mod_map <- function(
         clearGroup('municipi') %>%
         clearGroup('provincia')
     } else {
-      if (admin_div == 'provincia') {
-        leafletProxy('map') %>%
-          clearGroup('vegueria') %>%
-          clearGroup('comarca') %>%
-          clearGroup('municipi') %>%
-          addPolygons(
-            data = polygons_provincies, group = 'provincia',
-            weight = 1, smoothFactor = 0.5,
-            opacity = 1.0, fill = TRUE,
-            label = ~NOM_PROV,
-            layerId = nom_provincies,
-            color = '#6C7A89FF', fillColor = "#CF000F00",
-            highlightOptions = highlightOptions(
-              color = "#CF000F", weight = 2,
-              bringToFront = FALSE,
-              fill = TRUE, fillColor = "#CF000F00"
-            ),
-            options = pathOptions(
-              pane = 'admin_divs'
-            )
+      leafletProxy('map') %>%
+        clearGroup('vegueria') %>%
+        clearGroup('comarca') %>%
+        clearGroup('municipi') %>%
+        clearGroup('provincia') %>%
+        addPolygons(
+          data = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['polygon']])),
+          group = polygons_dictionary[[admin_div]][['group']],
+          label = polygons_dictionary[[admin_div]][['label']],
+          layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+          weight = 1, smoothFactor = 0.5,
+          opacity = 1.0, fill = TRUE,
+          color = '#6C7A89FF', fillColor = "#CF000F00",
+          highlightOptions = highlightOptions(
+            color = "#CF000F", weight = 2,
+            bringToFront = FALSE,
+            fill = TRUE, fillColor = "#CF000F00"
+          ),
+          options = pathOptions(
+            pane = 'admin_divs'
           )
-      } else {
-        if (admin_div == 'vegueria') {
-          leafletProxy('map') %>%
-            clearGroup('provincia') %>%
-            clearGroup('comarca') %>%
-            clearGroup('municipi') %>%
-            addPolygons(
-              data = polygons_vegueries, group = 'vegueria',
-              weight = 1, smoothFactor = 0.5,
-              opacity = 1.0, fill = TRUE,
-              label = ~NOMVEGUE,
-              layerId = nom_vegueries,
-              color = '#6C7A89FF', fillColor = "#CF000F00",
-              highlightOptions = highlightOptions(
-                color = "#CF000F", weight = 2,
-                bringToFront = FALSE,
-                fill = TRUE, fillColor = "#CF000F00"
-              ),
-              options = pathOptions(
-                pane = 'admin_divs'
-              )
-            )
-        } else {
-          if (admin_div == 'comarca') {
-            leafletProxy('map') %>%
-              clearGroup('vegueria') %>%
-              clearGroup('provincia') %>%
-              clearGroup('municipi') %>%
-              addPolygons(
-                data = polygons_comarques, group = 'comarca',
-                weight = 1, smoothFactor = 0.5,
-                opacity = 1.0, fill = TRUE,
-                label = ~NOM_COMAR,
-                layerId = nom_comarques,
-                color = '#6C7A89FF', fillColor = "#CF000F00",
-                highlightOptions = highlightOptions(
-                  color = "#CF000F", weight = 2,
-                  bringToFront = FALSE,
-                  fill = TRUE, fillColor = "#CF000F00"
-                ),
-                options = pathOptions(
-                  pane = 'admin_divs'
-                )
-              )
-          } else {
-            if (admin_div == 'municipi') {
-              leafletProxy('map') %>%
-                clearGroup('vegueria') %>%
-                clearGroup('comarca') %>%
-                clearGroup('provincia') %>%
-                addPolygons(
-                  data = polygons_municipis, group = 'municipi',
-                  weight = 1, smoothFactor = 0.5,
-                  opacity = 1.0, fill = TRUE,
-                  label = ~NOM_MUNI,
-                  layerId = nom_municipis,
-                  color = '#6C7A89FF', fillColor = "#CF000F00",
-                  highlightOptions = highlightOptions(
-                    color = "#CF000F", weight = 2,
-                    bringToFront = FALSE,
-                    fill = TRUE, fillColor = "#CF000F00"
-                  ),
-                  options = pathOptions(
-                    pane = 'admin_divs'
-                  )
-                )
-            }
-          }
-        }
-      }
+        )
     }
-    
-    
   })
   
   # observer for proteccions polygons, same as above
@@ -178,71 +108,27 @@ mod_map <- function(
         clearGroup('nomxarxa2000') %>%
         clearGroup('nomein')
     } else {
-      if (espai_tipus == 'nomein') {
-        leafletProxy('map') %>%
-          clearGroup('enpes') %>%
-          clearGroup('nomxarxa2000') %>%
-          addPolygons(
-            data = polygons_pein, group = 'nomein',
-            weight = 1, smoothFactor = 0.5,
-            opacity = 1.0, fill = TRUE,
-            label = ~nom,
-            layerId = nom_pein,
-            color = '#6C7A89FF', fillColor = "#6C7A89FF",
-            highlightOptions = highlightOptions(
-              color = "#CF000F", weight = 2,
-              bringToFront = FALSE,
-              fill = TRUE, fillColor = "#CF000F00"
-            ),
-            options = pathOptions(
-              pane = 'proteccions'
-            )
+      leafletProxy('map') %>%
+        clearGroup('enpes') %>%
+        clearGroup('nomxarxa2000') %>%
+        clearGroup('nomein') %>%
+        addPolygons(
+          data = rlang::eval_tidy(sym(polygons_dictionary[[espai_tipus]][['polygon']])),
+          group = polygons_dictionary[[espai_tipus]][['group']],
+          label = polygons_dictionary[[espai_tipus]][['label']],
+          layerId = rlang::eval_tidy(sym(polygons_dictionary[[espai_tipus]][['layerId']])),
+          weight = 1, smoothFactor = 0.5,
+          opacity = 1.0, fill = TRUE,
+          color = '#6C7A89FF', fillColor = "#CF000F00",
+          highlightOptions = highlightOptions(
+            color = "#CF000F", weight = 2,
+            bringToFront = FALSE,
+            fill = TRUE, fillColor = "#CF000F00"
+          ),
+          options = pathOptions(
+            pane = 'proteccions'
           )
-      } else {
-        if (espai_tipus == 'enpes') {
-          leafletProxy('map') %>%
-            clearGroup('nomein') %>%
-            clearGroup('nomxarxa2000') %>%
-            addPolygons(
-              data = polygons_enpe, group = 'enpes',
-              weight = 1, smoothFactor = 0.5,
-              opacity = 1.0, fill = TRUE,
-              label = ~nom,
-              layerId = nom_enpe,
-              color = '#6C7A89FF', fillColor = "#6C7A89FF",
-              highlightOptions = highlightOptions(
-                color = "#CF000F", weight = 2,
-                bringToFront = FALSE,
-                fill = TRUE, fillColor = "#CF000F00"
-              ),
-              options = pathOptions(
-                pane = 'proteccions'
-              )
-            )
-        } else {
-          if (espai_tipus == 'nomxarxa2000') {
-            leafletProxy('map') %>%
-              clearGroup('nomein') %>%
-              clearGroup('enpes') %>%
-              addPolygons(
-                data = polygons_xn2000, group = 'nomxarxa2000',
-                weight = 1, smoothFactor = 0.5,
-                opacity = 1.0, fill = TRUE,
-                label = ~nom_n2,
-                layerId = nom_xn2000,
-                color = '#6C7A89FF', fillColor = "#6C7A89FF",
-                highlightOptions = highlightOptions(
-                  color = "#CF000F", weight = 2,
-                  bringToFront = FALSE,
-                  fill = TRUE, fillColor = "#CF000F00"
-                ),
-                options = pathOptions(
-                  pane = 'proteccions'
-                )
-              )
-          }
-        }
-      }
+        )
     }
   })
   
@@ -264,7 +150,7 @@ mod_map <- function(
     
     # data core alternative if diameter classes is selected. This is due to the
     # fact that cd tables are not suitable for plotting the parceles in the map
-    # as there is several values for each parcele (one per diamtere class).
+    # as there is several values for each parcele (one per diameter class).
     if (isTRUE(mod_data$diam_class)) {
       
       ifn <- mod_data$ifn
