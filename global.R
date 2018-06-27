@@ -265,7 +265,7 @@ agg_levels <- list(
   ),
   
   'Administratiu' = list(
-    "Divisions seleccionats" = 'territori_rt',
+    "Divisions seleccionats" = 'territori_parcela_rt',
     "Divisions desglossat per Espècie" = 'territori_especie_rt',
     "Divisions desglossat per Espècie simplificat" = 'territori_espsimple_rt',
     "Divisions desglossat per Génere" = 'territori_genere_rt',
