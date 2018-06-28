@@ -132,7 +132,8 @@ mod_map <- function(
     }
   })
   
-  # observer for visual candy in the map (color and size of parceles)
+  # observer for visual candy in the map (color and size of parceles or color
+  # of the polygons in the administratiu aggregation levels)
   observe({
 
     # stuff needed
@@ -148,79 +149,194 @@ mod_map <- function(
     # check for any empty (color or mida) and remove it from the quosures
     vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
     
+    # mod_data stuff
+    agg <- mod_data$agg_level
+    
+    # parceles, tipus and derivats (points!!!)
+    if (agg %in% c(
+      'parcela', 'especie', 'espsimple', 'genere', 'cadesclcon', 'plancon',
+      'especie_rt', 'espsimple_rt', 'genere_rt', 'cadesclcon_rt', 'plancon_rt'
+    )) {
+      
+      data_parceles <- mod_data$data_viz() %>%
+        inner_join(mod_data$data_sig(), by = 'idparcela') %>% 
+        inner_join(mod_data$data_clima(), by = 'idparcela') %>% 
+        dplyr::select(!!! vars_sel) %>% 
+        collect()
+      
+      # color palette
+      if (is.null(color_var) || color_var == '') {
+        color_vector <- rep('parcel·la', nrow(data_parceles))
+        pal <- colorFactor('viridis', color_vector)
+      } else {
+        
+        # We must take into account if the variable is categorical or
+        # numerical
+        color_vector <- data_parceles[[color_var]]
+        if (is.numeric(color_vector)) {
+          pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+        } else {
+          pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+        }
+      }
+      
+      # size vector
+      if (is.null(mida_var) || mida_var == '') {
+        mida_vector <- rep(750, nrow(data_parceles))
+      } else {
+        # We must take into account if the variable is categorical or
+        # numerical
+        mida_var_values <- data_parceles[[mida_var]]
+        if (is.numeric(mida_var_values)) {
+          mida_vector <- mida_var_values / max(mida_var_values) * 3000
+        } else {
+          mida_vector <- rep(750, nrow(data_parceles))
+        }
+      }
+      
+      # update map
+      leafletProxy('map', data = data_parceles) %>%
+        clearGroup('idparcela') %>%
+        addCircles(
+          group = 'idparcela', lng = ~longitude, lat = ~latitude,
+          label = ~idparcela, layerId = ~idparcela,
+          stroke = FALSE, fillOpacity = 0.4, fillColor = pal(color_vector),
+          radius = mida_vector,
+          options = pathOptions(pane = 'parceles')
+        ) %>%
+        addLegend(
+          position = 'topright', pal = pal, values = color_vector,
+          title = color_var, layerId = 'color_legend'
+        )
+    } else {
+      
+      # administratiu (polygons!!!)
+      data_parceles <- mod_data$data_viz()
+      admin_div <- mod_data$admin_div
+      
+      # color palette
+      if (is.null(color_var) || color_var == '') {
+        color_vector <- rep('parcel·la', nrow(data_parceles))
+        pal <- colorFactor('viridis', color_vector)
+      } else {
+        
+        # We must take into account if the variable is categorical or
+        # numerical
+        color_vector <- data_parceles[[color_var]]
+        if (is.numeric(color_vector)) {
+          pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+        } else {
+          pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+        }
+      }
+      
+      if (admin_div == '') {
+        leafletProxy('map') %>%
+          clearGroup('vegueria') %>%
+          clearGroup('comarca') %>%
+          clearGroup('municipi') %>%
+          clearGroup('provincia')
+      } else {
+        leafletProxy('map') %>%
+          clearGroup('vegueria') %>%
+          clearGroup('comarca') %>%
+          clearGroup('municipi') %>%
+          clearGroup('provincia') %>%
+          addPolygons(
+            data = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['polygon']])),
+            group = polygons_dictionary[[admin_div]][['group']],
+            label = polygons_dictionary[[admin_div]][['label']],
+            layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+            weight = 1, smoothFactor = 0.5,
+            opacity = 1.0, fill = TRUE,
+            color = '#6C7A89FF', fillColor = pal(color_vector),
+            highlightOptions = highlightOptions(
+              color = "#CF000F", weight = 2,
+              bringToFront = FALSE,
+              fill = TRUE, fillColor = pal(color_vector)
+            ),
+            options = pathOptions(
+              pane = 'admin_divs'
+            )
+          )
+      }
+    }
+    
+    
+    
     # data core alternative if diameter classes is selected. This is due to the
     # fact that cd tables are not suitable for plotting the parceles in the map
     # as there is several values for each parcele (one per diameter class).
-    if (isTRUE(mod_data$diam_class)) {
-      
-      ifn <- mod_data$ifn
-      agg <- mod_data$agg_level
-      idparcelas <- mod_data$data_sig() %>% pull(idparcela)
-      
-      if (agg == 'parcela') {
-        core_name <- paste0('r_', ifn)
-      } else {
-        core_name <- paste0('r_', agg, '_', ifn)
-      }
-      
-      data_parceles <- tbl(oracle_ifn, core_name) %>%
-        filter(idparcela %in% idparcelas) %>%
-        inner_join(mod_data$data_sig(), by = 'idparcela') %>%
-        inner_join(mod_data$data_clima(), by = 'idparcela') %>%
-        dplyr::select(!!! vars_sel) %>%
-        collect()
-    } else {
-      data_parceles <- mod_data$data_core() %>%
-        inner_join(mod_data$data_sig(), by = 'idparcela') %>%
-        inner_join(mod_data$data_clima(), by = 'idparcela') %>%
-        dplyr::select(!!! vars_sel) %>%
-        collect()
-    }
-    
-    # color palette
-    if (is.null(color_var) || color_var == '') {
-      color_vector <- rep('parcel·la', nrow(data_parceles))
-      pal <- colorFactor('viridis', color_vector)
-    } else {
-      
-      # We must take into account if the variable is categorical or
-      # numerical
-      color_vector <- data_parceles[[color_var]]
-      if (is.numeric(color_vector)) {
-        pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
-      } else {
-        pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
-      }
-    }
-    
-    # size vector
-    if (is.null(mida_var) || mida_var == '') {
-      mida_vector <- rep(750, nrow(data_parceles))
-    } else {
-      # We must take into account if the variable is categorical or
-      # numerical
-      mida_var_values <- data_parceles[[mida_var]]
-      if (is.numeric(mida_var_values)) {
-        mida_vector <- mida_var_values / max(mida_var_values) * 3000
-      } else {
-        mida_vector <- rep(750, nrow(data_parceles))
-      }
-    }
-    
-    # update map
-    leafletProxy('map', data = data_parceles) %>%
-      clearGroup('idparcela') %>%
-      addCircles(
-        group = 'idparcela', lng = ~longitude, lat = ~latitude,
-        label = ~idparcela, layerId = ~idparcela,
-        stroke = FALSE, fillOpacity = 0.4, fillColor = pal(color_vector),
-        radius = mida_vector,
-        options = pathOptions(pane = 'parceles')
-      ) %>%
-      addLegend(
-        position = 'topright', pal = pal, values = color_vector,
-        title = color_var, layerId = 'color_legend'
-      )
+    # if (isTRUE(mod_data$diam_class)) {
+    #   
+    #   ifn <- mod_data$ifn
+    #   agg <- mod_data$agg_level
+    #   idparcelas <- mod_data$data_sig() %>% pull(idparcela)
+    #   
+    #   if (agg == 'parcela') {
+    #     core_name <- paste0('r_', ifn)
+    #   } else {
+    #     core_name <- paste0('r_', agg, '_', ifn)
+    #   }
+    #   
+    #   data_parceles <- tbl(oracle_ifn, core_name) %>%
+    #     filter(idparcela %in% idparcelas) %>%
+    #     inner_join(mod_data$data_sig(), by = 'idparcela') %>%
+    #     inner_join(mod_data$data_clima(), by = 'idparcela') %>%
+    #     dplyr::select(!!! vars_sel) %>%
+    #     collect()
+    # } else {
+    #   data_parceles <- mod_data$data_core() %>%
+    #     inner_join(mod_data$data_sig(), by = 'idparcela') %>%
+    #     inner_join(mod_data$data_clima(), by = 'idparcela') %>%
+    #     dplyr::select(!!! vars_sel) %>%
+    #     collect()
+    # }
+    # 
+    # # color palette
+    # if (is.null(color_var) || color_var == '') {
+    #   color_vector <- rep('parcel·la', nrow(data_parceles))
+    #   pal <- colorFactor('viridis', color_vector)
+    # } else {
+    #   
+    #   # We must take into account if the variable is categorical or
+    #   # numerical
+    #   color_vector <- data_parceles[[color_var]]
+    #   if (is.numeric(color_vector)) {
+    #     pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+    #   } else {
+    #     pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+    #   }
+    # }
+    # 
+    # # size vector
+    # if (is.null(mida_var) || mida_var == '') {
+    #   mida_vector <- rep(750, nrow(data_parceles))
+    # } else {
+    #   # We must take into account if the variable is categorical or
+    #   # numerical
+    #   mida_var_values <- data_parceles[[mida_var]]
+    #   if (is.numeric(mida_var_values)) {
+    #     mida_vector <- mida_var_values / max(mida_var_values) * 3000
+    #   } else {
+    #     mida_vector <- rep(750, nrow(data_parceles))
+    #   }
+    # }
+    # 
+    # # update map
+    # leafletProxy('map', data = data_parceles) %>%
+    #   clearGroup('idparcela') %>%
+    #   addCircles(
+    #     group = 'idparcela', lng = ~longitude, lat = ~latitude,
+    #     label = ~idparcela, layerId = ~idparcela,
+    #     stroke = FALSE, fillOpacity = 0.4, fillColor = pal(color_vector),
+    #     radius = mida_vector,
+    #     options = pathOptions(pane = 'parceles')
+    #   ) %>%
+    #   addLegend(
+    #     position = 'topright', pal = pal, values = color_vector,
+    #     title = color_var, layerId = 'color_legend'
+    #   )
   })
   
   # reactive with the map events

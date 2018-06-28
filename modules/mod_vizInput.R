@@ -52,7 +52,7 @@ mod_viz <- function(
   observe({
     
     vars_clima <- names(mod_data$data_clima() %>% collect())
-    vars_core <- names(mod_data$data_core() %>% collect())
+    vars_core <- names(mod_data$data_viz() %>% collect())
     
     vars_to_use <- list(
       "Variables parcel·la" = vars_core,
