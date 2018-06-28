@@ -141,14 +141,6 @@ mod_map <- function(
     mida_var <- mod_viz$mida
     inverse_pal <- mod_viz$inverse_pal
     
-    vars_sel <- quos(
-      !!sym(color_var), !!sym(mida_var),
-      !!sym('latitude'), !!sym('longitude'), !!sym('idparcela')
-    )
-
-    # check for any empty (color or mida) and remove it from the quosures
-    vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
-    
     # mod_data stuff
     agg <- mod_data$agg_level
     
@@ -157,6 +149,14 @@ mod_map <- function(
       'parcela', 'especie', 'espsimple', 'genere', 'cadesclcon', 'plancon',
       'especie_rt', 'espsimple_rt', 'genere_rt', 'cadesclcon_rt', 'plancon_rt'
     )) {
+      
+      vars_sel <- quos(
+        !!sym(color_var), !!sym(mida_var),
+        !!sym('latitude'), !!sym('longitude'), !!sym('idparcela')
+      )
+      
+      # check for any empty (color or mida) and remove it from the quosures
+      vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
       
       data_parceles <- mod_data$data_viz() %>%
         inner_join(mod_data$data_sig(), by = 'idparcela') %>% 
@@ -211,7 +211,23 @@ mod_map <- function(
     } else {
       
       # administratiu (polygons!!!)
-      data_parceles <- mod_data$data_viz()
+      vars_sel <- quos(
+        !!sym(color_var), !!sym(mida_var),
+        !!sym('latitude'), !!sym('longitude'), !!sym('idparcela')
+      )
+      
+      # check for any empty (color or mida) and remove it from the quosures
+      vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
+      
+      grup_fun_val <- agg %>%
+        stringr::str_remove('_rt') %>%
+        stringr::str_remove('territori_') %>%
+        paste0('id',.)
+      
+      data_parceles <- mod_data$data_viz() %>%
+        filter(!!sym(grup_fun_val) == mida_var) %>%
+        collect()
+      
       admin_div <- mod_data$admin_div
       
       # color palette
@@ -242,22 +258,27 @@ mod_map <- function(
           clearGroup('comarca') %>%
           clearGroup('municipi') %>%
           clearGroup('provincia') %>%
+          clearGroup('idparcela') %>%
           addPolygons(
             data = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['polygon']])),
             group = polygons_dictionary[[admin_div]][['group']],
             label = polygons_dictionary[[admin_div]][['label']],
             layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
             weight = 1, smoothFactor = 0.5,
-            opacity = 1.0, fill = TRUE,
-            color = '#6C7A89FF', fillColor = pal(color_vector),
+            opacity = 1.0, color = '#6C7A89FF',
+            fill = TRUE, fillColor = pal(color_vector),
             highlightOptions = highlightOptions(
               color = "#CF000F", weight = 2,
               bringToFront = FALSE,
-              fill = TRUE, fillColor = pal(color_vector)
+              fill = FALSE
             ),
             options = pathOptions(
               pane = 'admin_divs'
             )
+          ) %>%
+          addLegend(
+            position = 'topright', pal = pal, values = color_vector,
+            title = color_var, layerId = 'color_legend'
           )
       }
     }

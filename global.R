@@ -327,7 +327,7 @@ agg_levels <- list(
     "Divisions desglossat per Espècie simplificat" = 'territori_espsimple_rt',
     "Divisions desglossat per Génere" = 'territori_genere_rt',
     "Divisions desglossat per Conífera/Caducifoli/Esclerofil·le" = 'territori_cadesclcon_rt',
-    "Divisions desglossat per Conífera/Planifoli" = 'terrirori_plancon_rt'
+    "Divisions desglossat per Conífera/Planifoli" = 'territori_plancon_rt'
   )
 )
 

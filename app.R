@@ -181,7 +181,7 @@ server <- function(input, output, session) {
     viz_reactives$mida
   })
   output$debug3 <- renderPrint({
-    viz_reactives$inverse_pal
+    data_reactives$data_viz() %>% collect() %>% as.data.frame() %>% head()
   })
 }
 

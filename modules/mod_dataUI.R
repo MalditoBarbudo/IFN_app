@@ -194,8 +194,8 @@ mod_data <- function(
       # these inputs:
       input$apply_filters
       input$ifn
-      input$tipus_espai
-      input$admin_div
+      # input$tipus_espai
+      # input$admin_div
       
     },
     valueExpr = {
@@ -266,6 +266,14 @@ mod_data <- function(
     cd <- if (isTRUE(input$diam_class)) {'cd'} else {''}
     idparcelas <- data_sig() %>% pull(idparcela)
     
+    summarise_functions <- funs(
+      min(., na.rm = TRUE),
+      max(., na.rm = TRUE),
+      mean(., na.rm = TRUE),
+      # median(.),
+      n()
+    )
+    
     # real time calculations
     if (stringr::str_detect(agg, '_rt')) {
       
@@ -279,7 +287,7 @@ mod_data <- function(
         
         # get the core data name
         if (agg == 'parcela') {
-          core_name <- paste0('r_', cd, '_', ifn)
+          core_name <- paste0('r_', cd, '_',ifn)
           
           res <- tbl(oracle_ifn, core_name) %>%
             inner_join(
@@ -289,11 +297,10 @@ mod_data <- function(
             ) %>%
             group_by(!!sym(input$admin_div)) %>%
             filter(idparcela %in% idparcelas) %>%
-            summarise_if(is.numeric, funs(min, max, n, mean, median),
-                         na.rm = TRUE)
+            summarise_if(is.numeric, .funs = summarise_functions)
           
         } else {
-          core_name <- paste0('r_', agg, cd, '_', ifn)
+          core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
           agg_tipfun_var <- paste0('id', agg)
           
           res <- tbl(oracle_ifn, core_name) %>%
@@ -304,8 +311,7 @@ mod_data <- function(
             ) %>%
             filter(idparcela %in% idparcelas) %>%
             group_by(!!sym(input$admin_div), !!sym(agg_tipfun_var)) %>%
-            summarise_if(is.numeric, funs(min, max, n, mean, median),
-                         na.rm = TRUE)
+            summarise_if(is.numeric, .funs = summarise_functions)
         }
         
       } else {
@@ -315,7 +321,7 @@ mod_data <- function(
         agg <- stringr::str_remove(agg, '_rt')
         
         # get the core data name
-        core_name <- paste0('r_', agg, cd, '_', ifn)
+        core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
         
         # data
         temp_table <- tbl(oracle_ifn, core_name) %>%
@@ -325,8 +331,7 @@ mod_data <- function(
         
         res <- temp_table %>%
           group_by(!!sym(agg_tipfun_var)) %>% 
-          summarise_if(is.numeric, funs(min, max, n, mean, median),
-                       na.rm = TRUE)
+          summarise_if(is.numeric, .funs = summarise_functions)
         
       }
       
@@ -337,10 +342,10 @@ mod_data <- function(
         if (cd == '') {
           core_name <- paste0('r_', ifn)
         } else {
-          core_name <- paste0('r_', cd, '_', ifn)
+          core_name <- paste0('r_', cd, ifn)
         }
       } else {
-        core_name <- paste0('r_', agg, cd, '_', ifn)
+        core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
       }
       
       res <- tbl(oracle_ifn, core_name) %>%
