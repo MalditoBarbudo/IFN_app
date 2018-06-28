@@ -248,34 +248,6 @@ mod_data <- function(
     }
   )
   
-  
-  # data_sig <- reactive({
-  #   
-  #   sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
-  #   
-  #   # filters based on the dataFil inputs
-  #   # filter_exprs <- quos(
-  #   #   !!sym(input$admin_div) %in% !!input$admin_div_fil,
-  #   #   !!sym(input$espai_tipus) %in% !!input$espai_tipus_fil
-  #   # )
-  #   # if the admin_div is '' then there is no filter by admin_div
-  #   if (is.null(input$admin_div_fil)) {
-  #     filter_expr_admin <- quo(TRUE)
-  #   } else {
-  #     filter_expr_admin <- quo(!!sym(input$admin_div) %in% !!input$admin_div_fil)
-  #   }
-  #   
-  #   if (is.null(input$espai_tipus_fil)) {
-  #     filter_expr_espai <- quo(TRUE)
-  #   } else {
-  #     filter_expr_espai <- quo(!!sym(input$espai_tipus) %in% !!input$espai_tipus_fil)
-  #   }
-  #   
-  #   tbl(oracle_ifn, sig_name) %>%
-  #     filter(!!! filter_expr_admin, !!! filter_expr_espai)
-  #   
-  # })
-  
   data_clima <- reactive({
     
     clima_name <- paste0('parcela', input$ifn, '_clima')
@@ -380,6 +352,33 @@ mod_data <- function(
     
   })
   
+  # data viz reactive for generating the data for map points and the mod_viz
+  # variables
+  data_viz <- reactive({
+    
+    ifn <- input$ifn
+    agg <- input$agg_level
+    idparcelas <- data_sig() %>% pull(idparcela)
+    
+    # two cases, agg in parceles, derivats, tipus and derivatsm AND
+    # administratiu and derivats
+    
+    # parceles, tipus and derivats
+    if (agg %in% c(
+      'parcela', 'especie', 'espsimple', 'genere', 'cadesclcon', 'plancon',
+      'especie_rt', 'espsimple_rt', 'genere_rt', 'cadesclcon_rt', 'plancon_rt'
+    )) {
+      viz_name <- paste0('r_', ifn)
+      res <- tbl(oracle_ifn, viz_name) %>%
+        filter(idparcela %in% idparcelas)
+    } else {
+      res <- data_core()
+    }
+    
+    return(res)
+    
+  })
+  
   # reactive values to return for use in other modules
   data_reactives <- reactiveValues()
   
@@ -398,6 +397,7 @@ mod_data <- function(
     data_reactives$data_sig <- data_sig
     data_reactives$data_clima <- data_clima
     data_reactives$data_core <- data_core
+    data_reactives$data_viz <- data_viz
     
   })
   
