@@ -194,7 +194,7 @@ mod_data <- function(
       # these inputs:
       input$apply_filters
       input$ifn
-      # input$tipus_espai
+      # input$espai_tipus
       # input$admin_div
       
     },
@@ -203,11 +203,9 @@ mod_data <- function(
       # stuff needed
       sig_name <- paste0('parcela', input$ifn, '_sig_etrs89')
       
-      data_sig_init <- tbl(oracle_ifn, sig_name)
-      
       # if apply_filters button is not pressed, then return the initial data
       if (input$apply_filters == 0) {
-        return(data_sig_init)
+        return(tbl(oracle_ifn, sig_name))
       } else {
         
         # when button is pressed, then all the logic start working
@@ -248,16 +246,17 @@ mod_data <- function(
     }
   )
   
-  data_clima <- reactive({
-    
-    clima_name <- paste0('parcela', input$ifn, '_clima')
-    # idparcelas to filter based on data_sig()
-    idparcelas <- data_sig() %>% pull(idparcela)
-    
-    tbl(oracle_ifn, clima_name) %>%
-      filter(idparcela %in% idparcelas)
-    
-  })
+  data_clima <- eventReactive(
+    ignoreNULL = FALSE, ignoreInit = FALSE,
+    eventExpr = data_sig(),
+    valueExpr = {
+      clima_name <- paste0('parcela', input$ifn, '_clima')
+      # idparcelas to filter based on data_sig()
+      data_sig() %>%
+        select(idparcela) %>%
+        inner_join(tbl(oracle_ifn, clima_name), by = 'idparcela')
+    }
+  )
   
   data_core <- reactive({
     
@@ -289,29 +288,41 @@ mod_data <- function(
         if (agg == 'parcela') {
           core_name <- paste0('r_', cd, '_',ifn)
           
-          res <- tbl(oracle_ifn, core_name) %>%
-            inner_join(
-              {data_sig() %>%
-                  select(idparcela, !!sym(input$admin_div))},
-              by = 'idparcela'
-            ) %>%
+          res <- data_sig() %>%
+            select(idparcela, !!sym(input$admin_div)) %>%
+            inner_join(tbl(oracle_ifn, core_name), by = 'idparcela') %>%
             group_by(!!sym(input$admin_div)) %>%
-            filter(idparcela %in% idparcelas) %>%
             summarise_if(is.numeric, .funs = summarise_functions)
+          
+          # res <- tbl(oracle_ifn, core_name) %>%
+          #   inner_join(
+          #     {data_sig() %>%
+          #         select(idparcela, !!sym(input$admin_div))},
+          #     by = 'idparcela'
+          #   ) %>%
+          #   group_by(!!sym(input$admin_div)) %>%
+          #   filter(idparcela %in% idparcelas) %>%
+          #   summarise_if(is.numeric, .funs = summarise_functions)
           
         } else {
           core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
           agg_tipfun_var <- paste0('id', agg)
           
-          res <- tbl(oracle_ifn, core_name) %>%
-            inner_join(
-              {data_sig() %>%
-                  select(idparcela, !!sym(input$admin_div))},
-              by = 'idparcela'
-            ) %>%
-            filter(idparcela %in% idparcelas) %>%
+          res <- data_sig() %>%
+            select(idparcela, !!sym(input$admin_div)) %>%
+            inner_join(tbl(oracle_ifn, core_name), by = 'idparcela') %>%
             group_by(!!sym(input$admin_div), !!sym(agg_tipfun_var)) %>%
             summarise_if(is.numeric, .funs = summarise_functions)
+          
+          # res <- tbl(oracle_ifn, core_name) %>%
+          #   inner_join(
+          #     {data_sig() %>%
+          #         select(idparcela, !!sym(input$admin_div))},
+          #     by = 'idparcela'
+          #   ) %>%
+          #   filter(idparcela %in% idparcelas) %>%
+          #   group_by(!!sym(input$admin_div), !!sym(agg_tipfun_var)) %>%
+          #   summarise_if(is.numeric, .funs = summarise_functions)
         }
         
       } else {

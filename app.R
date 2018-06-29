@@ -84,14 +84,14 @@ ui <- tagList(
         
         ## mod_infoPanel ####
         # mod_infoPanel, it includes the map events info panel
-        disabled(
-          hidden(
-            div(
-              id = 'hiddeable_pan',
-              mod_infoPanelOutput('mod_infoPanelOutput')
-            )
-          )
-        ),
+        # disabled(
+        #   hidden(
+        #     div(
+        #       id = 'hiddeable_pan',
+        #       mod_infoPanelOutput('mod_infoPanelOutput')
+        #     )
+        #   )
+        # ),
         
         ## cite div ####
         tags$div(
@@ -136,10 +136,10 @@ server <- function(input, output, session) {
   )
   
   # info panel
-  callModule(
-    mod_infoPanel, 'mod_infoPanelOutput',
-    data_reactives, map_reactives, viz_reactives
-  )
+  # callModule(
+  #   mod_infoPanel, 'mod_infoPanelOutput',
+  #   data_reactives, map_reactives, viz_reactives
+  # )
   
   ## hide infoPanel ####
   observeEvent(
@@ -181,7 +181,7 @@ server <- function(input, output, session) {
     viz_reactives$mida
   })
   output$debug3 <- renderPrint({
-    data_reactives$data_viz() %>% collect() %>% as.data.frame() %>% head()
+    data_reactives$data_sig() %>% collect() %>% as.data.frame() %>% head()
   })
 }
 
