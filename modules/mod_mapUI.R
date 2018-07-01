@@ -214,9 +214,9 @@ mod_map <- function(
   observeEvent(
     eventExpr = {
       if (all(
-        is.null(mod_viz$color) || mod_viz$color == '' ,
-        is.null(mod_viz$mida) || mod_viz$mida == '' ,
-        is.null(mod_viz$inverse_pal) || mod_viz$inverse_pal == '' 
+        is.null(mod_viz$color) || mod_viz$color == '',
+        is.null(mod_viz$mida) || mod_viz$mida == '',
+        is.null(mod_viz$inverse_pal) || mod_viz$inverse_pal == ''
         # is.null(mod_data$agg_level) || mod_data$agg_level == ''
         # is.null(mod_data$data_viz())
       )) {
