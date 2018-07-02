@@ -286,7 +286,12 @@ mod_data <- function(
         
         # get the core data name
         if (agg == 'parcela') {
-          core_name <- paste0('r_', paste0(cd, '_'), ifn)
+          
+          if (isTRUE(input$diam_class)) {
+            core_name <- paste0('r_', paste0(cd, '_'), ifn)
+          } else {
+            core_name <- paste0('r_', ifn)
+          }
           
           res <- data_sig() %>%
             select(idparcela, !!sym(input$admin_div)) %>%

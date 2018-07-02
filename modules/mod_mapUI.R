@@ -331,22 +331,28 @@ mod_map <- function(
       } else {
         
         # administratiu (polygons!!!)
-        vars_sel <- quos(
-          !!sym(color_var), !!sym(mida_var),
-          !!sym('latitude'), !!sym('longitude'), !!sym('idparcela')
-        )
-        
-        # check for any empty (color or mida) and remove it from the quosures
-        vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
+        # vars_sel <- quos(
+        #   !!sym(color_var), !!sym(mida_var),
+        #   !!sym('latitude'), !!sym('longitude'), !!sym('idparcela')
+        # )
+        # 
+        # # check for any empty (color or mida) and remove it from the quosures
+        # vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
         
         grup_fun_val <- agg %>%
           stringr::str_remove('_rt') %>%
           stringr::str_remove('territori_') %>%
           paste0('id',.)
         
-        data_parceles <- mod_data$data_viz() %>%
-          filter(!!sym(grup_fun_val) == mida_var) %>%
-          collect()
+        if (mida_var == '') {
+          data_parceles <- mod_data$data_viz() %>%
+            # filter(!!sym(grup_fun_val) == mida_var) %>%
+            collect()
+        } else {
+          data_parceles <- mod_data$data_viz() %>%
+            filter(!!sym(grup_fun_val) == mida_var) %>%
+            collect()
+        }
         
         admin_div <- mod_data$admin_div
         

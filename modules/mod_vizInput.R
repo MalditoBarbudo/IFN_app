@@ -85,7 +85,7 @@ mod_viz <- function(
           choices = vars_to_use
         )
         
-        # shinyjs::enable('mida')
+        shinyjs::enable('mida')
         
         updateSelectInput(
           session, 'mida', label = 'Mida',
@@ -98,23 +98,35 @@ mod_viz <- function(
           "Variables aggregació" = vars_viz
         )
         
-        grup_func_choices <- mod_data$data_viz() %>% 
-          # pull(!!sym(grup_fun_val))
-          collect() %>%
-          pull(!!sym(grup_fun_val))
-        
-        updateSelectInput(
-          session, 'color', label = 'Color',
-          choices = vars_to_use, selected = 'temperaturamitjanaanual'
-        )
-        
-        # shinyjs::disable('mida')
-        
-        updateSelectInput(
-          session, 'mida', label = grup_fun_val,
-          choices = grup_func_choices
-        )
-        
+        # check if agg is parcela (after removing the territori_ and _rt part,
+        # as then the mida must dissapear)
+        if (grup_fun_val != 'idparcela') {
+          grup_func_choices <- mod_data$data_viz() %>% 
+            # pull(!!sym(grup_fun_val))
+            collect() %>%
+            pull(!!sym(grup_fun_val))
+          
+          updateSelectInput(
+            session, 'color', label = 'Color',
+            choices = vars_to_use
+          )
+          
+          # shinyjs::disable('mida')
+          
+          updateSelectInput(
+            session, 'mida', label = grup_fun_val,
+            choices = grup_func_choices
+          )
+        } else {
+          
+          updateSelectInput(
+            session, 'color', label = 'Color',
+            choices = vars_to_use
+          )
+          
+          shinyjs::disable('mida')
+          
+        }
       }
     }
   )
