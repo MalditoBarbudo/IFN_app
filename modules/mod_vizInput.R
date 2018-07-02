@@ -79,7 +79,7 @@ mod_viz <- function(
         
         updateSelectInput(
           session, 'color', label = 'Color',
-          choices = vars_to_use, selected = 'temperaturamitjanaanual'
+          choices = vars_to_use
         )
         
         # shinyjs::enable('mida')

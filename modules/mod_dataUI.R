@@ -286,7 +286,7 @@ mod_data <- function(
         
         # get the core data name
         if (agg == 'parcela') {
-          core_name <- paste0('r_', cd, '_',ifn)
+          core_name <- paste0('r_', paste0(cd, '_'), ifn)
           
           res <- data_sig() %>%
             select(idparcela, !!sym(input$admin_div)) %>%

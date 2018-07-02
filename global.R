@@ -45,8 +45,8 @@ load('shapefiles/polygons.RData')
 
 oracle_ifn <- dbPool(
   drv = RPostgreSQL::PostgreSQL(),
-  user = 'malditobarbudo',
-  # password = rstudioapi::askForPassword('Password for ifn'),
+  user = 'ifn',
+  password = rstudioapi::askForPassword('Password for ifn'),
   dbname = 'oracle_ifn',
   idleTimeout = 3600000
 )

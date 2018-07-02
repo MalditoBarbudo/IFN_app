@@ -181,7 +181,7 @@ server <- function(input, output, session) {
     viz_reactives$mida
   })
   output$debug3 <- renderPrint({
-    data_reactives$data_sig() %>% collect() %>% as.data.frame() %>% head()
+    data_reactives$data_viz() %>% collect() %>% as.data.frame() %>% head()
   })
 }
 

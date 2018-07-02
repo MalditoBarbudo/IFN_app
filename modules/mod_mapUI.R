@@ -216,9 +216,9 @@ mod_map <- function(
       if (all(
         is.null(mod_viz$color) || mod_viz$color == '',
         is.null(mod_viz$mida) || mod_viz$mida == '',
-        is.null(mod_viz$inverse_pal) || mod_viz$inverse_pal == ''
+        is.null(mod_viz$inverse_pal) || mod_viz$inverse_pal == '',
         # is.null(mod_data$agg_level) || mod_data$agg_level == ''
-        # is.null(mod_data$data_viz())
+        is.null(mod_data$data_sig())
       )) {
         return(NULL)
       } else {
@@ -279,7 +279,7 @@ mod_map <- function(
           # numerical
           mida_var_values <- data_parceles[[mida_var]]
           if (is.numeric(mida_var_values)) {
-            mida_vector <- mida_var_values / max(mida_var_values) * 3000
+            mida_vector <- mida_var_values / max(mida_var_values, na.rm = TRUE) * 3000
           } else {
             mida_vector <- rep(750, nrow(data_parceles))
           }
