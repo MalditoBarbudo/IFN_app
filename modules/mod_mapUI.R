@@ -80,7 +80,7 @@ mod_map <- function(
             group = polygons_dictionary[[admin_div]][['group']],
             label = polygons_dictionary[[admin_div]][['label']],
             layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
-            weight = 1, smoothFactor = 0.5,
+            weight = 1, smoothFactor = 1,
             opacity = 1.0, fill = TRUE,
             color = '#6C7A89FF', fillColor = "#CF000F00",
             highlightOptions = highlightOptions(
@@ -117,7 +117,7 @@ mod_map <- function(
   #         group = polygons_dictionary[[admin_div]][['group']],
   #         label = polygons_dictionary[[admin_div]][['label']],
   #         layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
-  #         weight = 1, smoothFactor = 0.5,
+  #         weight = 1, smoothFactor = 1,
   #         opacity = 1.0, fill = TRUE,
   #         color = '#6C7A89FF', fillColor = "#CF000F00",
   #         highlightOptions = highlightOptions(
@@ -157,7 +157,7 @@ mod_map <- function(
             group = polygons_dictionary[[espai_tipus]][['group']],
             label = polygons_dictionary[[espai_tipus]][['label']],
             layerId = rlang::eval_tidy(sym(polygons_dictionary[[espai_tipus]][['layerId']])),
-            weight = 1, smoothFactor = 0.5,
+            weight = 1, smoothFactor = 1,
             opacity = 1.0, fill = TRUE,
             color = '#6C7A89FF', fillColor = "#CF000F00",
             highlightOptions = highlightOptions(
@@ -194,7 +194,7 @@ mod_map <- function(
   #         group = polygons_dictionary[[espai_tipus]][['group']],
   #         label = polygons_dictionary[[espai_tipus]][['label']],
   #         layerId = rlang::eval_tidy(sym(polygons_dictionary[[espai_tipus]][['layerId']])),
-  #         weight = 1, smoothFactor = 0.5,
+  #         weight = 1, smoothFactor = 1,
   #         opacity = 1.0, fill = TRUE,
   #         color = '#6C7A89FF', fillColor = "#CF000F00",
   #         highlightOptions = highlightOptions(
@@ -315,7 +315,7 @@ mod_map <- function(
               group = polygons_dictionary[[admin_div]][['group']],
               label = polygons_dictionary[[admin_div]][['label']],
               layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
-              weight = 1, smoothFactor = 0.5,
+              weight = 1, smoothFactor = 1,
               opacity = 1.0, fill = TRUE,
               color = '#6C7A89FF', fillColor = "#CF000F00",
               highlightOptions = highlightOptions(
@@ -390,13 +390,12 @@ mod_map <- function(
               group = polygons_dictionary[[admin_div]][['group']],
               label = polygons_dictionary[[admin_div]][['label']],
               layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
-              weight = 1, smoothFactor = 0.5,
+              weight = 1, smoothFactor = 1,
               opacity = 1.0, color = '#6C7A89FF',
-              fill = TRUE, fillColor = pal(color_vector),
+              fill = TRUE, fillColor = pal(color_vector), fillOpacity = 1,
               highlightOptions = highlightOptions(
                 color = "#CF000F", weight = 2,
-                bringToFront = FALSE,
-                fill = FALSE
+                bringToFront = FALSE
               ),
               options = pathOptions(
                 pane = 'admin_divs'
@@ -542,7 +541,7 @@ mod_map <- function(
   #           group = polygons_dictionary[[admin_div]][['group']],
   #           label = polygons_dictionary[[admin_div]][['label']],
   #           layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
-  #           weight = 1, smoothFactor = 0.5,
+  #           weight = 1, smoothFactor = 1,
   #           opacity = 1.0, color = '#6C7A89FF',
   #           fill = TRUE, fillColor = pal(color_vector),
   #           highlightOptions = highlightOptions(
