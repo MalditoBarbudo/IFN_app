@@ -224,28 +224,40 @@ polygons_dictionary <- list(
     polygon = 'polygons_provincies',
     group = 'provincia',
     label = ~NOM_PROV,
-    layerId = 'nom_provincies'
+    label_new = ~provincia,
+    layerId = 'nom_provincies',
+    # color_var = ~pal(NOM_PROV),
+    label_chr = 'NOM_PROV'
   ),
   
   vegueria = list(
     polygon = 'polygons_vegueries',
     group = 'vegueria',
     label = ~NOMVEGUE,
-    layerId = 'nom_vegueries'
+    label_new = ~vegueria,
+    layerId = 'nom_vegueries',
+    # color_var = ~pal(NOMVEGUE),
+    label_chr = 'NOMVEGUE'
   ),
   
   comarca = list(
     polygon = 'polygons_comarques',
     group = 'comarca',
     label = ~NOM_COMAR,
-    layerId = 'nom_comarques'
+    label_new = ~comarca,
+    layerId = 'nom_comarques',
+    # color_var = ~pal(NOM_COMAR),
+    label_chr = 'NOM_COMAR'
   ),
   
   municipi = list(
     polygon = 'polygons_municipis',
     group = 'municipi',
     label = ~NOM_MUNI,
-    layerId = 'nom_municipis'
+    label_new = ~municipi,
+    layerId = 'nom_municipis',
+    # color_var = ~pal(NOM_MUNI),
+    label_chr = 'NOM_MUNI'
   ),
   
   ## espai tipus

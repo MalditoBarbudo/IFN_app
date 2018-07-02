@@ -344,6 +344,7 @@ mod_map <- function(
           stringr::str_remove('territori_') %>%
           paste0('id',.)
         
+        # data parceles from data_viz()
         if (mida_var == '') {
           data_parceles <- mod_data$data_viz() %>%
             # filter(!!sym(grup_fun_val) == mida_var) %>%
@@ -354,23 +355,61 @@ mod_map <- function(
             collect()
         }
         
+        # data polygons modified. We need to modify the data from the polygons
+        # object to be able to colour as NA when the filtering results in 
+        # some admin_divs without data (ie, filtering for platanus genera when
+        # in province admin_div only return data for Barcelona and Girona). If
+        # we modify the data slot in the polygon data frame with a left/right
+        # join we can add the admin divs as NAs
         admin_div <- mod_data$admin_div
+        polygons_label_var <- polygons_dictionary[[admin_div]][['label_chr']]
+        polygon_data <- rlang::eval_tidy(
+          sym(polygons_dictionary[[admin_div]][['polygon']])
+        )
+        
+        polygon_data@data <- polygon_data@data %>%
+          select(!!sym(polygons_label_var)) %>%
+          rename(!!sym(admin_div) := !!sym(polygons_label_var)) %>%
+          left_join(data_parceles, by = admin_div)
+        
+        
         
         # color palette
         if (is.null(color_var) || color_var == '') {
-          color_vector <- rep('parcel·la', nrow(data_parceles))
+          color_vector <- rep('parcel·la', nrow(polygon_data@data))
           pal <- colorFactor('viridis', color_vector)
         } else {
           
           # We must take into account if the variable is categorical or
           # numerical
-          color_vector <- data_parceles[[color_var]]
+          color_vector <- polygon_data@data[[color_var]]
+          
+          # color_domain_all_levels <- c(
+          #   color_vector,
+          #   rep(NA, length(
+          #     rlang::eval_tidy(
+          #       sym(polygons_dictionary[[admin_div]][['polygon']])
+          #     )@data[[as.character(polygons_dictionary[[admin_div]][['label']])[2]]]
+          #   ) - length(color_vector))
+          # )
+          
           if (is.numeric(color_vector)) {
             pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
           } else {
             pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
           }
         }
+        
+        # we need to remove the inexistent polygons when some genus or species
+        # are selected, as there is no info in that polygins after filtering
+        # polygon_data <- rlang::eval_tidy(
+        #   sym(polygons_dictionary[[admin_div]][['polygon']])
+        # )
+        # 
+        # polygon_data <- polygon_data[
+        #   as.character(polygon_data@data[[as.character(polygons_dictionary[[admin_div]][['label']])[2]]]) %in%
+        #     data_parceles[[admin_div]], 
+        # ]
         
         if (admin_div == '') {
           leafletProxy('map') %>%
@@ -386,13 +425,14 @@ mod_map <- function(
             clearGroup('provincia') %>%
             clearGroup('idparcela') %>%
             addPolygons(
-              data = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['polygon']])),
+              data = polygon_data,
               group = polygons_dictionary[[admin_div]][['group']],
-              label = polygons_dictionary[[admin_div]][['label']],
+              label = polygons_dictionary[[admin_div]][['label_new']],
               layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
               weight = 1, smoothFactor = 1,
               opacity = 1.0, color = '#6C7A89FF',
-              fill = TRUE, fillColor = pal(color_vector), fillOpacity = 1,
+              fill = TRUE, fillColor = pal(color_vector),
+              fillOpacity = 1,
               highlightOptions = highlightOptions(
                 color = "#CF000F", weight = 2,
                 bringToFront = FALSE
