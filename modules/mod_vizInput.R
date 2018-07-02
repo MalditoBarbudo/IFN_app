@@ -51,7 +51,10 @@ mod_viz <- function(
   # update inputs with variables present in data
   observeEvent(
     ignoreNULL = FALSE, ignoreInit = FALSE,
-    eventExpr = mod_data$agg_level,
+    eventExpr = {
+      mod_data$agg_level
+      mod_data$data_viz()
+    },
     handlerExpr = {
       
       ## debug

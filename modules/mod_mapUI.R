@@ -213,17 +213,13 @@ mod_map <- function(
   # of the polygons in the administratiu aggregation levels)
   observeEvent(
     eventExpr = {
-      if (all(
-        is.null(mod_viz$color) || mod_viz$color == '',
-        is.null(mod_viz$mida) || mod_viz$mida == '',
-        is.null(mod_viz$inverse_pal) || mod_viz$inverse_pal == '',
-        # is.null(mod_data$agg_level) || mod_data$agg_level == ''
-        is.null(mod_data$data_sig())
-      )) {
-        return(NULL)
-      } else {
-        TRUE
-      }
+      
+      mod_viz$color
+      mod_viz$mida
+      mod_viz$inverse_pal
+      
+      mod_data$data_sig()
+      # mod_data$admin_div
     },
     handlerExpr = {
       
@@ -299,6 +295,39 @@ mod_map <- function(
             position = 'topright', pal = pal, values = color_vector,
             title = color_var, layerId = 'color_legend'
           )
+        
+        admin_div <- mod_data$admin_div
+        
+        if (admin_div == '') {
+          leafletProxy('map') %>%
+            clearGroup('vegueria') %>%
+            clearGroup('comarca') %>%
+            clearGroup('municipi') %>%
+            clearGroup('provincia')
+        } else {
+          leafletProxy('map') %>%
+            clearGroup('vegueria') %>%
+            clearGroup('comarca') %>%
+            clearGroup('municipi') %>%
+            clearGroup('provincia') %>%
+            addPolygons(
+              data = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['polygon']])),
+              group = polygons_dictionary[[admin_div]][['group']],
+              label = polygons_dictionary[[admin_div]][['label']],
+              layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+              weight = 1, smoothFactor = 0.5,
+              opacity = 1.0, fill = TRUE,
+              color = '#6C7A89FF', fillColor = "#CF000F00",
+              highlightOptions = highlightOptions(
+                color = "#CF000F", weight = 2,
+                bringToFront = FALSE,
+                fill = TRUE, fillColor = "#CF000F00"
+              ),
+              options = pathOptions(
+                pane = 'admin_divs'
+              )
+            )
+        }
       } else {
         
         # administratiu (polygons!!!)

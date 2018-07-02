@@ -374,6 +374,7 @@ mod_data <- function(
     eventExpr = {
       data_sig()
       input$agg_level
+      input$admin_div
     },
     valueExpr = {
       ifn <- input$ifn
