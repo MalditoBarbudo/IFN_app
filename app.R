@@ -178,10 +178,10 @@ server <- function(input, output, session) {
     map_reactives$map_shape_click
   })
   output$debug2 <- renderPrint({
-    # data_reactives$data_core() %>% collect() %>% as.data.frame() %>% head()
+    data_reactives$data_core() %>% collect() %>% as.data.frame() %>% head()
   })
   output$debug3 <- renderPrint({
-    infoPanel_reactives$data_shape() %>% collect() %>% as.data.frame() %>% head()
+    # infoPanel_reactives$data_shape() %>% collect() %>% as.data.frame() %>% head()
   })
 }
 

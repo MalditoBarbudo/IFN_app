@@ -88,13 +88,25 @@ mod_infoPanel <- function(
           # here, is tricky. These are the aggregation levels for tipus
           # funcionals, and per se didn't belong to dots or polygons. So, for
           # the plotting parceles in the infoPanel we need to resort in
-          # data_viz()
+          # creating the data de novo
           if (click$group == 'idparcela') {
+            # res <- mod_data$data_sig() %>%
+            #   filter(!!! filter_expr) %>%
+            #   select(idparcela) %>%
+            #   inner_join(mod_data$data_viz(), by = 'idparcela') %>%
+            #   collect()
+            agg_real <- stringr::str_remove(agg, '_rt')
+            cd <- if (isTRUE(mod_data$diam_class)) {'cd'} else {''}
+            ifn <- mod_data$ifn
+            core_name <- paste0('r_', paste0(agg_real, cd, '_'), ifn)
+            
             res <- mod_data$data_sig() %>%
               filter(!!! filter_expr) %>%
               select(idparcela) %>%
-              inner_join(mod_data$data_viz(), by = 'idparcela') %>%
-              collect()
+              inner_join({
+                tbl(oracle_ifn, core_name)
+              }, by = 'idparcela')
+            
           } else {
             # res <- mod_data$data_core() %>%
             #   filter(!!! filter_expr)
@@ -206,7 +218,7 @@ mod_infoPanel <- function(
       }
       
       # parcela desglossat per especie
-      if (agg_level == 'especie') {
+      if (agg_level %in% c('especie', 'especie_rt')) {
         
         if (isTRUE(cd)) {
           
@@ -262,13 +274,8 @@ mod_infoPanel <- function(
         }
       }
       
-      # parcela clicked when agg is especie_rt
-      if (agg_level == 'especie_rt') {
-        #TODO
-      }
-      
       # parcela desglossat per espsimple
-      if (agg_level == 'espsimple') {
+      if (agg_level %in% c('espsimple', 'espsimple_rt')) {
         
         if (isTRUE(cd)) {
           
@@ -327,7 +334,7 @@ mod_infoPanel <- function(
       }
       
       # parcela desglossat per genere
-      if (agg_level == 'genere') {
+      if (agg_level %in% c('genere', 'genere_rt')) {
         
         if (isTRUE(cd)) {
           
@@ -383,7 +390,7 @@ mod_infoPanel <- function(
       }
       
       # parcele desglossat per cadesclcon
-      if (agg_level == 'cadesclcon') {
+      if (agg_level %in% c('cadesclcon', 'cadesclcon_rt')) {
         
         if (isTRUE(cd)) {
           
@@ -455,7 +462,7 @@ mod_infoPanel <- function(
       }
       
       # parcele desglossat per plancon
-      if (agg_level == 'plancon') {
+      if (agg_level %in% c('plancon', 'plancon_rt')) {
         
         if (isTRUE(cd)) {
           
