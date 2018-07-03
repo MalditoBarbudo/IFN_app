@@ -136,10 +136,10 @@ server <- function(input, output, session) {
   )
   
   # info panel
-  # callModule(
-  #   mod_infoPanel, 'mod_infoPanelOutput',
-  #   data_reactives, map_reactives, viz_reactives
-  # )
+  infoPanel_reactives <- callModule(
+    mod_infoPanel, 'mod_infoPanelOutput',
+    data_reactives, map_reactives, viz_reactives
+  )
   
   ## hide infoPanel ####
   observeEvent(
@@ -181,7 +181,7 @@ server <- function(input, output, session) {
     viz_reactives$mida
   })
   output$debug3 <- renderPrint({
-    data_reactives$data_viz() %>% collect() %>% as.data.frame() %>% head()
+    infoPanel_reactives$data_shape() %>% collect() %>% as.data.frame() %>% head()
   })
 }
 

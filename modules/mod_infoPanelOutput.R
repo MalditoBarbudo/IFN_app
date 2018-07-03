@@ -62,7 +62,7 @@ mod_infoPanel <- function(
   
   # shape data, we need an eventReactive
   data_shape <- eventReactive(
-    ignoreInit = TRUE,
+    ignoreInit = FALSE,
     
     eventExpr = mod_map$map_shape_click,
     valueExpr = {
@@ -73,19 +73,29 @@ mod_infoPanel <- function(
       # filter expression
       filter_expr <- quo(!!sym(click$group) == click$id)
       
-      # selected vars
-      vars_sel <- c('idcd', 'densitat', 'ab', 'planifconifdens', 'planifconifab',
-                    'percdensplanifconif', 'percabplanifconif', 'idespecie',
-                    'percdens', 'percab', 'idespeciesimple', 'idgenere',
-                    'idcaducesclerconif', 'idplanifconif')
+      # aggregation level
+      agg <- mod_data$agg_level
       
-      # data
-      mod_data$data_sig() %>%
-        filter(!!! filter_expr) %>%
-        # inner_join(mod_data$data_clima(), by = 'idparcela') %>%
-        inner_join(mod_data$data_core(), by = 'idparcela') %>%
-        dplyr::select(one_of(vars_sel)) %>%
-        collect()
+      # agg real time, then data_core() is in charge of everything, we only have
+      # to filter by the selected group
+      if (stringr::str_detect(agg, '_rt')) {
+        
+        res <- mod_data$data_core() %>%
+          filter(!!! filter_expr)
+        
+      } else {
+        
+        # if agg no real time, we need the data_core but also de sig to filter
+        # by the selected group
+        res <- mod_data$data_sig() %>%
+          filter(!!! filter_expr) %>%
+          select(idparcela) %>%
+          inner_join(mod_data$data_core(), by = 'idparcela') %>%
+          collect()
+        
+      }
+      
+      return(res)
     }
   )
   
@@ -849,4 +859,11 @@ mod_infoPanel <- function(
     plot_densitat + plot_ab
   })
   
+  infoPanel_reactives <- reactiveValues()
+  
+  observe({
+    infoPanel_reactives$data_shape <- data_shape
+  })
+  
+  return(infoPanel_reactives)
 }

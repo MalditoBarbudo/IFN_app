@@ -111,7 +111,8 @@ mod_viz <- function(
             choices = vars_to_use
           )
           
-          # shinyjs::disable('mida')
+          # shinyjs::reset('mida')
+          shinyjs::enable('mida')
           
           updateSelectInput(
             session, 'mida', label = grup_fun_val,
@@ -124,6 +125,7 @@ mod_viz <- function(
             choices = vars_to_use
           )
           
+          shinyjs::reset('mida')
           shinyjs::disable('mida')
           
         }
