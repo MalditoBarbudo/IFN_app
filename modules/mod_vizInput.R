@@ -62,7 +62,7 @@ mod_viz <- function(
       # browser()
       
       vars_clima <- names(mod_data$data_clima() %>% collect())
-      vars_viz <- names(mod_data$data_viz() %>% collect())
+      vars_viz <- names(mod_data$data_viz()) #%>% collect())
       agg <- mod_data$agg_level
       grup_fun_val <- agg %>%
         stringr::str_remove('_rt') %>%
@@ -103,7 +103,7 @@ mod_viz <- function(
         if (grup_fun_val != 'idparcela') {
           grup_func_choices <- mod_data$data_viz() %>% 
             # pull(!!sym(grup_fun_val))
-            collect() %>%
+            # collect() %>%
             pull(!!sym(grup_fun_val))
           
           updateSelectInput(

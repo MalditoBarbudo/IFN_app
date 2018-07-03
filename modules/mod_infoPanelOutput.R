@@ -82,8 +82,8 @@ mod_infoPanel <- function(
         
         if (stringr::str_detect(agg, 'territori_')) {
           res <- mod_data$data_core() %>%
-            filter(!!! filter_expr) %>%
-            collect()
+            filter(!!! filter_expr) #%>%
+            # collect()
         } else {
           # here, is tricky. These are the aggregation levels for tipus
           # funcionals, and per se didn't belong to dots or polygons. So, for

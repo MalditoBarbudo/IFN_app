@@ -45,8 +45,8 @@ load('shapefiles/polygons.RData')
 
 oracle_ifn <- dbPool(
   drv = RPostgreSQL::PostgreSQL(),
-  user = 'ifn',
-  password = rstudioapi::askForPassword('Password for ifn'),
+  user = 'malditobarbudo',
+  # password = rstudioapi::askForPassword('Password for ifn'),
   dbname = 'oracle_ifn',
   idleTimeout = 3600000
 )
@@ -411,6 +411,8 @@ data_generator <- function(
   idparcelas <- data_sig %>% pull(idparcela)
   # diameter classes
   cd_real <- if (isTRUE(cd)) {'cd'} else {''}
+  # collect sig_data
+  data_sig <- data_sig %>% collect()
   
   
   # real time calculations
@@ -484,7 +486,7 @@ data_generator <- function(
         core_name <- paste0('r_', ifn)
       }
     } else {
-      core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
+      core_name <- paste0('r_', paste0(agg, cd_real, '_'), ifn)
     }
     
     res <- tbl(sql_db, core_name) %>%

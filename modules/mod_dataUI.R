@@ -260,116 +260,133 @@ mod_data <- function(
   
   data_core <- reactive({
     
-    ifn <- input$ifn
-    agg <- input$agg_level
-    cd <- if (isTRUE(input$diam_class)) {'cd'} else {''}
-    idparcelas <- data_sig() %>% pull(idparcela)
-    
-    summarise_functions <- funs(
-      min(., na.rm = TRUE),
-      max(., na.rm = TRUE),
-      mean(., na.rm = TRUE),
-      # median(.),
-      n()
+    data_generator(
+      sql_db = oracle_ifn,
+      ifn = input$ifn,
+      agg = input$agg_level,
+      cd = input$diam_class,
+      data_sig = data_sig(),
+      admin_div = input$admin_div,
+      .funs = funs(
+        mean(., na.rm = TRUE),
+        sd(., na.rm = TRUE),
+        min(., na.rm = TRUE),
+        max(., na.rm = TRUE),
+        median(., na.rm = TRUE),
+        q95 = quantile(., probs = 0.95, na.rm = TRUE)
+      )
     )
     
-    # real time calculations
-    if (stringr::str_detect(agg, '_rt')) {
-      
-      ## territoris
-      if (stringr::str_detect(agg, 'territori_')) {
-        
-        # get the correct aggregation name removing the _rt and the territori_
-        # parts
-        agg <- stringr::str_remove(agg, '_rt') %>%
-          stringr::str_remove('territori_')
-        
-        # get the core data name
-        if (agg == 'parcela') {
-          
-          if (isTRUE(input$diam_class)) {
-            core_name <- paste0('r_', paste0(cd, '_'), ifn)
-          } else {
-            core_name <- paste0('r_', ifn)
-          }
-          
-          res <- data_sig() %>%
-            select(idparcela, !!sym(input$admin_div)) %>%
-            inner_join(tbl(oracle_ifn, core_name), by = 'idparcela') %>%
-            group_by(!!sym(input$admin_div)) %>%
-            summarise_if(is.numeric, .funs = summarise_functions)
-          
-          # res <- tbl(oracle_ifn, core_name) %>%
-          #   inner_join(
-          #     {data_sig() %>%
-          #         select(idparcela, !!sym(input$admin_div))},
-          #     by = 'idparcela'
-          #   ) %>%
-          #   group_by(!!sym(input$admin_div)) %>%
-          #   filter(idparcela %in% idparcelas) %>%
-          #   summarise_if(is.numeric, .funs = summarise_functions)
-          
-        } else {
-          core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
-          agg_tipfun_var <- paste0('id', agg)
-          
-          res <- data_sig() %>%
-            select(idparcela, !!sym(input$admin_div)) %>%
-            inner_join(tbl(oracle_ifn, core_name), by = 'idparcela') %>%
-            group_by(!!sym(input$admin_div), !!sym(agg_tipfun_var)) %>%
-            summarise_if(is.numeric, .funs = summarise_functions)
-          
-          # res <- tbl(oracle_ifn, core_name) %>%
-          #   inner_join(
-          #     {data_sig() %>%
-          #         select(idparcela, !!sym(input$admin_div))},
-          #     by = 'idparcela'
-          #   ) %>%
-          #   filter(idparcela %in% idparcelas) %>%
-          #   group_by(!!sym(input$admin_div), !!sym(agg_tipfun_var)) %>%
-          #   summarise_if(is.numeric, .funs = summarise_functions)
-        }
-        
-      } else {
-        
-        ## tipus funcionales
-        # get the correct aggregation name removing the _rt part
-        agg <- stringr::str_remove(agg, '_rt')
-        
-        # get the core data name
-        core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
-        
-        # data
-        temp_table <- tbl(oracle_ifn, core_name) %>%
-          filter(idparcela %in% idparcelas)
-        
-        agg_tipfun_var <- paste0('id', agg)
-        
-        res <- temp_table %>%
-          group_by(!!sym(agg_tipfun_var)) %>% 
-          summarise_if(is.numeric, .funs = summarise_functions)
-        
-      }
-      
-    } else {
-      
-      # parcela, no aggregation level
-      if (agg == 'parcela') {
-        if (cd == '') {
-          core_name <- paste0('r_', ifn)
-        } else {
-          core_name <- paste0('r_', cd, ifn)
-        }
-      } else {
-        core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
-      }
-      
-      res <- tbl(oracle_ifn, core_name) %>%
-        filter(idparcela %in% idparcelas)
-      
-    }
-    
-    return(res)
+    # ifn <- input$ifn
+    # agg <- input$agg_level
+    # cd <- if (isTRUE(input$diam_class)) {'cd'} else {''}
+    # idparcelas <- data_sig() %>% pull(idparcela)
+    # 
+    # summarise_functions <- funs(
+    #   min(., na.rm = TRUE),
+    #   max(., na.rm = TRUE),
+    #   mean(., na.rm = TRUE),
+    #   # median(.),
+    #   n()
+    # )
+    # 
+    # # real time calculations
+    # if (stringr::str_detect(agg, '_rt')) {
+    #   
+    #   ## territoris
+    #   if (stringr::str_detect(agg, 'territori_')) {
+    #     
+    #     # get the correct aggregation name removing the _rt and the territori_
+    #     # parts
+    #     agg <- stringr::str_remove(agg, '_rt') %>%
+    #       stringr::str_remove('territori_')
+    #     
+    #     # get the core data name
+    #     if (agg == 'parcela') {
+    #       
+    #       if (isTRUE(input$diam_class)) {
+    #         core_name <- paste0('r_', paste0(cd, '_'), ifn)
+    #       } else {
+    #         core_name <- paste0('r_', ifn)
+    #       }
+    #       
+    #       res <- data_sig() %>%
+    #         select(idparcela, !!sym(input$admin_div)) %>%
+    #         inner_join(tbl(oracle_ifn, core_name), by = 'idparcela') %>%
+    #         group_by(!!sym(input$admin_div)) %>%
+    #         summarise_if(is.numeric, .funs = summarise_functions)
+    #       
+    #       # res <- tbl(oracle_ifn, core_name) %>%
+    #       #   inner_join(
+    #       #     {data_sig() %>%
+    #       #         select(idparcela, !!sym(input$admin_div))},
+    #       #     by = 'idparcela'
+    #       #   ) %>%
+    #       #   group_by(!!sym(input$admin_div)) %>%
+    #       #   filter(idparcela %in% idparcelas) %>%
+    #       #   summarise_if(is.numeric, .funs = summarise_functions)
+    #       
+    #     } else {
+    #       core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
+    #       agg_tipfun_var <- paste0('id', agg)
+    #       
+    #       res <- data_sig() %>%
+    #         select(idparcela, !!sym(input$admin_div)) %>%
+    #         inner_join(tbl(oracle_ifn, core_name), by = 'idparcela') %>%
+    #         group_by(!!sym(input$admin_div), !!sym(agg_tipfun_var)) %>%
+    #         summarise_if(is.numeric, .funs = summarise_functions)
+    #       
+    #       # res <- tbl(oracle_ifn, core_name) %>%
+    #       #   inner_join(
+    #       #     {data_sig() %>%
+    #       #         select(idparcela, !!sym(input$admin_div))},
+    #       #     by = 'idparcela'
+    #       #   ) %>%
+    #       #   filter(idparcela %in% idparcelas) %>%
+    #       #   group_by(!!sym(input$admin_div), !!sym(agg_tipfun_var)) %>%
+    #       #   summarise_if(is.numeric, .funs = summarise_functions)
+    #     }
+    #     
+    #   } else {
+    #     
+    #     ## tipus funcionales
+    #     # get the correct aggregation name removing the _rt part
+    #     agg <- stringr::str_remove(agg, '_rt')
+    #     
+    #     # get the core data name
+    #     core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
+    #     
+    #     # data
+    #     temp_table <- tbl(oracle_ifn, core_name) %>%
+    #       filter(idparcela %in% idparcelas)
+    #     
+    #     agg_tipfun_var <- paste0('id', agg)
+    #     
+    #     res <- temp_table %>%
+    #       group_by(!!sym(agg_tipfun_var)) %>% 
+    #       summarise_if(is.numeric, .funs = summarise_functions)
+    #     
+    #   }
+    #   
+    # } else {
+    #   
+    #   # parcela, no aggregation level
+    #   if (agg == 'parcela') {
+    #     if (cd == '') {
+    #       core_name <- paste0('r_', ifn)
+    #     } else {
+    #       core_name <- paste0('r_', cd, ifn)
+    #     }
+    #   } else {
+    #     core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
+    #   }
+    #   
+    #   res <- tbl(oracle_ifn, core_name) %>%
+    #     filter(idparcela %in% idparcelas)
+    #   
+    # }
+    # 
+    # return(res)
     
   })
   
@@ -382,24 +399,45 @@ mod_data <- function(
       input$admin_div
     },
     valueExpr = {
-      ifn <- input$ifn
-      agg <- input$agg_level
-      idparcelas <- data_sig() %>% pull(idparcela)
       
-      # two cases, agg in parceles, derivats, tipus and derivats AND
-      # administratiu and derivats
-      
-      # parceles, tipus and derivats
-      if (agg %in% c(
+      # plots, tipus funcionals, and their derivatives
+      if (input$agg_level %in% c(
         'parcela', 'especie', 'espsimple', 'genere', 'cadesclcon', 'plancon',
         'especie_rt', 'espsimple_rt', 'genere_rt', 'cadesclcon_rt', 'plancon_rt'
       )) {
-        viz_name <- paste0('r_', ifn)
-        res <- tbl(oracle_ifn, viz_name) %>%
-          filter(idparcela %in% idparcelas)
+        
+        res <- data_generator(
+          sql_db = oracle_ifn,
+          ifn = input$ifn,
+          agg = 'parcela',
+          cd = FALSE,
+          data_sig = data_sig(),
+          admin_div = NULL,
+          .funs = NULL
+        )
+        
       } else {
         res <- data_core()
       }
+      
+      # ifn <- input$ifn
+      # agg <- input$agg_level
+      # idparcelas <- data_sig() %>% pull(idparcela)
+      # 
+      # # two cases, agg in parceles, derivats, tipus and derivats AND
+      # # administratiu and derivats
+      # 
+      # # parceles, tipus and derivats
+      # if (agg %in% c(
+      #   'parcela', 'especie', 'espsimple', 'genere', 'cadesclcon', 'plancon',
+      #   'especie_rt', 'espsimple_rt', 'genere_rt', 'cadesclcon_rt', 'plancon_rt'
+      # )) {
+      #   viz_name <- paste0('r_', ifn)
+      #   res <- tbl(oracle_ifn, viz_name) %>%
+      #     filter(idparcela %in% idparcelas)
+      # } else {
+      #   res <- data_core()
+      # }
       
       return(res)
     }

@@ -246,8 +246,12 @@ mod_map <- function(
         vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
         
         data_parceles <- mod_data$data_viz() %>%
-          inner_join(mod_data$data_sig(), by = 'idparcela') %>% 
-          inner_join(mod_data$data_clima(), by = 'idparcela') %>% 
+          inner_join({
+            mod_data$data_sig() %>% collect()
+          }, by = 'idparcela') %>% 
+          inner_join({
+            mod_data$data_clima() %>% collect()
+          }, by = 'idparcela') %>% 
           dplyr::select(!!! vars_sel) %>% 
           collect()
         
@@ -346,13 +350,13 @@ mod_map <- function(
         
         # data parceles from data_viz()
         if (mida_var == '') {
-          data_parceles <- mod_data$data_viz() %>%
+          data_parceles <- mod_data$data_viz() #%>%
             # filter(!!sym(grup_fun_val) == mida_var) %>%
-            collect()
+            # collect()
         } else {
           data_parceles <- mod_data$data_viz() %>%
-            filter(!!sym(grup_fun_val) == mida_var) %>%
-            collect()
+            filter(!!sym(grup_fun_val) == mida_var) #%>%
+            # collect()
         }
         
         # data polygons modified. We need to modify the data from the polygons
