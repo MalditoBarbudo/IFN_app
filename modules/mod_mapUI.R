@@ -443,7 +443,7 @@ mod_map <- function(
             ) %>%
             addLegend(
               position = 'topright', pal = pal, values = color_vector,
-              title = color_var, layerId = 'color_legend'
+              title = color_var, layerId = 'color_legend', opacity = 1
             )
         }
       }
