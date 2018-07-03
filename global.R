@@ -395,6 +395,108 @@ theme_infoPanel <- theme_void() + theme(
   
 )
 
+#### Helper functions ##########################################################
+
+data_generator <- function(
+  sql_db,
+  ifn,
+  agg,
+  cd,
+  data_sig,
+  admin_div,
+  .funs
+) {
+  
+  # plots to use, based on data_sig
+  idparcelas <- data_sig %>% pull(idparcela)
+  # diameter classes
+  cd_real <- if (isTRUE(cd)) {'cd'} else {''}
+  
+  
+  # real time calculations
+  if (stringr::str_detect(agg, '_rt')) {
+    
+    # polygons
+    if (stringr::str_detect(agg, 'territori_')) {
+      
+      # get the "official" aggregation level name
+      agg_real <- stringr::str_remove(agg, '_rt') %>%
+        stringr::str_remove('territori_')
+      
+      # get the core data name based on agg and cd
+      if (agg_real == 'parcela') {
+        if (isTRUE(cd)) {
+          core_name <- paste0('r_', cd, '_', ifn)
+        } else {
+          core_name <- paste0('r_', ifn)
+        }
+        
+        # data to return
+        core_tbl <- tbl(sql_db, core_name) %>% collect()
+        res <- data_sig %>%
+          select(idparcela, !!sym(admin_div)) %>% 
+          inner_join(core_tbl, by = 'idparcela') %>%
+          group_by(!!sym(admin_div)) %>%
+          summarise_if(is.numeric, .funs = .funs)
+      } else {
+        # core data name
+        core_name <- paste0('r_', paste0(agg_real, cd_real, '_'), ifn)
+        # tipu funcional variable
+        agg_tipfun_var <- paste0('id', agg_real)
+        
+        # data to return
+        core_tbl <- tbl(sql_db, core_name) %>% collect()
+        res <- data_sig %>%
+          select(idparcela, !!sym(admin_div)) %>%
+          inner_join(core_tbl, by = 'idparcela') %>%
+          group_by(!!sym(admin_div), !!sym(agg_tipfun_var)) %>%
+          summarise_if(is.numeric, .funs = .funs)
+      }
+      
+    } else {
+      # tipus funcionals aggregations without polygons
+      
+      # get the "official" aggregation level name
+      agg_real <- stringr::str_remove(agg, '_rt')
+      
+      # get the tipu funcinal variable
+      agg_tipfun_var <- paste0('id', agg_real)
+      
+      # get the core data name
+      core_name <- paste0('r_', paste0(agg_real, cd_real, '_'), ifn)
+      
+      # data to return
+      res <- tbl(sql_db, core_name) %>%
+        collect() %>%
+        filter(idparcela %in% idparcelas) %>%
+        group_by(!!sym(agg_tipfun_var)) %>% 
+        summarise_if(is.numeric, .funs = .funs)
+    }
+    
+  } else {
+    
+    # plot agg level, or plot/tipu funcional agg levels (not real time
+    # calculations)
+    if (agg == 'parcela') {
+      if (isTRUE(cd)) {
+        core_name <- paste0('r_', cd_real, '_', ifn)
+      } else {
+        core_name <- paste0('r_', ifn)
+      }
+    } else {
+      core_name <- paste0('r_', paste0(agg, cd, '_'), ifn)
+    }
+    
+    res <- tbl(sql_db, core_name) %>%
+      collect() %>%
+      filter(idparcela %in% idparcelas)
+    
+  }
+  
+  return(res)
+  
+}
+
 
 ################################################################################
 
