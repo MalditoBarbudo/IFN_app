@@ -80,9 +80,40 @@ mod_infoPanel <- function(
       # to filter by the selected group
       if (stringr::str_detect(agg, '_rt')) {
         
-        res <- mod_data$data_core() %>%
-          filter(!!! filter_expr)
-        
+        if (stringr::str_detect(agg, 'territori_')) {
+          res <- mod_data$data_core() %>%
+            filter(!!! filter_expr) %>%
+            collect()
+        } else {
+          # here, is tricky. These are the aggregation levels for tipus
+          # funcionals, and per se didn't belong to dots or polygons. So, for
+          # the plotting parceles in the infoPanel we need to resort in
+          # data_viz()
+          if (click$group == 'idparcela') {
+            res <- mod_data$data_sig() %>%
+              filter(!!! filter_expr) %>%
+              select(idparcela) %>%
+              inner_join(mod_data$data_viz(), by = 'idparcela') %>%
+              collect()
+          } else {
+            # res <- mod_data$data_core() %>%
+            #   filter(!!! filter_expr)
+            agg_real <- stringr::str_remove(agg, '_rt') %>%
+              stringr::str_remove('territori_')
+            cd <- if (isTRUE(mod_data$diam_class)) {'cd'} else {''}
+            ifn <- mod_data$ifn
+            core_name <- paste0('r_', paste0(agg_real, cd, '_'), ifn)
+            agg_tipfun_var <- paste0('id', agg_real)
+            
+            res <- mod_data$data_sig() %>%
+              select(idparcela, !!sym(mod_data$admin_div)) %>%
+              inner_join(tbl(oracle_ifn, core_name), by = 'idparcela') %>%
+              # group_by(!!sym(mod_data$admin_div), !!sym(agg_tipfun_var)) %>%
+              # summarise_if(is.numeric, .funs = funs(mean(., na.rm = TRUE))) %>%
+              filter(!!! filter_expr) %>%
+              collect()
+          }
+        }
       } else {
         
         # if agg no real time, we need the data_core but also de sig to filter
@@ -229,6 +260,11 @@ mod_infoPanel <- function(
             scale_y_continuous(limits = c(0,100), expand = expand_scale(0,0)) +
             theme_infoPanel
         }
+      }
+      
+      # parcela clicked when agg is especie_rt
+      if (agg_level == 'especie_rt') {
+        #TODO
       }
       
       # parcela desglossat per espsimple
@@ -552,7 +588,7 @@ mod_infoPanel <- function(
       }
       
       # parcela desglossat per especie
-      if (agg_level == 'especie') {
+      if (agg_level %in% c('especie', 'especie_rt')) {
         
         if (isTRUE(cd)) {
           
@@ -607,7 +643,7 @@ mod_infoPanel <- function(
       }
       
       # parcela desglossat per espsimple
-      if (agg_level == 'espsimple') {
+      if (agg_level %in% c('espsimple', 'espsimple_rt')) {
         
         if (isTRUE(cd)) {
           
@@ -662,7 +698,7 @@ mod_infoPanel <- function(
       }
       
       # parcela desglossat per genere
-      if (agg_level == 'genere') {
+      if (agg_level %in% c('genere', 'genere_rt')) {
         
         if (isTRUE(cd)) {
           
@@ -715,7 +751,7 @@ mod_infoPanel <- function(
       }
       
       # parcele desglossat per cadesclcon
-      if (agg_level == 'cadesclcon') {
+      if (agg_level %in% c('cadesclcon', 'cadesclcon_rt')) {
         
         if (isTRUE(cd)) {
           
@@ -788,7 +824,7 @@ mod_infoPanel <- function(
       }
       
       # parcele desglossat per plancon
-      if (agg_level == 'plancon') {
+      if (agg_level %in% c('plancon', 'plancon_rt')) {
         
         if (isTRUE(cd)) {
           
