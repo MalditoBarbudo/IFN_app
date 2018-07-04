@@ -794,12 +794,12 @@ data_generator <- function(
   .funs
 ) {
   
-  # plots to use, based on data_sig
-  idparcelas <- data_sig %>% pull(idparcela)
   # diameter classes
   cd_real <- if (isTRUE(cd)) {'cd'} else {''}
   # collect sig_data
   data_sig <- data_sig %>% collect()
+  # plots to use, based on data_sig
+  idparcelas <- data_sig %>% pull(idparcela)
   
   
   # real time calculations
@@ -889,7 +889,7 @@ data_generator <- function(
 
 ################################################################################
 
-## On.Stop routine ####
+## On.Stop routine #############################################################
 onStop(
   function() {
     poolClose(oracle_ifn)

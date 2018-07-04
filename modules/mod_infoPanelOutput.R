@@ -79,13 +79,24 @@ mod_infoPanel <- function(
         stringr::str_remove('_rt') %>%
         stringr::str_remove('territori_')
       
+      
+      ## debug
+      ## remove
+      # browser()
+      
       # data. We dont use data_core() or data_viz() because we want to override
       # the agg input as we dont want to work here with any _rt or territori_
       # variants as they return unusable data for this plotting panel. So we
       # use the data_generator function, overriding agg with the agg_real value
       # This way we don't need to even worry about if click is in plot or in
       # polygon and things like that.
-      data_core <- data_generator(
+      idparcelas <- mod_data$data_sig() %>%
+        filter(!!! filter_expr) %>%
+        select(idparcela) %>%
+        collect() %>%
+        pull(idparcela)
+      
+      res <- data_generator(
         sql_db = oracle_ifn,
         ifn = mod_data$ifn,
         agg = agg_real,
@@ -93,13 +104,8 @@ mod_infoPanel <- function(
         data_sig = mod_data$data_sig(),
         admin_div = NULL,
         .funs = NULL
-      )
-      
-      res <- mod_data$data_sig() %>%
-        filter(!!! filter_expr) %>%
-        select(idparcela) %>%
-        collect() %>%
-        inner_join(data_core, by = 'idparcela')
+      ) %>%
+        filter(idparcela %in% idparcelas)
     }
   )
   
