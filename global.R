@@ -45,8 +45,8 @@ load('shapefiles/polygons.RData')
 
 oracle_ifn <- dbPool(
   drv = RPostgreSQL::PostgreSQL(),
-  user = 'malditobarbudo',
-  # password = rstudioapi::askForPassword('Password for ifn'),
+  user = 'ifn',
+  password = rstudioapi::askForPassword('Password for ifn'),
   dbname = 'oracle_ifn',
   idleTimeout = 3600000
 )
@@ -283,6 +283,345 @@ polygons_dictionary <- list(
     layerId = 'nom_xn2000'
   )
   
+)
+
+plots_dictionary <- list(
+  
+  # idparcela (click in circles)
+  idparcela = list(
+    
+    # density plot
+    densitat = list(
+      
+      # agg's
+      parcela = list(
+        x = 'planifconifdens',
+        y = 'percdensplanifconif',
+        fill = 'planifconifdens',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Densitat (%)',
+        subtitle = 'del grup funcional dominant',
+        scale_fill = scale_fill_manual(name = '', values = c(
+          "Conífera" = "#440154FF",
+          "Planifoli" = "#21908CFF"
+        )),
+        geom = geom_col()
+      ),
+      especie = list(
+        x = 'idespecie',
+        y = 'percdens',
+        fill = 'idespecie',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Densitat (%)',
+        subtitle = 'per espècie',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_col()
+      ),
+      espsimple = list(
+        x = 'idespeciesimple',
+        y = 'percdens',
+        fill = 'idespeciesimple',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Densitat (%)',
+        subtitle = 'per espècie simplificat',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_col()
+      ),
+      genere = list(
+        x = 'idgenere',
+        y = 'percdens',
+        fill = 'idgenere',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Densitat (%)',
+        subtitle = 'per gènere',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_col()
+      ),
+      cadesclcon = list(
+        x = 'idcaducesclerconif',
+        y = 'percdens',
+        fill = 'idcaducesclerconif',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Densitat (%)',
+        subtitle = 'per grup funcional',
+        scale_fill = scale_fill_manual(name = 'densitat %', values = c(
+          "Conífera" = "#440154FF",
+          "Caducifoli" = "#3B528BFF",
+          "Esclerofil·le" = "#21908CFF"
+        )),
+        geom = geom_col()
+      ),
+      plancon = list(
+        x = 'idplanifconif',
+        y = 'percdens',
+        fill = 'idplanifconif',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Densitat (%)',
+        subtitle = 'per grup funcional',
+        scale_fill = scale_fill_manual(name = '', values = c(
+          "Conífera" = "#440154FF",
+          "Planifoli" = "#21908CFF"
+        )),
+        geom = geom_col()
+      )
+    ),
+    
+    # basal area plot
+    ab = list(
+      
+      # agg's
+      parcela = list(
+        x = 'planifconifab',
+        y = 'percabplanifconif',
+        fill = 'planifconifab',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Àrea basal (%)',
+        subtitle = 'del grup funcional dominant',
+        scale_fill = scale_fill_manual(name = '', values = c(
+          "Conífera" = "#440154FF",
+          "Planifoli" = "#21908CFF"
+        )),
+        geom = geom_col()
+      ),
+      especie = list(
+        x = 'idespecie',
+        y = 'percab',
+        fill = 'idespecie',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Àrea basal (%)',
+        subtitle = 'per espècie',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_col()
+      ),
+      espsimple = list(
+        x = 'idespeciesimple',
+        y = 'percab',
+        fill = 'idespeciesimple',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Àrea basal (%)',
+        subtitle = 'per espècie simplificat',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_col()
+      ),
+      genere = list(
+        x = 'idgenere',
+        y = 'percab',
+        fill = 'idgenere',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Àrea basal (%)',
+        subtitle = 'per gènere',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_col()
+      ),
+      cadesclcon = list(
+        x = 'idcaducesclerconif',
+        y = 'percab',
+        fill = 'idcaducesclerconif',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Àrea basal (%)',
+        subtitle = 'per grup funcional',
+        scale_fill = scale_fill_manual(name = 'densitat %', values = c(
+          "Conífera" = "#440154FF",
+          "Caducifoli" = "#3B528BFF",
+          "Esclerofil·le" = "#21908CFF"
+        )),
+        geom = geom_col()
+      ),
+      plancon = list(
+        x = 'idplanifconif',
+        y = 'percab',
+        fill = 'idplanifconif',
+        fill_col = NULL,
+        y_lims = c(0, 100),
+        title = 'Àrea basal (%)',
+        subtitle = 'per grup funcional',
+        scale_fill = scale_fill_manual(name = '', values = c(
+          "Conífera" = "#440154FF",
+          "Planifoli" = "#21908CFF"
+        )),
+        geom = geom_col()
+      )
+    )
+  ),
+  
+  # other (click in polygons)
+  other = list(
+    
+    # density plot
+    densitat = list(
+      
+      # agg's
+      parcela = list(
+        x = 'planifconifdens',
+        y = 'densitat',
+        fill = 'planifconifdens',
+        fill_col = NULL,
+        y_lims = c(0, 3500),
+        title = 'Densitat',
+        subtitle = 'del grup funcional dominant',
+        scale_fill = scale_fill_manual(name = '', values = c(
+          "Conífera" = "#440154FF",
+          "Planifoli" = "#21908CFF"
+        )),
+        geom = geom_boxplot()
+      ),
+      especie = list(
+        x = 'idespecie',
+        y = 'densitat',
+        fill = 'idespecie',
+        fill_col = NULL,
+        y_lims = c(0, 3500),
+        title = 'Densitat',
+        subtitle = 'per espècie',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_boxplot()
+      ),
+      espsimple = list(
+        x = 'idespeciesimple',
+        y = 'densitat',
+        fill = 'idespeciesimple',
+        fill_col = NULL,
+        y_lims = c(0, 3500),
+        title = 'Densitat',
+        subtitle = 'per espècie simplificat',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_boxplot()
+      ),
+      genere = list(
+        x = 'idgenere',
+        y = 'densitat',
+        fill = 'idgenere',
+        fill_col = NULL,
+        y_lims = c(0, 3500),
+        title = 'Densitat',
+        subtitle = 'per gènere',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_boxplot()
+      ),
+      cadesclcon = list(
+        x = 'idcaducesclerconif',
+        y = 'densitat',
+        fill = 'idcaducesclerconif',
+        fill_col = NULL,
+        y_lims = c(0, 3500),
+        title = 'Densitat',
+        subtitle = 'per grup funcional',
+        scale_fill = scale_fill_manual(name = 'densitat %', values = c(
+          "Conífera" = "#440154FF",
+          "Caducifoli" = "#3B528BFF",
+          "Esclerofil·le" = "#21908CFF"
+        )),
+        geom = geom_boxplot()
+      ),
+      plancon = list(
+        x = 'idplanifconif',
+        y = 'densitat',
+        fill = 'idpanifconif',
+        fill_col = NULL,
+        y_lims = c(0, 3500),
+        title = 'Densitat',
+        subtitle = 'per grup funcional',
+        scale_fill = scale_fill_manual(name = '', values = c(
+          "Conífera" = "#440154FF",
+          "Planifoli" = "#21908CFF"
+        )),
+        geom = geom_boxplot()
+      )
+    ),
+    
+    # basal area plot
+    ab = list(
+      
+      # agg's
+      parcela = list(
+        x = 'planifconifab',
+        y = 'ab',
+        fill = 'planifconifab',
+        fill_col = NULL,
+        y_lims = c(0, 50),
+        title = 'Àrea basal',
+        subtitle = 'del grup funcional dominant',
+        scale_fill = scale_fill_manual(name = '', values = c(
+          "Conífera" = "#440154FF",
+          "Planifoli" = "#21908CFF"
+        )),
+        geom = geom_boxplot()
+      ),
+      especie = list(
+        x = 'idespecie',
+        y = 'ab',
+        fill = 'idespecie',
+        fill_col = NULL,
+        y_lims = c(0, 50),
+        title = 'Àrea basal',
+        subtitle = 'per espècie',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_boxplot()
+      ),
+      espsimple = list(
+        x = 'idespeciesimple',
+        y = 'ab',
+        fill = 'idespeciesimple',
+        fill_col = NULL,
+        y_lims = c(0, 50),
+        title = 'Àrea basal',
+        subtitle = 'per espècie simplificat',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_boxplot()
+      ),
+      genere = list(
+        x = 'idgenere',
+        y = 'ab',
+        fill = 'idgenere',
+        fill_col = NULL,
+        y_lims = c(0, 50),
+        title = 'Àrea basal',
+        subtitle = 'per gènere',
+        scale_fill = scale_fill_viridis(discrete = TRUE),
+        geom = geom_boxplot()
+      ),
+      cadesclcon = list(
+        x = 'idcaducesclerconif',
+        y = 'ab',
+        fill = 'idcaducesclerconif',
+        fill_col = NULL,
+        y_lims = c(0, 50),
+        title = 'Àrea basal',
+        subtitle = 'per grup funcional',
+        scale_fill = scale_fill_manual(name = 'densitat %', values = c(
+          "Conífera" = "#440154FF",
+          "Caducifoli" = "#3B528BFF",
+          "Esclerofil·le" = "#21908CFF"
+        )),
+        geom = geom_boxplot()
+      ),
+      plancon = list(
+        x = 'idplanifconif',
+        y = 'ab',
+        fill = 'idpanifconif',
+        fill_col = NULL,
+        y_lims = c(0, 50),
+        title = 'Àrea basal',
+        subtitle = 'per grup funcional',
+        scale_fill = scale_fill_manual(name = '', values = c(
+          "Conífera" = "#440154FF",
+          "Planifoli" = "#21908CFF"
+        )),
+        geom = geom_boxplot()
+      )
+    )
+  )
 )
 
 ### inputs choices #############################################################

@@ -75,74 +75,48 @@ mod_infoPanel <- function(
       
       # aggregation level
       agg <- mod_data$agg_level
+      agg_real <- agg %>%
+        stringr::str_remove('_rt') %>%
+        stringr::str_remove('territori_')
       
-      # agg real time, then data_core() is in charge of everything, we only have
-      # to filter by the selected group
-      if (stringr::str_detect(agg, '_rt')) {
-        
-        if (stringr::str_detect(agg, 'territori_')) {
-          res <- mod_data$data_core() %>%
-            filter(!!! filter_expr) #%>%
-            # collect()
-        } else {
-          # here, is tricky. These are the aggregation levels for tipus
-          # funcionals, and per se didn't belong to dots or polygons. So, for
-          # the plotting parceles in the infoPanel we need to resort in
-          # creating the data de novo
-          if (click$group == 'idparcela') {
-            # res <- mod_data$data_sig() %>%
-            #   filter(!!! filter_expr) %>%
-            #   select(idparcela) %>%
-            #   inner_join(mod_data$data_viz(), by = 'idparcela') %>%
-            #   collect()
-            agg_real <- stringr::str_remove(agg, '_rt')
-            cd <- if (isTRUE(mod_data$diam_class)) {'cd'} else {''}
-            ifn <- mod_data$ifn
-            core_name <- paste0('r_', paste0(agg_real, cd, '_'), ifn)
-            
-            res <- mod_data$data_sig() %>%
-              filter(!!! filter_expr) %>%
-              select(idparcela) %>%
-              inner_join({
-                tbl(oracle_ifn, core_name)
-              }, by = 'idparcela')
-            
-          } else {
-            # res <- mod_data$data_core() %>%
-            #   filter(!!! filter_expr)
-            agg_real <- stringr::str_remove(agg, '_rt') %>%
-              stringr::str_remove('territori_')
-            cd <- if (isTRUE(mod_data$diam_class)) {'cd'} else {''}
-            ifn <- mod_data$ifn
-            core_name <- paste0('r_', paste0(agg_real, cd, '_'), ifn)
-            agg_tipfun_var <- paste0('id', agg_real)
-            
-            res <- mod_data$data_sig() %>%
-              select(idparcela, !!sym(mod_data$admin_div)) %>%
-              inner_join(tbl(oracle_ifn, core_name), by = 'idparcela') %>%
-              # group_by(!!sym(mod_data$admin_div), !!sym(agg_tipfun_var)) %>%
-              # summarise_if(is.numeric, .funs = funs(mean(., na.rm = TRUE))) %>%
-              filter(!!! filter_expr) %>%
-              collect()
-          }
-        }
-      } else {
-        
-        # if agg no real time, we need the data_core but also de sig to filter
-        # by the selected group
-        res <- mod_data$data_sig() %>%
-          filter(!!! filter_expr) %>%
-          select(idparcela) %>%
-          inner_join(mod_data$data_core(), by = 'idparcela') %>%
-          collect()
-        
-      }
+      # data. We dont use data_core() or data_viz() because we want to override
+      # the agg input as we dont want to work here with any _rt or territori_
+      # variants as they return unusable data for this plotting panel. So we
+      # use the data_generator function, overriding agg with the agg_real value
+      # This way we don't need to even worry about if click is in plot or in
+      # polygon and things like that.
+      data_core <- data_generator(
+        sql_db = oracle_ifn,
+        ifn = mod_data$ifn,
+        agg = agg_real,
+        cd = mod_data$diam_class,
+        data_sig = mod_data$data_sig(),
+        admin_div = NULL,
+        .funs = NULL
+      )
       
-      return(res)
+      res <- mod_data$data_sig() %>%
+        filter(!!! filter_expr) %>%
+        select(idparcela) %>%
+        collect() %>%
+        inner_join(data_core, by = 'idparcela')
     }
   )
   
   # plotting
+  output$shape_click_plot <- renderPlot({
+    
+    click <- mod_map$map_shape_click
+    
+    if (click$group == 'idparcela') {
+      
+      
+      
+    }
+    
+  })
+  
+  
   output$shape_click_plot <- renderPlot({
     
     data_plot <- data_shape()
