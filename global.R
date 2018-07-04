@@ -302,11 +302,13 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Densitat (%)',
         subtitle = 'del grup funcional dominant',
-        scale_fill = scale_fill_manual(name = '', values = c(
-          "Conífera" = "#440154FF",
-          "Planifoli" = "#21908CFF"
-        )),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_manual(name = '', values = c(
+            "Conífera" = "#440154FF",
+            "Planifoli" = "#21908CFF"
+          ))
+        )
       ),
       especie = list(
         x = 'idespecie',
@@ -316,8 +318,10 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Densitat (%)',
         subtitle = 'per espècie',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       espsimple = list(
         x = 'idespeciesimple',
@@ -327,8 +331,10 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Densitat (%)',
         subtitle = 'per espècie simplificat',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       genere = list(
         x = 'idgenere',
@@ -338,8 +344,10 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Densitat (%)',
         subtitle = 'per gènere',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       cadesclcon = list(
         x = 'idcaducesclerconif',
@@ -349,12 +357,14 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Densitat (%)',
         subtitle = 'per grup funcional',
-        scale_fill = scale_fill_manual(name = 'densitat %', values = c(
-          "Conífera" = "#440154FF",
-          "Caducifoli" = "#3B528BFF",
-          "Esclerofil·le" = "#21908CFF"
-        )),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_manual(name = 'densitat %', values = c(
+            "Conífera" = "#440154FF",
+            "Caducifoli" = "#3B528BFF",
+            "Esclerofil·le" = "#21908CFF"
+          ))
+        )
       ),
       plancon = list(
         x = 'idplanifconif',
@@ -364,11 +374,13 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Densitat (%)',
         subtitle = 'per grup funcional',
-        scale_fill = scale_fill_manual(name = '', values = c(
-          "Conífera" = "#440154FF",
-          "Planifoli" = "#21908CFF"
-        )),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_manual(name = '', values = c(
+            "Conífera" = "#440154FF",
+            "Planifoli" = "#21908CFF"
+          ))
+        )
       )
     ),
     
@@ -384,11 +396,13 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Àrea basal (%)',
         subtitle = 'del grup funcional dominant',
-        scale_fill = scale_fill_manual(name = '', values = c(
-          "Conífera" = "#440154FF",
-          "Planifoli" = "#21908CFF"
-        )),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_manual(name = '', values = c(
+            "Conífera" = "#440154FF",
+            "Planifoli" = "#21908CFF"
+          ))
+        )
       ),
       especie = list(
         x = 'idespecie',
@@ -398,8 +412,10 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Àrea basal (%)',
         subtitle = 'per espècie',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       espsimple = list(
         x = 'idespeciesimple',
@@ -409,8 +425,10 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Àrea basal (%)',
         subtitle = 'per espècie simplificat',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       genere = list(
         x = 'idgenere',
@@ -420,8 +438,10 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Àrea basal (%)',
         subtitle = 'per gènere',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       cadesclcon = list(
         x = 'idcaducesclerconif',
@@ -431,12 +451,14 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Àrea basal (%)',
         subtitle = 'per grup funcional',
-        scale_fill = scale_fill_manual(name = 'densitat %', values = c(
-          "Conífera" = "#440154FF",
-          "Caducifoli" = "#3B528BFF",
-          "Esclerofil·le" = "#21908CFF"
-        )),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_manual(name = 'densitat %', values = c(
+            "Conífera" = "#440154FF",
+            "Caducifoli" = "#3B528BFF",
+            "Esclerofil·le" = "#21908CFF"
+          ))
+        )
       ),
       plancon = list(
         x = 'idplanifconif',
@@ -446,11 +468,13 @@ plots_dictionary <- list(
         y_lims = c(0, 100),
         title = 'Àrea basal (%)',
         subtitle = 'per grup funcional',
-        scale_fill = scale_fill_manual(name = '', values = c(
-          "Conífera" = "#440154FF",
-          "Planifoli" = "#21908CFF"
-        )),
-        geom = geom_col()
+        plot_list = list(
+          geom_col(),
+          scale_fill_manual(name = '', values = c(
+            "Conífera" = "#440154FF",
+            "Planifoli" = "#21908CFF"
+          ))
+        )
       )
     )
   ),
@@ -470,11 +494,13 @@ plots_dictionary <- list(
         y_lims = c(0, 3500),
         title = 'Densitat',
         subtitle = 'del grup funcional dominant',
-        scale_fill = scale_fill_manual(name = '', values = c(
-          "Conífera" = "#440154FF",
-          "Planifoli" = "#21908CFF"
-        )),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_manual(name = '', values = c(
+            "Conífera" = "#440154FF",
+            "Planifoli" = "#21908CFF"
+          ))
+        )
       ),
       especie = list(
         x = 'idespecie',
@@ -484,8 +510,10 @@ plots_dictionary <- list(
         y_lims = c(0, 3500),
         title = 'Densitat',
         subtitle = 'per espècie',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       espsimple = list(
         x = 'idespeciesimple',
@@ -495,8 +523,10 @@ plots_dictionary <- list(
         y_lims = c(0, 3500),
         title = 'Densitat',
         subtitle = 'per espècie simplificat',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       genere = list(
         x = 'idgenere',
@@ -506,8 +536,10 @@ plots_dictionary <- list(
         y_lims = c(0, 3500),
         title = 'Densitat',
         subtitle = 'per gènere',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       cadesclcon = list(
         x = 'idcaducesclerconif',
@@ -517,12 +549,14 @@ plots_dictionary <- list(
         y_lims = c(0, 3500),
         title = 'Densitat',
         subtitle = 'per grup funcional',
-        scale_fill = scale_fill_manual(name = 'densitat %', values = c(
-          "Conífera" = "#440154FF",
-          "Caducifoli" = "#3B528BFF",
-          "Esclerofil·le" = "#21908CFF"
-        )),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_manual(name = 'densitat %', values = c(
+            "Conífera" = "#440154FF",
+            "Caducifoli" = "#3B528BFF",
+            "Esclerofil·le" = "#21908CFF"
+          ))
+        )
       ),
       plancon = list(
         x = 'idplanifconif',
@@ -532,11 +566,13 @@ plots_dictionary <- list(
         y_lims = c(0, 3500),
         title = 'Densitat',
         subtitle = 'per grup funcional',
-        scale_fill = scale_fill_manual(name = '', values = c(
-          "Conífera" = "#440154FF",
-          "Planifoli" = "#21908CFF"
-        )),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_manual(name = '', values = c(
+            "Conífera" = "#440154FF",
+            "Planifoli" = "#21908CFF"
+          ))
+        )
       )
     ),
     
@@ -552,11 +588,13 @@ plots_dictionary <- list(
         y_lims = c(0, 50),
         title = 'Àrea basal',
         subtitle = 'del grup funcional dominant',
-        scale_fill = scale_fill_manual(name = '', values = c(
-          "Conífera" = "#440154FF",
-          "Planifoli" = "#21908CFF"
-        )),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_manual(name = '', values = c(
+            "Conífera" = "#440154FF",
+            "Planifoli" = "#21908CFF"
+          ))
+        )
       ),
       especie = list(
         x = 'idespecie',
@@ -566,8 +604,10 @@ plots_dictionary <- list(
         y_lims = c(0, 50),
         title = 'Àrea basal',
         subtitle = 'per espècie',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       espsimple = list(
         x = 'idespeciesimple',
@@ -577,8 +617,10 @@ plots_dictionary <- list(
         y_lims = c(0, 50),
         title = 'Àrea basal',
         subtitle = 'per espècie simplificat',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       genere = list(
         x = 'idgenere',
@@ -588,8 +630,10 @@ plots_dictionary <- list(
         y_lims = c(0, 50),
         title = 'Àrea basal',
         subtitle = 'per gènere',
-        scale_fill = scale_fill_viridis(discrete = TRUE),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_viridis(discrete = TRUE)
+        )
       ),
       cadesclcon = list(
         x = 'idcaducesclerconif',
@@ -599,12 +643,14 @@ plots_dictionary <- list(
         y_lims = c(0, 50),
         title = 'Àrea basal',
         subtitle = 'per grup funcional',
-        scale_fill = scale_fill_manual(name = 'densitat %', values = c(
-          "Conífera" = "#440154FF",
-          "Caducifoli" = "#3B528BFF",
-          "Esclerofil·le" = "#21908CFF"
-        )),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_manual(name = 'densitat %', values = c(
+            "Conífera" = "#440154FF",
+            "Caducifoli" = "#3B528BFF",
+            "Esclerofil·le" = "#21908CFF"
+          ))
+        )
       ),
       plancon = list(
         x = 'idplanifconif',
@@ -614,11 +660,13 @@ plots_dictionary <- list(
         y_lims = c(0, 50),
         title = 'Àrea basal',
         subtitle = 'per grup funcional',
-        scale_fill = scale_fill_manual(name = '', values = c(
-          "Conífera" = "#440154FF",
-          "Planifoli" = "#21908CFF"
-        )),
-        geom = geom_boxplot()
+        plot_list = list(
+          geom_boxplot(),
+          scale_fill_manual(name = '', values = c(
+            "Conífera" = "#440154FF",
+            "Planifoli" = "#21908CFF"
+          ))
+        )
       )
     )
   )
