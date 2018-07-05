@@ -53,13 +53,13 @@ mod_viz <- function(
     ignoreNULL = FALSE, ignoreInit = FALSE,
     eventExpr = {
       mod_data$agg_level
-      mod_data$data_viz()
+      # mod_data$data_viz()
     },
     handlerExpr = {
       
       ## debug
       ## remove
-      # browser()
+      browser()
       
       vars_clima <- names(mod_data$data_clima() %>% collect())
       vars_viz <- names(mod_data$data_viz()) #%>% collect())
@@ -132,64 +132,6 @@ mod_viz <- function(
       }
     }
   )
-  # observe({
-  #   
-  #   vars_clima <- names(mod_data$data_clima() %>% collect())
-  #   vars_viz <- names(mod_data$data_viz() %>% collect())
-  #   agg <- mod_data$agg_level
-  #   grup_fun_val <- agg %>%
-  #     stringr::str_remove('_rt') %>%
-  #     stringr::str_remove('territori_') %>%
-  #     paste0('id',.)
-  #   
-  #   # check if points or polygons
-  #   if (agg %in% c(
-  #     'parcela', 'especie', 'espsimple', 'genere', 'cadesclcon', 'plancon',
-  #     'especie_rt', 'espsimple_rt', 'genere_rt', 'cadesclcon_rt', 'plancon_rt'
-  #   )) {
-  #     
-  #     vars_to_use <- list(
-  #       "Variables parcel·la" = vars_viz,
-  #       "Variables climàtiques" = vars_clima
-  #     )
-  #     
-  #     updateSelectInput(
-  #       session, 'color', label = 'Color',
-  #       choices = vars_to_use, selected = 'temperaturamitjanaanual'
-  #     )
-  #     
-  #     # shinyjs::enable('mida')
-  #     
-  #     updateSelectInput(
-  #       session, 'mida', label = 'Mida',
-  #       choices = vars_to_use, selected = ''
-  #     )
-  #     
-  #   } else {
-  #     
-  #     vars_to_use <- list(
-  #       "Variables aggregació" = vars_viz
-  #     )
-  #     
-  #     grup_func_choices <- mod_data$data_viz() %>% 
-  #       # pull(!!sym(grup_fun_val))
-  #       collect() %>%
-  #       pull(!!sym(grup_fun_val))
-  #     
-  #     updateSelectInput(
-  #       session, 'color', label = 'Color',
-  #       choices = vars_to_use, selected = 'temperaturamitjanaanual'
-  #     )
-  #     
-  #     # shinyjs::disable('mida')
-  #     
-  #     updateSelectInput(
-  #       session, 'mida', label = grup_fun_val,
-  #       choices = grup_func_choices
-  #     )
-  #     
-  #   }
-  # })
   
   # reactive with the inputs values
   viz_reactives <- reactiveValues()

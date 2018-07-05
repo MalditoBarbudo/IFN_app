@@ -309,52 +309,9 @@ mod_data <- function(
         res <- data_core()
       }
       
-      # ifn <- input$ifn
-      # agg <- input$agg_level
-      # idparcelas <- data_sig() %>% pull(idparcela)
-      # 
-      # # two cases, agg in parceles, derivats, tipus and derivats AND
-      # # administratiu and derivats
-      # 
-      # # parceles, tipus and derivats
-      # if (agg %in% c(
-      #   'parcela', 'especie', 'espsimple', 'genere', 'cadesclcon', 'plancon',
-      #   'especie_rt', 'espsimple_rt', 'genere_rt', 'cadesclcon_rt', 'plancon_rt'
-      # )) {
-      #   viz_name <- paste0('r_', ifn)
-      #   res <- tbl(oracle_ifn, viz_name) %>%
-      #     filter(idparcela %in% idparcelas)
-      # } else {
-      #   res <- data_core()
-      # }
-      
       return(res)
     }
   )
-  # data_viz <- reactive({
-  #   
-  #   ifn <- input$ifn
-  #   agg <- input$agg_level
-  #   idparcelas <- data_sig() %>% pull(idparcela)
-  #   
-  #   # two cases, agg in parceles, derivats, tipus and derivats AND
-  #   # administratiu and derivats
-  #   
-  #   # parceles, tipus and derivats
-  #   if (agg %in% c(
-  #     'parcela', 'especie', 'espsimple', 'genere', 'cadesclcon', 'plancon',
-  #     'especie_rt', 'espsimple_rt', 'genere_rt', 'cadesclcon_rt', 'plancon_rt'
-  #   )) {
-  #     viz_name <- paste0('r_', ifn)
-  #     res <- tbl(oracle_ifn, viz_name) %>%
-  #       filter(idparcela %in% idparcelas)
-  #   } else {
-  #     res <- data_core()
-  #   }
-  #   
-  #   return(res)
-  #   
-  # })
   
   # reactive values to return for use in other modules
   data_reactives <- reactiveValues()

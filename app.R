@@ -52,24 +52,24 @@ ui <- tagList(
         ),
         
         ########################################################### debug ######
-        absolutePanel(
-          id = 'debug', class = 'panel panel-default', fixed = TRUE,
-          draggable = TRUE, width = 640, height = 'auto',
-          # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
-          # top = 'auto', left = 'auto', right = 100, bottom = 100,
-          top = 60, left = 'auto', right = 50, bottom = 'auto',
-          
-          textOutput('debug1'),
-          textOutput('debug2'),
-          textOutput('debug3')
-        ),
+        # absolutePanel(
+        #   id = 'debug', class = 'panel panel-default', fixed = TRUE,
+        #   draggable = TRUE, width = 640, height = 'auto',
+        #   # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+        #   # top = 'auto', left = 'auto', right = 100, bottom = 100,
+        #   top = 60, left = 'auto', right = 50, bottom = 'auto',
+        #   
+        #   textOutput('debug1'),
+        #   textOutput('debug2'),
+        #   textOutput('debug3')
+        # ),
         ########################################################### end debug ##
         
         ## vizControls ####
         absolutePanel(
           id = 'vizControls', class = 'panel panel-default', fixed = TRUE,
           draggable = TRUE, width = 320, height = 'auto',
-          top = 360, right = 'auto', left = 50, bottom = 'auto',
+          top = 60, right = 'auto', left = 700, bottom = 'auto',
           
           mod_vizInput('mod_vizInput')
         ),

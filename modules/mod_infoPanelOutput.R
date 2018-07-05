@@ -23,17 +23,17 @@ mod_infoPanelOutput <- function(id) {
         id = 'infoPanel_tabs', type = 'pills',
         
         tabPanel(
-          'Visualització de densitat i àrea basal',
+          'Info',
+          uiOutput(ns('shape_click_info')),
+          'Aquí va la info de la parcela o del polígono clickado'
+        ),
+        
+        tabPanel(
+          'Visualització',
           plotOutput(ns('shape_click_plot'), width = 600, height = 350) %>%
             withSpinner(
               type = 4, color = '#D2527F'
             )
-        ),
-        
-        tabPanel(
-          'Shape info',
-          uiOutput(ns('shape_click_info')),
-          'Aquí va la info de la parcela o del polígono clickado'
         )
       )
     )
@@ -174,7 +174,7 @@ mod_infoPanel <- function(
     
     #debug
     #remove
-    browser()
+    # browser()
     # info for plots
     if (click$group == 'idparcela') {
       
@@ -194,9 +194,15 @@ mod_infoPanel <- function(
       
       # info for polygons
     } else {
+      
+      info_sig <- mod_data$data_sig() %>%
+        filter(!!sym(mod_data$admin_div) == click$id) %>%
+        select(idparcela, altitud, pendentpercentatge, proteccio) %>%
+        collect()
+      
       tagList(
         h4(paste0(
-          length(unique(data_info[['idparcela']])), ' parcel·les en ', click$id
+          length(unique(info_sig[['idparcela']])), ' parcel·les en ', click$id
         ))
       )
     }
