@@ -59,10 +59,10 @@ mod_viz <- function(
       
       ## debug
       ## remove
-      browser()
+      # browser()
       
-      vars_clima <- names(mod_data$data_clima() %>% collect())
-      vars_viz <- names(mod_data$data_viz()) #%>% collect())
+      vars_clima <- names(mod_data$data_clima() %>% collect()) %>% stringr::str_sort()
+      vars_viz <- names(mod_data$data_viz()) %>% stringr::str_sort()
       agg <- mod_data$agg_level
       grup_fun_val <- agg %>%
         stringr::str_remove('_rt') %>%
@@ -104,7 +104,8 @@ mod_viz <- function(
           grup_func_choices <- mod_data$data_viz() %>% 
             # pull(!!sym(grup_fun_val))
             # collect() %>%
-            pull(!!sym(grup_fun_val))
+            pull(!!sym(grup_fun_val)) %>%
+            stringr::str_sort()
           
           updateSelectInput(
             session, 'color', label = 'Color',
