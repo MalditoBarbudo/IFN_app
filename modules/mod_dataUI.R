@@ -24,26 +24,36 @@ mod_dataUI <- function(id) {
       top = 60, right = 'auto', left = 50, bottom = 'auto',
       
       # panel contents
-      
       # 1. data selection (div and id is for shinyjs later application)
       div(
         id = 'dataSel',
         
+        h3('Selecció i filtrat'),
+        
         fluidRow(
           column(
-            4, offset = 4,
+            4,
             selectInput(
               ns('ifn'), 'Versió de les dades', ifns,
-              selected = 'ifn2'
+              selected = 'ifn3'
+            )
+          ),
+          column(
+            6, offset = 2,
+            radioButtons(
+              ns('viz_shape'), 'Tipus de visualització',
+                 choices = c('Parcel·les' = 'parcela', 'Poligons' = 'polygon'),
+                 selected = 'polygon', inline = TRUE
             )
           )
         ),
+        
         fluidRow(
           column(
             6,
             selectInput(
               ns('admin_div'), 'Divisions administratatives', admin_divs,
-              selected = ''
+              selected = 'comarca'
             )
           ),
           column(
@@ -55,6 +65,38 @@ mod_dataUI <- function(id) {
           )
         )
       ),
+      
+      # 
+      # # 1. data selection (div and id is for shinyjs later application)
+      # div(
+      #   id = 'dataSel',
+      #   
+      #   fluidRow(
+      #     column(
+      #       4, offset = 4,
+      #       selectInput(
+      #         ns('ifn'), 'Versió de les dades', ifns,
+      #         selected = 'ifn2'
+      #       )
+      #     )
+      #   ),
+      #   fluidRow(
+      #     column(
+      #       6,
+      #       selectInput(
+      #         ns('admin_div'), 'Divisions administratatives', admin_divs,
+      #         selected = ''
+      #       )
+      #     ),
+      #     column(
+      #       6,
+      #       selectInput(
+      #         ns('espai_tipus'), "Tipus d'espai", espai_tipus,
+      #         selected = 'proteccio'
+      #       )
+      #     )
+      #   )
+      # ),
       
       # 2. data filtering (div and id is for shinyjs later application)
       #   (this inputs are created empty and filled later on in the server based
@@ -83,9 +125,33 @@ mod_dataUI <- function(id) {
             )
           )
         ),
+        
+        # here in the middle must be the advanced fiters, hidden and showed when
+        # a button is pressed
+        hidden(
+          div(
+            id = 'advancedFils',
+            hr(),
+            fluidRow(
+              column(
+                12,
+                'Aquí los filtros avanzados (TODO)'
+              )
+            ),
+            hr()
+          )
+        ),
+        
         fluidRow(
           column(
-            4, offset = 4,
+            4, offset = 2,
+            actionButton(
+              ns('show_adv_fils'), 'Filtres avançats', width = '100%' 
+            )
+          ),
+          
+          column(
+            4, offset = 2,
             actionButton(
               ns('apply_filters'), 'Aplicar filtres', width = '100%' 
             )
@@ -183,19 +249,15 @@ mod_data <- function(
   # data reactives to create (sig, clima and core). The sig data is the key
   # as it can be filtered by admin divs and espais. Also, is really costy, so
   # it must be only recalculated when the user selection is completly done,
-  # so we have to add a button to signal the filtering step. Even more, we need
-  # to create an empty data frame in the case of filtering returns no data.
+  # so we have to add a button to signal the filtering step.
   data_sig <- eventReactive(
     ignoreNULL = FALSE, ignoreInit = FALSE,
     eventExpr = {
       
       # we need to update the data when ifn is changed or when filterings are
-      # applied, or when admin_div or espi_tipus are changed, so we look up for
-      # these inputs:
+      # applied
       input$apply_filters
       input$ifn
-      # input$espai_tipus
-      # input$admin_div
       
     },
     valueExpr = {
@@ -236,22 +298,25 @@ mod_data <- function(
           }
         }
         
+        # here the advanced filters
+        # TODO
+        
         tbl(oracle_ifn, sig_name) %>%
           filter(!!! filter_expr_admin) %>%
-          filter(!!! filter_expr_espai)
+          filter(!!! filter_expr_espai) #%>%
+          # advanced filters also TODO
         
       }
-      
-      
     }
   )
   
   data_clima <- eventReactive(
     ignoreNULL = FALSE, ignoreInit = FALSE,
+    # data_clima only depends on data_sig and must be updated when data_sig is
     eventExpr = data_sig(),
     valueExpr = {
       clima_name <- paste0('parcela', input$ifn, '_clima')
-      # idparcelas to filter based on data_sig()
+      
       data_sig() %>%
         select(idparcela) %>%
         left_join(tbl(oracle_ifn, clima_name), by = 'idparcela')

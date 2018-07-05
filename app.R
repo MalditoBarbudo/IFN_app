@@ -11,6 +11,7 @@ library(viridis)
 library(DT)
 library(patchwork)
 library(shinycssloaders)
+library(glue)
 
 ## SOURCES ####
 source('global.R')

@@ -702,33 +702,42 @@ espai_tipus <- c(
 )
 
 agg_levels <- list(
-  
-  "Parcel·les" = list(
-    'Parcel·les' = 'parcela',
-    'Parcel·les desglossat per Espècie' = 'especie',
-    'Parcel·les desglossat per Espècie simplificat' = 'espsimple',
-    'Parcel·les desglossat per Gènere' = 'genere',
-    'Parcel·les desglossat per Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon',
-    'Parcel·les desglossat per Conífera/Planifoli' = 'plancon'
-  ),
-  
-  "Grups funcionals" = list(
-    'Espècie' = 'especie_rt',
-    'Espècie simplificat' = 'espsimple_rt',
-    'Gènere' = 'genere_rt',
-    'Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon_rt',
-    'Conífera/Planifoli' = 'plancon_rt'
-  ),
-  
-  'Administratiu' = list(
-    "Divisions seleccionats" = 'territori_parcela_rt',
-    "Divisions desglossat per Espècie" = 'territori_especie_rt',
-    "Divisions desglossat per Espècie simplificat" = 'territori_espsimple_rt',
-    "Divisions desglossat per Génere" = 'territori_genere_rt',
-    "Divisions desglossat per Conífera/Caducifoli/Esclerofil·le" = 'territori_cadesclcon_rt',
-    "Divisions desglossat per Conífera/Planifoli" = 'territori_plancon_rt'
-  )
+  'Agregat' = '',
+  'Desglossat per Espècie' = 'especie',
+  'Desglossat per Espècie simplificat' = 'espsimple',
+  'Desglossat per Gènere' = 'genere',
+  'Desglossat per Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon',
+  'Desglossat per Conífera/Planifoli' = 'plancon'
 )
+
+# agg_levels <- list(
+#   
+#   "Parcel·les" = list(
+#     'Parcel·les' = 'parcela',
+#     'Parcel·les desglossat per Espècie' = 'especie',
+#     'Parcel·les desglossat per Espècie simplificat' = 'espsimple',
+#     'Parcel·les desglossat per Gènere' = 'genere',
+#     'Parcel·les desglossat per Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon',
+#     'Parcel·les desglossat per Conífera/Planifoli' = 'plancon'
+#   ),
+#   
+#   "Grups funcionals" = list(
+#     'Espècie' = 'especie_rt',
+#     'Espècie simplificat' = 'espsimple_rt',
+#     'Gènere' = 'genere_rt',
+#     'Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon_rt',
+#     'Conífera/Planifoli' = 'plancon_rt'
+#   ),
+#   
+#   'Administratiu' = list(
+#     "Divisions seleccionats" = 'territori_parcela_rt',
+#     "Divisions desglossat per Espècie" = 'territori_especie_rt',
+#     "Divisions desglossat per Espècie simplificat" = 'territori_espsimple_rt',
+#     "Divisions desglossat per Génere" = 'territori_genere_rt',
+#     "Divisions desglossat per Conífera/Caducifoli/Esclerofil·le" = 'territori_cadesclcon_rt',
+#     "Divisions desglossat per Conífera/Planifoli" = 'territori_plancon_rt'
+#   )
+# )
 
 #### ggplot theme for infoPanel ################################################
 theme_infoPanel <- theme_void() + theme(
@@ -787,101 +796,102 @@ theme_infoPanel <- theme_void() + theme(
 data_generator <- function(
   sql_db,
   ifn,
-  agg,
-  cd,
-  data_sig,
+  viz_shape,
+  agg_level,
   admin_div,
+  diam_class,
+  data_sig,
   .funs
 ) {
   
-  # diameter classes
-  cd_real <- if (isTRUE(cd)) {'cd'} else {''}
-  # collect sig_data
+  # sig_data
   data_sig <- data_sig %>% collect()
-  # plots to use, based on data_sig
+  # plots
   idparcelas <- data_sig %>% pull(idparcela)
   
-  
-  # real time calculations
-  if (stringr::str_detect(agg, '_rt')) {
+  # visualization
+  # plots?
+  if (viz_shape == 'parcela') {
     
-    # polygons
-    if (stringr::str_detect(agg, 'territori_')) {
-      
-      # get the "official" aggregation level name
-      agg_real <- stringr::str_remove(agg, '_rt') %>%
-        stringr::str_remove('territori_')
-      
-      # get the core data name based on agg and cd
-      if (agg_real == 'parcela') {
-        if (isTRUE(cd)) {
-          core_name <- paste0('r_', cd, '_', ifn)
-        } else {
-          core_name <- paste0('r_', ifn)
-        }
-        
-        # data to return
-        core_tbl <- tbl(sql_db, core_name) %>% collect()
-        res <- data_sig %>%
-          select(idparcela, !!sym(admin_div)) %>% 
-          inner_join(core_tbl, by = 'idparcela') %>%
-          group_by(!!sym(admin_div)) %>%
-          summarise_if(is.numeric, .funs = .funs)
-      } else {
-        # core data name
-        core_name <- paste0('r_', paste0(agg_real, cd_real, '_'), ifn)
-        # tipu funcional variable
-        agg_tipfun_var <- paste0('id', agg_real)
-        
-        # data to return
-        core_tbl <- tbl(sql_db, core_name) %>% collect()
-        res <- data_sig %>%
-          select(idparcela, !!sym(admin_div)) %>%
-          inner_join(core_tbl, by = 'idparcela') %>%
-          group_by(!!sym(admin_div), !!sym(agg_tipfun_var)) %>%
-          summarise_if(is.numeric, .funs = .funs)
-      }
-      
+    # diam classes??
+    if (isTRUE(diam_class)) {
+      # core name
+      core_name <- glue::glue('r_{agg_level}cd_{ifn}')
     } else {
-      # tipus funcionals aggregations without polygons
-      
-      # get the "official" aggregation level name
-      agg_real <- stringr::str_remove(agg, '_rt')
-      
-      # get the tipu funcinal variable
-      agg_tipfun_var <- paste0('id', agg_real)
-      
-      # get the core data name
-      core_name <- paste0('r_', paste0(agg_real, cd_real, '_'), ifn)
-      
-      # data to return
-      res <- tbl(sql_db, core_name) %>%
-        collect() %>%
-        filter(idparcela %in% idparcelas) %>%
-        group_by(!!sym(agg_tipfun_var)) %>% 
-        summarise_if(is.numeric, .funs = .funs)
+      core_name <- glue::glue('r_{agg_level}_{ifn}')
     }
+    # data
+    res <- tbl(sql_db, core_name) %>%
+      filter(idparcela %in% idparcelas) %>%
+      collect()
     
   } else {
     
-    # plot agg level, or plot/tipu funcional agg levels (not real time
-    # calculations)
-    if (agg == 'parcela') {
-      if (isTRUE(cd)) {
-        core_name <- paste0('r_', cd_real, '_', ifn)
+    # polygons? meaning real time calculations
+    
+    # not division
+    if (agg_level == '') {
+      
+      # diam classes?
+      if (isTRUE(diam_class)) {
+        
+        # core_name
+        core_name <- glue::glue('r_{agg_level}cd_{ifn}')
+        # core_table
+        core_table <- tbl(sql_db, core_name) %>% collect()
+        # data to return
+        res <- data_sig %>%
+          select(idparcela, !!sym(admin_div)) %>%
+          inner_join(core_table, by = 'idparcela') %>% 
+          group_by(!!sym(admin_div), idcd) %>%
+          summarise_if(is.numeric(.funs = .funs))
       } else {
-        core_name <- paste0('r_', ifn)
+        # core_name
+        core_name <- glue::glue('r_{agg_level}_{ifn}')
+        # core_table
+        core_table <- tbl(sql_db, core_name) %>% collect()
+        # data to return
+        res <- data_sig %>%
+          select(idparcela, !!sym(admin_div)) %>%
+          inner_join(core_table, by = 'idparcela') %>% 
+          group_by(!!sym(admin_div)) %>%
+          summarise_if(is.numeric(.funs = .funs))
+        
       }
     } else {
-      core_name <- paste0('r_', paste0(agg, cd_real, '_'), ifn)
+      
+      if (isTRUE(diam_class)) {
+        
+        core_name <- glue::glue('r_{agg_level}cd_{ifn}')
+        # functional type variable to divide by
+        agg_tipfun_var <- glue::glue('id{agg_level}')
+        # core_table
+        core_table <- tbl(sql_db, core_name) %>% collect()
+        
+        # data to return
+        res <- data_sig %>%
+          select(idparcela, !!sym(admin_div)) %>%
+          inner_join(core_table, by = 'idparcela') %>% 
+          group_by(!!sym(admin_div), !!sym(agg_tipfun_var), idcd) %>%
+          summarise_if(is.numeric, .funs = .funs)
+      } else {
+        core_name <- glue::glue('r_{agg_level}_{ifn}')
+        # functional type variable to divide by
+        agg_tipfun_var <- glue::glue('id{agg_level}')
+        # core_table
+        core_table <- tbl(sql_db, core_name) %>% collect()
+        
+        # data to return
+        res <- data_sig %>%
+          select(idparcela, !!sym(admin_div)) %>%
+          inner_join(core_table, by = 'idparcela') %>% 
+          group_by(!!sym(admin_div), !!sym(agg_tipfun_var)) %>%
+          summarise_if(is.numeric, .funs = .funs)
+      }
     }
-    
-    res <- tbl(sql_db, core_name) %>%
-      collect() %>%
-      filter(idparcela %in% idparcelas)
-    
   }
   
+  # return res
   return(res)
   
 }
