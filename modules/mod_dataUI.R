@@ -391,6 +391,7 @@ mod_data <- function(
     data_reactives$apply_filters <- input$apply_filters
     data_reactives$agg_level <- input$agg_level
     data_reactives$diam_class <- input$diam_class
+    data_reactives$viz_shape <- input$viz_shape
     
     # data
     data_reactives$data_sig <- data_sig
