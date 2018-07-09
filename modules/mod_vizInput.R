@@ -63,13 +63,13 @@ mod_viz <- function(
   # so we build a reactive to know which scenario we have
   input_scenario <- reactive({
     if (mod_data$viz_shape == 'parcela') {
-      if (mod_data$agg_level == '') {
+      if (mod_data$agg_level == 'parcela') {
         return('scenario1')
       } else {
         return('scenario2')
       }
     } else {
-      if (mod_data$agg_level == '') {
+      if (mod_data$agg_level == 'parcela') {
         return('scenario3')
       } else {
         return('scenario4')
@@ -158,7 +158,7 @@ mod_viz <- function(
             vars_viz <- names(mod_data$data_core()) %>%
               stringr::str_sort() %>% 
               stringr::str_remove(
-                pattern = '_mean$|_sd$|_min$|_max$|_n$|_q95$'
+                pattern = '_mean$|_sd$|_min$|_max$|_n$|_q95$|_median$'
               ) %>%
               unique()
             
@@ -167,9 +167,9 @@ mod_viz <- function(
             )
             
             statistics_choices <- c(
-              'Mitjana' = '_mean', 'Desviació estàndard' = '_sd',
-              'Mìnim' = '_min', 'Màxim' = '_max', 'Nombre parcel·les' = '_n',
-              'Quartil 95' = '_q95'
+              'Mitjana' = '_mean', 'Mediana' = '_median',
+              'Desviació estàndard' = '_sd', 'Mìnim' = '_min', 'Màxim' = '_max',
+              'Nombre parcel·les' = '_n', 'Quartil 95' = '_q95'
             )
             
             # update the needed inputs
@@ -194,7 +194,7 @@ mod_viz <- function(
             vars_viz <- names(mod_data$data_core()) %>%
               stringr::str_sort() %>% 
               stringr::str_remove(
-                pattern = '_mean$|_sd$|_min$|_max$|_n$|_q95$'
+                pattern = '_mean$|_sd$|_min$|_max$|_n$|_q95$|_median$'
               ) %>%
               unique()
             
@@ -203,12 +203,12 @@ mod_viz <- function(
             )
             
             statistics_choices <- c(
-              'Mitjana' = '_mean', 'Desviació estàndard' = '_sd',
-              'Mìnim' = '_min', 'Màxim' = '_max', 'Nombre parcel·les' = '_n',
-              'Quartil 95' = '_q95'
+              'Mitjana' = '_mean', 'Mediana' = '_median',
+              'Desviació estàndard' = '_sd', 'Mìnim' = '_min', 'Màxim' = '_max',
+              'Nombre parcel·les' = '_n', 'Quartil 95' = '_q95'
             )
             
-            grup_func_var <- glue('id{mod_data$agg_level')
+            grup_func_var <- glue('id{mod_data$agg_level}')
             
             grup_func_choices <- mod_data$data_core() %>%
               pull(!!sym(grup_func_var)) %>%

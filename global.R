@@ -702,7 +702,7 @@ espai_tipus <- c(
 )
 
 agg_levels <- list(
-  'Agregat' = '',
+  'Agregat' = 'parcela',
   'Desglossat per Espècie' = 'especie',
   'Desglossat per Espècie simplificat' = 'espsimple',
   'Desglossat per Gènere' = 'genere',
@@ -830,7 +830,7 @@ data_generator <- function(
     # polygons? meaning real time calculations
     
     # not division
-    if (agg_level == '') {
+    if (agg_level == 'parcela') {
       
       # diam classes?
       if (isTRUE(diam_class)) {
@@ -844,7 +844,7 @@ data_generator <- function(
           select(idparcela, !!sym(admin_div)) %>%
           inner_join(core_table, by = 'idparcela') %>% 
           group_by(!!sym(admin_div), idcd) %>%
-          summarise_if(is.numeric(.funs = .funs))
+          summarise_if(is.numeric, .funs = .funs)
       } else {
         # core_name
         core_name <- glue::glue('r_{agg_level}_{ifn}')
@@ -855,7 +855,7 @@ data_generator <- function(
           select(idparcela, !!sym(admin_div)) %>%
           inner_join(core_table, by = 'idparcela') %>% 
           group_by(!!sym(admin_div)) %>%
-          summarise_if(is.numeric(.funs = .funs))
+          summarise_if(is.numeric, .funs = .funs)
         
       }
     } else {

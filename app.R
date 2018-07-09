@@ -53,17 +53,17 @@ ui <- tagList(
         ),
         
         ########################################################### debug ######
-        # absolutePanel(
-        #   id = 'debug', class = 'panel panel-default', fixed = TRUE,
-        #   draggable = TRUE, width = 640, height = 'auto',
-        #   # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
-        #   # top = 'auto', left = 'auto', right = 100, bottom = 100,
-        #   top = 60, left = 'auto', right = 50, bottom = 'auto',
-        #   
-        #   textOutput('debug1'),
-        #   textOutput('debug2'),
-        #   textOutput('debug3')
-        # ),
+        absolutePanel(
+          id = 'debug', class = 'panel panel-default', fixed = TRUE,
+          draggable = TRUE, width = 640, height = 'auto',
+          # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+          # top = 'auto', left = 'auto', right = 100, bottom = 100,
+          top = 60, left = 'auto', right = 50, bottom = 'auto',
+
+          textOutput('debug1'),
+          textOutput('debug2'),
+          textOutput('debug3')
+        ),
         ########################################################### end debug ##
         
         ## vizControls ####
@@ -176,14 +176,14 @@ server <- function(input, output, session) {
   
   ## debug #####
   output$debug1 <- renderPrint({
-    map_reactives$map_shape_click
-  })
-  output$debug2 <- renderPrint({
     data_reactives$agg_level
   })
+  output$debug2 <- renderPrint({
+    data_reactives$viz_shape
+  })
   output$debug3 <- renderPrint({
-    infoPanel_reactives$data_shape() %>% collect() %>% as.data.frame() %>% head()
-    # data_reactives$data_core() %>% collect() %>% as.data.frame() %>% head()
+    # infoPanel_reactives$data_shape() %>% collect() %>% as.data.frame() %>% head()
+    data_reactives$data_core() %>% collect() %>% as.data.frame() %>% head()
   })
 }
 

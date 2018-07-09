@@ -164,7 +164,7 @@ mod_map <- function(
       # mod_data stuff
       data_core <- mod_data$data_core()
       agg_level <- mod_data$agg_level
-      grup_func_var <- glue('id{mod_data$agg_level')
+      grup_func_var <- glue('id{mod_data$agg_level}')
       viz_shape <- mod_data$viz_shape
       admin_div <- mod_data$admin_div
       
@@ -174,15 +174,15 @@ mod_map <- function(
         # variables to select
         vars_sel <- quos(
           !!sym(color_var), !!sym(mida_var),
-          !!sym(group_func_var), !!sym(statistic_var),
+          !!sym(grup_func_var),
           !!sym('latitude'), !!sym('longitude'), !!sym('idparcela')
         )
         # check for any empty variable and remove it from the quosures
         vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
         
         # extra data needed for parcela
-        data_sig <- data_mod$data_sig() %>% collect()
-        data_clima <- data_mod$data_clima() %>% collect()
+        data_sig <- mod_data$data_sig() %>% collect()
+        data_clima <- mod_data$data_clima() %>% collect()
         
         # data_map
         data_map <- data_core %>%
@@ -190,7 +190,7 @@ mod_map <- function(
           left_join(data_clima, by = 'idparcela') %>%
           dplyr::select(!!! vars_sel)
         
-        if (agg_level != '') {
+        if (agg_level != 'parcela') {
           data_map <- data_map %>%
             filter(!!grup_func_var %in% grup_func_choices)
             # mutate(!!color_var := case_when(
@@ -268,8 +268,96 @@ mod_map <- function(
       } else {
         # viz_shape == 'polygon'
         
+        # debug
+        # remove
+        # browser()
+        
+        # variables to select
+        vars_sel <- quos(
+          !!sym(paste0(color_var, statistic_var)), !!sym(mida_var),
+          !!sym(grup_func_var), !!sym(admin_div)
+        )
+        # check for any empty variable and remove it from the quosures
+        vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
+        # data_map
+        data_map <- data_core #%>%
+          # dplyr::select(!!! vars_sel)
+        
+        # data polygons modified. We need to modify the data from the polygons
+        # object to be able to colour as NA when the filtering results in
+        # some admin_divs without data (ie, filtering for platanus genera when
+        # in province admin_div only return data for Barcelona and Girona). If
+        # we modify the data slot in the polygon data frame with a left/right
+        # join we can add the admin divs as NAs
+        admin_div <- mod_data$admin_div
+        polygons_label_var <- polygons_dictionary[[admin_div]][['label_chr']]
+        polygon_data <- rlang::eval_tidy(
+          sym(polygons_dictionary[[admin_div]][['polygon']])
+        )
+        
+        polygon_data@data <- polygon_data@data %>%
+          select(!!sym(polygons_label_var)) %>%
+          rename(!!sym(admin_div) := !!sym(polygons_label_var)) %>%
+          left_join(data_map, by = admin_div)
         
         
+        # color palette
+        if (is.null(color_var) || color_var == '') {
+          color_variable_def <- 'Cap'
+          color_vector <- rep('parcel·la', nrow(polygon_data@data))
+          pal <- colorFactor('viridis', color_vector)
+        } else {
+          
+          # We must take into account if the variable is categorical or
+          # numerical
+          color_variable_def <- paste0(color_var, statistic_var)
+          color_vector <- polygon_data@data[[color_variable_def]]
+          
+          if (is.numeric(color_vector)) {
+            pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+          } else {
+            pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+          }
+        }
+        
+        # we need to remove the inexistent polygons when some genus or species
+        # are selected, as there is no info in that polygons after filtering
+        
+        if (admin_div == '') {
+          leafletProxy('map') %>%
+            clearGroup('vegueria') %>%
+            clearGroup('comarca') %>%
+            clearGroup('municipi') %>%
+            clearGroup('provincia')
+        } else {
+          leafletProxy('map') %>%
+            clearGroup('vegueria') %>%
+            clearGroup('comarca') %>%
+            clearGroup('municipi') %>%
+            clearGroup('provincia') %>%
+            clearGroup('idparcela') %>%
+            addPolygons(
+              data = polygon_data,
+              group = polygons_dictionary[[admin_div]][['group']],
+              label = polygons_dictionary[[admin_div]][['label_new']],
+              layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+              weight = 1, smoothFactor = 1,
+              opacity = 1.0, color = '#6C7A89FF',
+              fill = TRUE, fillColor = pal(color_vector),
+              fillOpacity = 1,
+              highlightOptions = highlightOptions(
+                color = "#CF000F", weight = 2,
+                bringToFront = FALSE
+              ),
+              options = pathOptions(
+                pane = 'admin_divs'
+              )
+            ) %>%
+            addLegend(
+              position = 'topright', pal = pal, values = color_vector,
+              title = color_variable_def, layerId = 'color_legend', opacity = 1
+            )
+        }
       }
       
       
@@ -378,93 +466,93 @@ mod_map <- function(
       #   
       #   # administratiu (polygons!!!)
       #   
-      #   grup_fun_val <- agg %>%
-      #     stringr::str_remove('_rt') %>%
-      #     stringr::str_remove('territori_') %>%
-      #     paste0('id',.)
-      #   
-      #   # data parceles from data_viz()
-      #   if (mida_var == '') {
-      #     data_parceles <- mod_data$data_viz()
-      #   } else {
-      #     data_parceles <- mod_data$data_viz() %>%
-      #       filter(!!sym(grup_fun_val) == mida_var)
-      #   }
-      #   
-      #   # data polygons modified. We need to modify the data from the polygons
-      #   # object to be able to colour as NA when the filtering results in 
-      #   # some admin_divs without data (ie, filtering for platanus genera when
-      #   # in province admin_div only return data for Barcelona and Girona). If
-      #   # we modify the data slot in the polygon data frame with a left/right
-      #   # join we can add the admin divs as NAs
-      #   admin_div <- mod_data$admin_div
-      #   polygons_label_var <- polygons_dictionary[[admin_div]][['label_chr']]
-      #   polygon_data <- rlang::eval_tidy(
-      #     sym(polygons_dictionary[[admin_div]][['polygon']])
-      #   )
-      #   
-      #   polygon_data@data <- polygon_data@data %>%
-      #     select(!!sym(polygons_label_var)) %>%
-      #     rename(!!sym(admin_div) := !!sym(polygons_label_var)) %>%
-      #     left_join(data_parceles, by = admin_div)
-      #   
-      #   
-      #   
-      #   # color palette
-      #   if (is.null(color_var) || color_var == '') {
-      #     color_vector <- rep('parcel·la', nrow(polygon_data@data))
-      #     pal <- colorFactor('viridis', color_vector)
-      #   } else {
-      #     
-      #     # We must take into account if the variable is categorical or
-      #     # numerical
-      #     color_vector <- polygon_data@data[[color_var]]
-      #     
-      #     if (is.numeric(color_vector)) {
-      #       pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
-      #     } else {
-      #       pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
-      #     }
-      #   }
-      #   
-      #   # we need to remove the inexistent polygons when some genus or species
-      #   # are selected, as there is no info in that polygons after filtering
-      #   
-      #   if (admin_div == '') {
-      #     leafletProxy('map') %>%
-      #       clearGroup('vegueria') %>%
-      #       clearGroup('comarca') %>%
-      #       clearGroup('municipi') %>%
-      #       clearGroup('provincia')
-      #   } else {
-      #     leafletProxy('map') %>%
-      #       clearGroup('vegueria') %>%
-      #       clearGroup('comarca') %>%
-      #       clearGroup('municipi') %>%
-      #       clearGroup('provincia') %>%
-      #       clearGroup('idparcela') %>%
-      #       addPolygons(
-      #         data = polygon_data,
-      #         group = polygons_dictionary[[admin_div]][['group']],
-      #         label = polygons_dictionary[[admin_div]][['label_new']],
-      #         layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
-      #         weight = 1, smoothFactor = 1,
-      #         opacity = 1.0, color = '#6C7A89FF',
-      #         fill = TRUE, fillColor = pal(color_vector),
-      #         fillOpacity = 1,
-      #         highlightOptions = highlightOptions(
-      #           color = "#CF000F", weight = 2,
-      #           bringToFront = FALSE
-      #         ),
-      #         options = pathOptions(
-      #           pane = 'admin_divs'
-      #         )
-      #       ) %>%
-      #       addLegend(
-      #         position = 'topright', pal = pal, values = color_vector,
-      #         title = color_var, layerId = 'color_legend', opacity = 1
-      #       )
-      #   }
+        # grup_fun_val <- agg %>%
+        #   stringr::str_remove('_rt') %>%
+        #   stringr::str_remove('territori_') %>%
+        #   paste0('id',.)
+        # 
+        # # data parceles from data_viz()
+        # if (mida_var == '') {
+        #   data_parceles <- mod_data$data_viz()
+        # } else {
+        #   data_parceles <- mod_data$data_viz() %>%
+        #     filter(!!sym(grup_fun_val) == mida_var)
+        # }
+        # 
+        # # data polygons modified. We need to modify the data from the polygons
+        # # object to be able to colour as NA when the filtering results in
+        # # some admin_divs without data (ie, filtering for platanus genera when
+        # # in province admin_div only return data for Barcelona and Girona). If
+        # # we modify the data slot in the polygon data frame with a left/right
+        # # join we can add the admin divs as NAs
+        # admin_div <- mod_data$admin_div
+        # polygons_label_var <- polygons_dictionary[[admin_div]][['label_chr']]
+        # polygon_data <- rlang::eval_tidy(
+        #   sym(polygons_dictionary[[admin_div]][['polygon']])
+        # )
+        # 
+        # polygon_data@data <- polygon_data@data %>%
+        #   select(!!sym(polygons_label_var)) %>%
+        #   rename(!!sym(admin_div) := !!sym(polygons_label_var)) %>%
+        #   left_join(data_parceles, by = admin_div)
+        # 
+        # 
+        # 
+        # # color palette
+        # if (is.null(color_var) || color_var == '') {
+        #   color_vector <- rep('parcel·la', nrow(polygon_data@data))
+        #   pal <- colorFactor('viridis', color_vector)
+        # } else {
+        # 
+        #   # We must take into account if the variable is categorical or
+        #   # numerical
+        #   color_vector <- polygon_data@data[[color_var]]
+        # 
+        #   if (is.numeric(color_vector)) {
+        #     pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+        #   } else {
+        #     pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+        #   }
+        # }
+        # 
+        # # we need to remove the inexistent polygons when some genus or species
+        # # are selected, as there is no info in that polygons after filtering
+        # 
+        # if (admin_div == '') {
+        #   leafletProxy('map') %>%
+        #     clearGroup('vegueria') %>%
+        #     clearGroup('comarca') %>%
+        #     clearGroup('municipi') %>%
+        #     clearGroup('provincia')
+        # } else {
+        #   leafletProxy('map') %>%
+        #     clearGroup('vegueria') %>%
+        #     clearGroup('comarca') %>%
+        #     clearGroup('municipi') %>%
+        #     clearGroup('provincia') %>%
+        #     clearGroup('idparcela') %>%
+        #     addPolygons(
+        #       data = polygon_data,
+        #       group = polygons_dictionary[[admin_div]][['group']],
+        #       label = polygons_dictionary[[admin_div]][['label_new']],
+        #       layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+        #       weight = 1, smoothFactor = 1,
+        #       opacity = 1.0, color = '#6C7A89FF',
+        #       fill = TRUE, fillColor = pal(color_vector),
+        #       fillOpacity = 1,
+        #       highlightOptions = highlightOptions(
+        #         color = "#CF000F", weight = 2,
+        #         bringToFront = FALSE
+        #       ),
+        #       options = pathOptions(
+        #         pane = 'admin_divs'
+        #       )
+        #     ) %>%
+        #     addLegend(
+        #       position = 'topright', pal = pal, values = color_vector,
+        #       title = color_var, layerId = 'color_legend', opacity = 1
+        #     )
+        # }
       # }
     }
   )

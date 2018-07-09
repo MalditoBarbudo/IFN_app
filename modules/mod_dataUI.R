@@ -328,10 +328,11 @@ mod_data <- function(
     data_generator(
       sql_db = oracle_ifn,
       ifn = input$ifn,
-      agg = input$agg_level,
-      cd = input$diam_class,
-      data_sig = data_sig(),
+      viz_shape = input$viz_shape,
+      agg_level = input$agg_level,
       admin_div = input$admin_div,
+      diam_class = input$diam_class,
+      data_sig = data_sig(),
       .funs = funs(
         mean(., na.rm = TRUE),
         sd(., na.rm = TRUE),
