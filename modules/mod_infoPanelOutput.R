@@ -71,10 +71,7 @@ mod_infoPanel <- function(
       filter_expr <- quo(!!sym(click$group) == click$id)
       
       # aggregation level
-      agg <- mod_data$agg_level
-      agg_real <- agg %>%
-        stringr::str_remove('_rt') %>%
-        stringr::str_remove('territori_')
+      agg_real <- mod_data$agg_level
       
       
       ## debug
@@ -96,10 +93,11 @@ mod_infoPanel <- function(
       res <- data_generator(
         sql_db = oracle_ifn,
         ifn = mod_data$ifn,
-        agg = agg_real,
-        cd = mod_data$diam_class,
-        data_sig = mod_data$data_sig(),
+        viz_shape = 'parcela',
+        agg_level = agg_real,
         admin_div = NULL,
+        diam_class = mod_data$diam_class,
+        data_sig = mod_data$data_sig(),
         .funs = NULL
       ) %>%
         filter(idparcela %in% idparcelas)

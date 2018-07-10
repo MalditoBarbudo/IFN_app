@@ -191,8 +191,14 @@ mod_map <- function(
           dplyr::select(!!! vars_sel)
         
         if (agg_level != 'parcela') {
+          
+          if (is.null(grup_func_choices) || grup_func_choices == '') {
+            grup_func_choices <- data_map %>%
+              pull(!!grup_func_var)
+          }
+          
           data_map <- data_map %>%
-            filter(!!grup_func_var %in% grup_func_choices)
+            filter(!!sym(grup_func_var) %in% grup_func_choices)
             # mutate(!!color_var := case_when(
             #   !!grup_func_var %in% grup_func_choices ~ !!color_var,
             #   TRUE ~ NA
@@ -283,6 +289,21 @@ mod_map <- function(
         data_map <- data_core #%>%
           # dplyr::select(!!! vars_sel)
         
+        if (agg_level != 'parcela') {
+          
+          if (is.null(grup_func_choices) || grup_func_choices == '') {
+            grup_func_choices <- data_map %>%
+              pull(!!grup_func_var)
+          }
+          
+          data_map <- data_map %>%
+            filter(!!sym(grup_func_var) %in% grup_func_choices)
+          # mutate(!!color_var := case_when(
+          #   !!grup_func_var %in% grup_func_choices ~ !!color_var,
+          #   TRUE ~ NA
+          # ))
+        }
+        
         # data polygons modified. We need to modify the data from the polygons
         # object to be able to colour as NA when the filtering results in
         # some admin_divs without data (ie, filtering for platanus genera when
@@ -296,7 +317,7 @@ mod_map <- function(
         )
         
         polygon_data@data <- polygon_data@data %>%
-          select(!!sym(polygons_label_var)) %>%
+          # select(!!sym(polygons_label_var)) %>%
           rename(!!sym(admin_div) := !!sym(polygons_label_var)) %>%
           left_join(data_map, by = admin_div)
         
@@ -319,6 +340,10 @@ mod_map <- function(
             pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
           }
         }
+        
+        # debug
+        # remove
+        # browser()
         
         # we need to remove the inexistent polygons when some genus or species
         # are selected, as there is no info in that polygons after filtering

@@ -30,8 +30,7 @@ mod_vizInput <- function(id) {
         ),
         disabled(
           selectInput(
-            ns('grup_func'), 'Grup funcional', c(Totes = ''), width = '100%',
-            multiple = TRUE
+            ns('grup_func'), 'Grup funcional', c(Cap = ''), width = '100%'
           )
         ),
         disabled(
@@ -115,6 +114,8 @@ mod_viz <- function(
         shinyjs::enable('mida')
         shinyjs::disable('grup_func')
         shinyjs::disable('statistic')
+        shinyjs::reset('grup_func')
+        shinyjs::reset('statistic')
         
       } else {
         if (scenario == 'scenario2') {
@@ -144,13 +145,13 @@ mod_viz <- function(
           
           updateSelectInput(
             session, 'grup_func', label = glue('{mod_data$agg_level}'),
-            choices = c('Totes' = '', grup_func_choices)
+            choices = grup_func_choices
           )
           
           # enable/disable and show/hide the needed inputs
           shinyjs::enable('grup_func')
-          shinyjs::disable('mida')
           shinyjs::disable('statistic')
+          shinyjs::reset('statistic')
           
         } else {
           if (scenario == 'scenario3') {
@@ -187,6 +188,8 @@ mod_viz <- function(
             shinyjs::disable('grup_func')
             shinyjs::disable('mida')
             shinyjs::enable('statistic')
+            shinyjs::reset('grup_func')
+            shinyjs::reset('mida')
             
           } else {
             # scenario4
@@ -227,106 +230,20 @@ mod_viz <- function(
             
             updateSelectInput(
               session, 'grup_func', label = glue('{mod_data$agg_level}'),
-              choices = c('Totes' = '', grup_func_choices)
+              choices = grup_func_choices
             )
             
             # enable/disable and show/hide the needed inputs
             shinyjs::enable('grup_func')
-            shinyjs::disable('mida')
             shinyjs::enable('statistic')
+            shinyjs::disable('mida')
+            shinyjs::reset('mida')
             
           }
         }
       }
     }
   )
-  
-  
-  # # update inputs with variables present in data
-  # observeEvent(
-  #   ignoreNULL = FALSE, ignoreInit = FALSE,
-  #   eventExpr = {
-  #     mod_data$agg_level
-  #     # mod_data$data_viz()
-  #   },
-  #   handlerExpr = {
-  #     
-  #     ## debug
-  #     ## remove
-  #     # browser()
-  #     
-  #     vars_clima <- names(mod_data$data_clima() %>% collect()) %>% stringr::str_sort()
-  #     vars_viz <- names(mod_data$data_viz()) %>% stringr::str_sort()
-  #     agg <- mod_data$agg_level
-  #     grup_fun_val <- agg %>%
-  #       stringr::str_remove('_rt') %>%
-  #       stringr::str_remove('territori_') %>%
-  #       paste0('id',.)
-  #     
-  #     # check if points or polygons
-  #     if (agg %in% c(
-  #       'parcela', 'especie', 'espsimple', 'genere', 'cadesclcon', 'plancon',
-  #       'especie_rt', 'espsimple_rt', 'genere_rt', 'cadesclcon_rt', 'plancon_rt'
-  #     )) {
-  #       
-  #       vars_to_use <- list(
-  #         "Variables parcel·la" = vars_viz,
-  #         "Variables climàtiques" = vars_clima
-  #       )
-  #       
-  #       updateSelectInput(
-  #         session, 'color', label = 'Color',
-  #         choices = vars_to_use
-  #       )
-  #       
-  #       shinyjs::enable('mida')
-  #       
-  #       updateSelectInput(
-  #         session, 'mida', label = 'Mida',
-  #         choices = vars_to_use, selected = ''
-  #       )
-  #       
-  #     } else {
-  #       
-  #       vars_to_use <- list(
-  #         "Variables aggregació" = vars_viz
-  #       )
-  #       
-  #       # check if agg is parcela (after removing the territori_ and _rt part,
-  #       # as then the mida must dissapear)
-  #       if (grup_fun_val != 'idparcela') {
-  #         grup_func_choices <- mod_data$data_viz() %>% 
-  #           # pull(!!sym(grup_fun_val))
-  #           # collect() %>%
-  #           pull(!!sym(grup_fun_val)) %>%
-  #           stringr::str_sort()
-  #         
-  #         updateSelectInput(
-  #           session, 'color', label = 'Color',
-  #           choices = vars_to_use
-  #         )
-  #         
-  #         # shinyjs::reset('mida')
-  #         shinyjs::enable('mida')
-  #         
-  #         updateSelectInput(
-  #           session, 'mida', label = grup_fun_val,
-  #           choices = grup_func_choices
-  #         )
-  #       } else {
-  #         
-  #         updateSelectInput(
-  #           session, 'color', label = 'Color',
-  #           choices = vars_to_use
-  #         )
-  #         
-  #         shinyjs::reset('mida')
-  #         shinyjs::disable('mida')
-  #         
-  #       }
-  #     }
-  #   }
-  # )
   
   # reactive with the inputs values
   viz_reactives <- reactiveValues()
