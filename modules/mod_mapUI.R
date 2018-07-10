@@ -20,14 +20,14 @@ mod_mapUI <- function(id) {
 #' @param session internal
 #' 
 #' @param mod_data reactive with the reactive data and the data inputs
-#' @param mod_viz reactive with the inputs from viz module
+#' @param mod_data reactive with the inputs from viz module
 #' 
 #' @export
 #' 
 #' @rdname mod_mapUI
 mod_map <- function(
   input, output, session,
-  mod_data, mod_viz
+  mod_data
 ) {
   
   # noms division
@@ -145,21 +145,21 @@ mod_map <- function(
       
       mod_data$data_core()
       
-      mod_viz$grup_func
-      mod_viz$statistic
-      mod_viz$color
-      mod_viz$mida
-      mod_viz$inverse_pal
+      mod_data$grup_func
+      mod_data$statistic
+      mod_data$color
+      mod_data$mida
+      mod_data$inverse_pal
       
     },
     handlerExpr = {
       
-      # mod_viz stuff needed
-      color_var <- mod_viz$color
-      mida_var <- mod_viz$mida
-      inverse_pal <- mod_viz$inverse_pal
-      grup_func_choices <- mod_viz$grup_func
-      statistic_var <- mod_viz$statistic
+      # mod_data stuff needed
+      color_var <- mod_data$color
+      mida_var <- mod_data$mida
+      inverse_pal <- mod_data$inverse_pal
+      grup_func_choices <- mod_data$grup_func
+      statistic_var <- mod_data$statistic
       
       # mod_data stuff
       data_core <- mod_data$data_core()
@@ -197,12 +197,22 @@ mod_map <- function(
               pull(!!grup_func_var)
           }
           
+          if (is.numeric(data_map[[color_var]])) {
+            na <- NA_real_
+          } else {
+            na <- NA_character_
+          }
+          
+          # debug
+          # browser()
+          
           data_map <- data_map %>%
-            filter(!!sym(grup_func_var) %in% grup_func_choices)
-            # mutate(!!color_var := case_when(
-            #   !!grup_func_var %in% grup_func_choices ~ !!color_var,
-            #   TRUE ~ NA
-            # ))
+            # filter(!!sym(grup_func_var) %in% grup_func_choices)
+            mutate(!!color_var := case_when(
+              !!sym(grup_func_var) %in% grup_func_choices ~ !!sym(color_var),
+              TRUE ~ na
+            )) %>%
+            arrange(!is.na(!!sym(color_var)), !!sym(color_var))
         }
         
         # color palette

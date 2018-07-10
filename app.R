@@ -66,15 +66,6 @@ ui <- tagList(
         ),
         ########################################################### end debug ##
         
-        ## vizControls ####
-        absolutePanel(
-          id = 'vizControls', class = 'panel panel-default', fixed = TRUE,
-          draggable = TRUE, width = 320, height = 'auto',
-          top = 60, right = 'auto', left = 700, bottom = 'auto',
-          
-          mod_vizInput('mod_vizInput')
-        ),
-        
         ## mod_data ####
         # mod_data module, it includes the dataSel, dataFil and dataAgg inputs
         mod_dataUI('mod_dataUI'),
@@ -124,22 +115,16 @@ server <- function(input, output, session) {
     mod_data, 'mod_dataUI'
   )
   
-  # viz controls
-  viz_reactives <- callModule(
-    mod_viz, 'mod_vizInput',
-    data_reactives
-  )
-  
   # map
   map_reactives <- callModule(
     mod_map, 'mod_mapUI',
-    data_reactives, viz_reactives
+    data_reactives
   )
   
   # info panel
   infoPanel_reactives <- callModule(
     mod_infoPanel, 'mod_infoPanelOutput',
-    data_reactives, map_reactives, viz_reactives
+    data_reactives, map_reactives
   )
   
   ## hide infoPanel ####
@@ -154,9 +139,9 @@ server <- function(input, output, session) {
       data_reactives$agg_level
       data_reactives$diam_class
       # viz inputs
-      viz_reactives$color
-      viz_reactives$mida
-      viz_reactives$inverse_pal
+      data_reactives$color
+      data_reactives$mida
+      data_reactives$inverse_pal
       #
     },
     handlerExpr = {

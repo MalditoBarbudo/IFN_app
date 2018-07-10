@@ -66,38 +66,6 @@ mod_dataUI <- function(id) {
         )
       ),
       
-      # 
-      # # 1. data selection (div and id is for shinyjs later application)
-      # div(
-      #   id = 'dataSel',
-      #   
-      #   fluidRow(
-      #     column(
-      #       4, offset = 4,
-      #       selectInput(
-      #         ns('ifn'), 'Versió de les dades', ifns,
-      #         selected = 'ifn2'
-      #       )
-      #     )
-      #   ),
-      #   fluidRow(
-      #     column(
-      #       6,
-      #       selectInput(
-      #         ns('admin_div'), 'Divisions administratatives', admin_divs,
-      #         selected = ''
-      #       )
-      #     ),
-      #     column(
-      #       6,
-      #       selectInput(
-      #         ns('espai_tipus'), "Tipus d'espai", espai_tipus,
-      #         selected = 'proteccio'
-      #       )
-      #     )
-      #   )
-      # ),
-      
       # 2. data filtering (div and id is for shinyjs later application)
       #   (this inputs are created empty and filled later on in the server based
       #   on the section 1. inputs)
@@ -183,7 +151,16 @@ mod_dataUI <- function(id) {
           )
         )
       )
-    ) # absolute panel end
+    ), # absolute panel end
+    
+    ## vizControls ####
+    absolutePanel(
+      id = 'vizControls', class = 'panel panel-default', fixed = TRUE,
+      draggable = TRUE, width = 320, height = 'auto',
+      top = 60, right = 'auto', left = 700, bottom = 'auto',
+      
+      mod_vizInput(ns('mod_vizInput'))
+    )
     
   ) # end of tagList
 }
@@ -400,6 +377,21 @@ mod_data <- function(
     data_reactives$data_core <- data_core
     data_reactives$data_viz <- data_viz
     
+  })
+  
+  # viz controls
+  viz_reactives <- callModule(
+    mod_viz, 'mod_vizInput',
+    data_reactives
+  )
+  
+  observe({
+    # inputs
+    data_reactives$color <- viz_reactives$color
+    data_reactives$inverse_pal <- viz_reactives$inverse_pal
+    data_reactives$mida <- viz_reactives$mida
+    data_reactives$grup_func <- viz_reactives$grup_func
+    data_reactives$statistic <- viz_reactives$statistic
   })
   
   return(data_reactives)

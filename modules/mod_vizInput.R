@@ -114,8 +114,8 @@ mod_viz <- function(
         shinyjs::enable('mida')
         shinyjs::disable('grup_func')
         shinyjs::disable('statistic')
-        shinyjs::reset('grup_func')
-        shinyjs::reset('statistic')
+        # shinyjs::reset('grup_func')
+        # shinyjs::reset('statistic')
         
       } else {
         if (scenario == 'scenario2') {
@@ -151,7 +151,7 @@ mod_viz <- function(
           # enable/disable and show/hide the needed inputs
           shinyjs::enable('grup_func')
           shinyjs::disable('statistic')
-          shinyjs::reset('statistic')
+          # shinyjs::reset('statistic')
           
         } else {
           if (scenario == 'scenario3') {
@@ -188,8 +188,8 @@ mod_viz <- function(
             shinyjs::disable('grup_func')
             shinyjs::disable('mida')
             shinyjs::enable('statistic')
-            shinyjs::reset('grup_func')
-            shinyjs::reset('mida')
+            # shinyjs::reset('grup_func')
+            # shinyjs::reset('mida')
             
           } else {
             # scenario4
@@ -237,7 +237,7 @@ mod_viz <- function(
             shinyjs::enable('grup_func')
             shinyjs::enable('statistic')
             shinyjs::disable('mida')
-            shinyjs::reset('mida')
+            # shinyjs::reset('mida')
             
           }
         }
