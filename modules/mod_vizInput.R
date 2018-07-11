@@ -31,6 +31,12 @@ mod_vizInput <- function(id) {
         ),
         disabled(
           selectInput(
+            ns('tipo_grup_func'), 'Tipus grup funcional',
+            c(Cap = ''), width = '100%'
+          )
+        ),
+        disabled(
+          selectInput(
             ns('grup_func'), 'Grup funcional', c(Cap = ''), width = '100%'
           )
         ),
@@ -98,6 +104,22 @@ mod_viz <- function(
         updateSelectInput(
           session, 'mida', label = 'Mida',
           choices = vars_to_use, selected = ''
+        )
+        
+        updateSelectInput(
+          session, 'tipo_grup_func', label = 'Tipus de grup funcional',
+          choices = c(
+            'Espècie' = 'especie',
+            'Espècie simplificat' = 'espsimple',
+            'Gènere' = 'genere',
+            'Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon',
+            'Conífera/Planifoli' = 'plancon'
+          )
+        )
+        
+        updateSelectInput(
+          session, 'grup_func', label = glue('{input$tipo_grup_func} dominant per densitat'),
+          choices = mod_data$data_core()[[glue('{input$tipo_grup_func}dens')]]
         )
         
         # enable/disable and show/hide the needed inputs
