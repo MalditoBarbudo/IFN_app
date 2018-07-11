@@ -702,7 +702,7 @@ espai_tipus <- c(
 )
 
 agg_levels <- list(
-  'Agregat' = 'parcela',
+  'Agregat o Total???' = 'parcela',
   'Desglossat per Espècie' = 'especie',
   'Desglossat per Espècie simplificat' = 'espsimple',
   'Desglossat per Gènere' = 'genere',
@@ -893,6 +893,28 @@ data_generator <- function(
   
   # return res
   return(res)
+  
+}
+
+get_scenario <- function(viz_shape, agg_level) {
+  
+  if (viz_shape == 'parcela') {
+    if (agg_level == 'parcela') {
+      # parcelas y agregado por parcelas
+      return('scenario1')
+    } else {
+      # parcelas y desglosado por tipo funcional
+      return('scenario2')
+    }
+  } else {
+    if (agg_level == 'parcela') {
+      # poligonos agregados por parcelas
+      return('scenario3')
+    } else {
+      # poligonos desglosados por tipo funcional
+      return('scenario4')
+    }
+  }
   
 }
 

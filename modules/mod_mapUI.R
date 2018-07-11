@@ -141,15 +141,71 @@ mod_map <- function(
   # observer for visual candy in the map (color and size of parceles or color
   # of the polygons in the administratiu aggregation levels)
   observeEvent(
+    ignoreNULL = TRUE, ignoreInit = FALSE, 
     eventExpr = {
       
-      mod_data$data_core()
+      scenario <- get_scenario(mod_data$viz_shape, mod_data$agg_level)
       
-      mod_data$grup_func
-      mod_data$statistic
-      mod_data$color
-      mod_data$mida
-      mod_data$inverse_pal
+      # scenario1, parcelas-parcelas
+      if (scenario == 'scenario1') {
+        # en este escenario solo se depende de color y mida, aunque mida puede
+        # estar vacio
+        if (is.null(mod_data$color) || mod_data$color == '') {
+          return(NULL)
+        } else {
+          return(TRUE)
+        }
+      }
+      
+      # scenario2, parcelas-grupofunc
+      if (scenario == 'scenario2') {
+        # en este escenario se depende de color, mida y grup_func, siendo el
+        # problemático grup_func, que se resetea al cambiar la cosa
+        if (
+          is.null(mod_data$grup_func) || mod_data$grup_func == '' ||
+          is.null(mod_data$color) || mod_data$color == ''
+        ) {
+          return(NULL)
+        } else {
+          return(TRUE)
+        }
+      }
+      
+      # scenario3, polígonos-parcelas
+      if (scenario == 'scenario3') {
+        # en este caso dependemos de color y estadístico
+        if (
+          is.null(mod_data$statistic) || mod_data$statistic == '' ||
+          is.null(mod_data$color) || mod_data$color == ''
+        ) {
+          return(NULL)
+        } else {
+          return(TRUE)
+        }
+      }
+      
+      # scenario4, polígonos-grupofunc
+      if (scenario == 'scenario4') {
+        # aquí dependemos de color, estadístico y grupo funcional
+        if (
+          is.null(mod_data$grup_func) || mod_data$grup_func == '' ||
+          is.null(mod_data$statistic) || mod_data$statistic == '' ||
+          is.null(mod_data$color) || mod_data$color == ''
+        ) {
+          return(NULL)
+        } else {
+          return(TRUE)
+        }
+      }
+      
+      
+      # mod_data$data_core()
+      # 
+      # mod_data$grup_func
+      # mod_data$statistic
+      # mod_data$color
+      # mod_data$mida
+      # mod_data$inverse_pal
       
     },
     handlerExpr = {

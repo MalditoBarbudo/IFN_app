@@ -19,6 +19,7 @@ mod_vizInput <- function(id) {
       id = 'vizInputs',
       
       wellPanel(
+        h3('Visualització'),
         selectInput(
           ns('color'), 'Color', c(Cap = ''), width = '100%'
         ),
@@ -59,21 +60,10 @@ mod_viz <- function(
 ) {
   
   # update inputs with variables present in data. We have four input scenarios
-  # so we build a reactive to know which scenario we have
+  # so we build a reactive to know which scenario we have using the get_scenario
+  # function from global.R
   input_scenario <- reactive({
-    if (mod_data$viz_shape == 'parcela') {
-      if (mod_data$agg_level == 'parcela') {
-        return('scenario1')
-      } else {
-        return('scenario2')
-      }
-    } else {
-      if (mod_data$agg_level == 'parcela') {
-        return('scenario3')
-      } else {
-        return('scenario4')
-      }
-    }
+    get_scenario(mod_data$viz_shape, mod_data$agg_level)
   })
   
   # and now an observeEvent based on scenario
