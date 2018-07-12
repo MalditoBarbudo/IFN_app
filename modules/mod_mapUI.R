@@ -150,7 +150,10 @@ mod_map <- function(
       if (scenario == 'scenario1') {
         # en este escenario solo se depende de color y mida, aunque mida puede
         # estar vacio
-        if (is.null(mod_data$color) || mod_data$color == '') {
+        if (
+          is.null(mod_data$color) || mod_data$color == '' ||
+          is.null(mod_data$tipo_grup_func) || mod_data$tipo_grup_func == ''
+        ) {
           return(NULL)
         } else {
           return(TRUE)

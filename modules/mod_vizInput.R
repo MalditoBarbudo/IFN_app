@@ -29,16 +29,18 @@ mod_vizInput <- function(id) {
         selectInput(
           ns('mida'), 'Mida', c(Cap = ''), width = '100%'
         ),
-        disabled(
-          selectInput(
-            ns('tipo_grup_func'), 'Tipus grup funcional',
-            c(Cap = ''), width = '100%'
-          )
-        ),
-        disabled(
-          selectInput(
-            ns('grup_func'), 'Grup funcional', c(Cap = ''), width = '100%'
-          )
+        selectInput(
+          ns('tipo_grup_func'), 'Tipus grup funcional',
+          choices = c(
+            'Espècie' = 'especie',
+            'Espècie simplificat' = 'especiesimple',
+            'Gènere' = 'genere',
+            'Conífera/Caducifoli/Esclerofil·le' = 'caducesclerconif',
+            'Conífera/Planifoli' = 'planifconif'
+          ), width = '100%'
+        ),  
+        selectInput(
+          ns('grup_func'), 'Grup funcional', c(Cap = ''), width = '100%'
         ),
         disabled(
           selectInput(
@@ -84,6 +86,19 @@ mod_viz <- function(
       
       if (scenario == 'scenario1') {
         
+        # reset needed inputs and hide no needed inputs
+        shinyjs::reset('color')
+        shinyjs::reset('mida')
+        shinyjs::reset('tipo_grup_func')
+        shinyjs::reset('grup_func')
+        shinyjs::hide('statistic')
+        shinyjs::show('mida')
+        shinyjs::show('tipo_grup_func')
+        shinyjs::show('grup_func')
+        shinyjs::enable('mida')
+        shinyjs::enable('tipo_grup_func')
+        shinyjs::enable('grup_func')
+        
         # data needed
         vars_clima <- names(mod_data$data_clima() %>% collect()) %>%
           stringr::str_sort()
@@ -106,31 +121,29 @@ mod_viz <- function(
           choices = vars_to_use, selected = ''
         )
         
-        updateSelectInput(
-          session, 'tipo_grup_func', label = 'Tipus de grup funcional',
-          choices = c(
-            'Espècie' = 'especie',
-            'Espècie simplificat' = 'espsimple',
-            'Gènere' = 'genere',
-            'Conífera/Caducifoli/Esclerofil·le' = 'cadesclcon',
-            'Conífera/Planifoli' = 'plancon'
-          )
-        )
-        
+        grup_func_choices <- mod_data$data_core() %>%
+          pull(!!sym(glue('{input$tipo_grup_func}dens'))) %>%
+          stringr::str_sort() %>%
+          c('Qualsevol', .)
+
         updateSelectInput(
           session, 'grup_func', label = glue('{input$tipo_grup_func} dominant per densitat'),
-          choices = mod_data$data_core()[[glue('{input$tipo_grup_func}dens')]]
+          choices = grup_func_choices, selected = 'Qualsevol'
         )
-        
-        # enable/disable and show/hide the needed inputs
-        shinyjs::enable('mida')
-        shinyjs::disable('grup_func')
-        shinyjs::disable('statistic')
-        # shinyjs::reset('grup_func')
-        # shinyjs::reset('statistic')
         
       } else {
         if (scenario == 'scenario2') {
+          
+          # reset needed inputs and hide no needed inputs
+          shinyjs::reset('color')
+          shinyjs::reset('mida')
+          shinyjs::reset('grup_func')
+          shinyjs::hide('statistic')
+          shinyjs::hide('tipo_grup_func')
+          shinyjs::show('mida')
+          shinyjs::show('grup_func')
+          shinyjs::enable('mida')
+          shinyjs::enable('grup_func')
           
           # data needed
           vars_clima <- names(mod_data$data_clima() %>% collect()) %>%
@@ -156,17 +169,31 @@ mod_viz <- function(
           )
           
           updateSelectInput(
+            session, 'mida', label = 'Mida',
+            choices = vars_to_use, selected = ''
+          )
+          
+          updateSelectInput(
             session, 'grup_func', label = glue('{mod_data$agg_level}'),
             choices = grup_func_choices
           )
           
-          # enable/disable and show/hide the needed inputs
-          shinyjs::enable('grup_func')
-          shinyjs::disable('statistic')
-          # shinyjs::reset('statistic')
-          
         } else {
           if (scenario == 'scenario3') {
+            
+            # reset needed inputs and hide no needed inputs
+            shinyjs::reset('color')
+            shinyjs::reset('tipo_grup_func')
+            shinyjs::reset('grup_func')
+            shinyjs::reset('statistic')
+            shinyjs::hide('mida')
+            shinyjs::show('tipo_grup_func')
+            shinyjs::show('grup_func')
+            shinyjs::show('statistic')
+            shinyjs::enable('tipo_grup_func')
+            shinyjs::enable('grup_func')
+            shinyjs::enable('statistic')
+            
             # data needed
             vars_viz <- names(mod_data$data_core()) %>%
               stringr::str_sort() %>% 
@@ -196,15 +223,40 @@ mod_viz <- function(
               choices = statistics_choices
             )
             
-            # enable/disable and show/hide the needed inputs
-            shinyjs::disable('grup_func')
-            shinyjs::disable('mida')
-            shinyjs::enable('statistic')
-            # shinyjs::reset('grup_func')
-            # shinyjs::reset('mida')
+            # grup_func_choices <- mod_data$data_core() %>%
+            #   pull(!!sym(glue('{input$tipo_grup_func}dens'))) %>%
+            #   stringr::str_sort()
+            grup_func_choices <- data_generator(
+              oracle_ifn, mod_data$ifn, 'parcela', 'parcela', NULL, FALSE,
+              {mod_data$data_sig() %>% collect()}, NULL
+            ) %>%
+              pull(!!sym(glue('{input$tipo_grup_func}dens'))) %>%
+              stringr::str_sort() %>%
+              c('Qualsevol', .)
+              
+            
+            updateSelectInput(
+              session, 'grup_func',
+              label = glue('{input$tipo_grup_func} dominant per densitat'),
+              choices = grup_func_choices
+            )
             
           } else {
             # scenario4
+            
+            # reset needed inputs and hide no needed inputs
+            shinyjs::reset('color')
+            shinyjs::reset('grup_func')
+            shinyjs::reset('statistic')
+            shinyjs::hide('tipo_grup_func')
+            shinyjs::hide('mida')
+            shinyjs::show('color')
+            shinyjs::show('grup_func')
+            shinyjs::show('statistic')
+            shinyjs::enable('color')
+            shinyjs::enable('grup_func')
+            shinyjs::enable('statistic')
+            
             # data needed
             vars_viz <- names(mod_data$data_core()) %>%
               stringr::str_sort() %>% 
@@ -244,12 +296,6 @@ mod_viz <- function(
               session, 'grup_func', label = glue('{mod_data$agg_level}'),
               choices = grup_func_choices
             )
-            
-            # enable/disable and show/hide the needed inputs
-            shinyjs::enable('grup_func')
-            shinyjs::enable('statistic')
-            shinyjs::disable('mida')
-            # shinyjs::reset('mida')
             
           }
         }
