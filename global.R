@@ -801,6 +801,7 @@ data_generator <- function(
   admin_div,
   diam_class,
   data_sig,
+  filter_arg_val = NULL,
   .funs
 ) {
   
@@ -851,11 +852,23 @@ data_generator <- function(
         # core_table
         core_table <- tbl(sql_db, core_name) %>% collect()
         # data to return
-        res <- data_sig %>%
-          select(idparcela, !!sym(admin_div)) %>%
-          inner_join(core_table, by = 'idparcela') %>% 
-          group_by(!!sym(admin_div)) %>%
-          summarise_if(is.numeric, .funs = .funs)
+        # (here we use the filter_arg_val, for the scenario 3 mod_map data)
+        if (is.null(filter_arg_val)) {
+          res <- data_sig %>%
+            select(idparcela, !!sym(admin_div)) %>%
+            inner_join(core_table, by = 'idparcela') %>% 
+            group_by(!!sym(admin_div)) %>%
+            summarise_if(is.numeric, .funs = .funs)
+        } else {
+          filter_arg_val <- quo(!!sym(filter_arg_val))
+          res <- data_sig %>%
+            select(idparcela, !!sym(admin_div)) %>%
+            inner_join(core_table, by = 'idparcela') %>%
+            filter(!!! filter_arg_val) %>%
+            group_by(!!sym(admin_div)) %>%
+            summarise_if(is.numeric, .funs = .funs)
+        }
+        
         
       }
     } else {

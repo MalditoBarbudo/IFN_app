@@ -138,169 +138,98 @@ mod_map <- function(
     }
   )
   
-  # observer for visual candy in the map (color and size of parceles or color
-  # of the polygons in the administratiu aggregation levels)
-  observeEvent(
-    ignoreNULL = TRUE, ignoreInit = FALSE, 
+  # update inputs with variables present in data. We have four input scenarios
+  # so we build a reactive to know which scenario we have using the get_scenario
+  # function from global.R
+  input_scenario <- reactive({
+    get_scenario(mod_data$viz_shape, mod_data$agg_level)
+  })
+  
+  scenario1_reactive <- eventReactive(
     eventExpr = {
       
-      scenario <- get_scenario(mod_data$viz_shape, mod_data$agg_level)
-      
-      # scenario1, parcelas-parcelas
-      if (scenario == 'scenario1') {
-        # en este escenario solo se depende de color y mida, aunque mida puede
-        # estar vacio
-        if (
-          is.null(mod_data$color) || mod_data$color == '' ||
-          is.null(mod_data$tipo_grup_func) || mod_data$tipo_grup_func == ''
-        ) {
-          return(NULL)
-        } else {
-          return(TRUE)
-        }
-      }
-      
-      # scenario2, parcelas-grupofunc
-      if (scenario == 'scenario2') {
-        # en este escenario se depende de color, mida y grup_func, siendo el
-        # problemático grup_func, que se resetea al cambiar la cosa
-        if (
-          is.null(mod_data$grup_func) || mod_data$grup_func == '' ||
-          is.null(mod_data$color) || mod_data$color == ''
-        ) {
-          return(NULL)
-        } else {
-          return(TRUE)
-        }
-      }
-      
-      # scenario3, polígonos-parcelas
-      if (scenario == 'scenario3') {
-        # en este caso dependemos de color y estadístico
-        if (
-          is.null(mod_data$statistic) || mod_data$statistic == '' ||
-          is.null(mod_data$color) || mod_data$color == ''
-        ) {
-          return(NULL)
-        } else {
-          return(TRUE)
-        }
-      }
-      
-      # scenario4, polígonos-grupofunc
-      if (scenario == 'scenario4') {
-        # aquí dependemos de color, estadístico y grupo funcional
-        if (
-          is.null(mod_data$grup_func) || mod_data$grup_func == '' ||
-          is.null(mod_data$statistic) || mod_data$statistic == '' ||
-          is.null(mod_data$color) || mod_data$color == ''
-        ) {
-          return(NULL)
-        } else {
-          return(TRUE)
-        }
-      }
-      
-      
-      # mod_data$data_core()
-      # 
-      # mod_data$grup_func
-      # mod_data$statistic
-      # mod_data$color
-      # mod_data$mida
-      # mod_data$inverse_pal
+      mod_data$inverse_pal
+      mod_data$color
+      mod_data$mida
+      mod_data$tipo_grup_func
+      mod_data$grup_func
       
     },
-    handlerExpr = {
+    valueExpr = {
       
-      # mod_data stuff needed
-      color_var <- mod_data$color
-      mida_var <- mod_data$mida
-      inverse_pal <- mod_data$inverse_pal
-      grup_func_choices <- mod_data$grup_func
-      statistic_var <- mod_data$statistic
-      
-      # mod_data stuff
-      data_core <- mod_data$data_core()
-      agg_level <- mod_data$agg_level
-      grup_func_var <- glue('id{mod_data$agg_level}')
-      viz_shape <- mod_data$viz_shape
-      admin_div <- mod_data$admin_div
-      
-      # plots
-      if (viz_shape == 'parcela') {
+      if (input_scenario() == 'scenario1') {
+        # viz_inputs needed
+        color_val <- mod_data$color
+        mida_val <- mod_data$mida
+        tipo_grup_func_val <- mod_data$tipo_grup_func
+        grup_func_val <- mod_data$grup_func
+        inverse_pal_val <- mod_data$inverse_pal
         
-        # variables to select
-        vars_sel <- quos(
-          !!sym(color_var), !!sym(mida_var),
-          !!sym(grup_func_var),
-          !!sym('latitude'), !!sym('longitude'), !!sym('idparcela')
+        # vars to select
+        vars_to_sel <- c(
+          color_val, mida_val, 'latitude', 'longitude', 'idparcela',
+          glue('{tipo_grup_func_val}dens')
         )
-        # check for any empty variable and remove it from the quosures
-        vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
         
-        # extra data needed for parcela
-        data_sig <- mod_data$data_sig() %>% collect()
-        data_clima <- mod_data$data_clima() %>% collect()
-        
-        # data_map
+        data_core <- mod_data$data_core() %>%
+          select(one_of(vars_to_sel))
+        data_sig <- mod_data$data_sig() %>%
+          select(one_of(vars_to_sel)) %>%
+          collect()
+        data_clima <- mod_data$data_clima() %>%
+          select(one_of(vars_to_sel)) %>%
+          collect()
         data_map <- data_core %>%
           left_join(data_sig, by = 'idparcela') %>%
-          left_join(data_clima, by = 'idparcela') %>%
-          dplyr::select(!!! vars_sel)
+          left_join(data_clima, by = 'idparcela')
         
-        if (agg_level != 'parcela') {
-          
-          if (is.null(grup_func_choices) || grup_func_choices == '') {
-            grup_func_choices <- data_map %>%
-              pull(!!grup_func_var)
-          }
-          
-          if (is.numeric(data_map[[color_var]])) {
+        
+        if (grup_func_val != 'Qualsevol') {
+          if (is.numeric(data_map[[color_val]])) {
             na <- NA_real_
           } else {
             na <- NA_character_
           }
           
-          # debug
-          # browser()
-          
           data_map <- data_map %>%
-            # filter(!!sym(grup_func_var) %in% grup_func_choices)
-            mutate(!!color_var := case_when(
-              !!sym(grup_func_var) %in% grup_func_choices ~ !!sym(color_var),
-              TRUE ~ na
-            )) %>%
-            arrange(!is.na(!!sym(color_var)), !!sym(color_var))
+            mutate(
+              !!color_val := case_when(
+                !!sym(glue('{tipo_grup_func_val}dens')) == grup_func_val ~ !!sym(color_val),
+                TRUE ~ na
+              )
+            )
         }
         
         # color palette
-        if (is.null(color_var) || color_var == '') {
+        if (is.null(color_val) || color_val == '') {
           color_vector <- rep('parcel·la', nrow(data_map))
           pal <- colorFactor('viridis', color_vector)
         } else {
           
           # We must take into account if the variable is categorical or
           # numerical
-          color_vector <- data_map[[color_var]]
+          color_vector <- data_map[[color_val]]
           if (is.numeric(color_vector)) {
-            pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+            pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal_val)
           } else {
-            pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+            pal <- colorFactor('viridis', color_vector, reverse = inverse_pal_val)
           }
         }
         
+        # mida vector
         # size vector
-        if (is.null(mida_var) || mida_var == '') {
+        if (is.null(mida_val) || mida_val == '') {
           mida_vector <- rep(750, nrow(data_map))
         } else {
           # We must take into account if the variable is categorical or
           # numerical
-          mida_var_values <- data_map[[mida_var]]
-          if (is.numeric(mida_var_values)) {
-            mida_vector <- mida_var_values / max(mida_var_values, na.rm = TRUE) * 3000
+          mida_val_values <- data_map[[mida_val]]
+          
+          if (is.numeric(mida_val_values)) {
+            mida_vector <- mida_val_values / max(mida_val_values, na.rm = TRUE) * 3000
           } else {
-            mida_vector <- rep(750, nrow(data_map))
+            mida_vector <- as.numeric(as.factor(mida_val_values)) /
+              max(as.numeric(as.factor(mida_val_values)), na.rm = TRUE) * 3000
           }
         }
         
@@ -316,7 +245,7 @@ mod_map <- function(
           ) %>%
           addLegend(
             position = 'topright', pal = pal, values = color_vector,
-            title = color_var, layerId = 'color_legend'
+            title = color_val, layerId = 'color_legend'
           ) %>%
           clearGroup('vegueria') %>%
           clearGroup('comarca') %>%
@@ -339,69 +268,210 @@ mod_map <- function(
               pane = 'admin_divs'
             )
           )
-        
       } else {
-        # viz_shape == 'polygon'
+        return()
+      }
+    }
+  )
+  
+  scenario2_reactive <- eventReactive(
+    eventExpr = {
+      
+      mod_data$inverse_pal
+      mod_data$color
+      mod_data$mida
+      mod_data$grup_func
+      
+    },
+    valueExpr = {
+      
+      if (input_scenario() == 'scenario2') {
+        # viz_inputs needed
+        color_val <- mod_data$color
+        mida_val <- mod_data$mida
+        grup_func_val <- mod_data$grup_func
+        inverse_pal_val <- mod_data$inverse_pal
         
-        # debug
-        # remove
-        # browser()
-        
-        # variables to select
-        vars_sel <- quos(
-          !!sym(paste0(color_var, statistic_var)), !!sym(mida_var),
-          !!sym(grup_func_var), !!sym(admin_div)
+        # vars to select
+        vars_to_sel <- c(
+          color_val, mida_val, 'latitude', 'longitude', 'idparcela',
+          glue('id{mod_data$agg_level}')
         )
-        # check for any empty variable and remove it from the quosures
-        vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
-        # data_map
-        data_map <- data_core #%>%
-          # dplyr::select(!!! vars_sel)
         
-        if (agg_level != 'parcela') {
-          
-          if (is.null(grup_func_choices) || grup_func_choices == '') {
-            grup_func_choices <- data_map %>%
-              pull(!!grup_func_var)
-          }
-          
-          data_map <- data_map %>%
-            filter(!!sym(grup_func_var) %in% grup_func_choices)
-          # mutate(!!color_var := case_when(
-          #   !!grup_func_var %in% grup_func_choices ~ !!color_var,
-          #   TRUE ~ NA
-          # ))
+        data_core <- mod_data$data_core() %>%
+          select(one_of(vars_to_sel))
+        data_sig <- mod_data$data_sig() %>%
+          select(one_of(vars_to_sel)) %>%
+          collect()
+        data_clima <- mod_data$data_clima() %>%
+          select(one_of(vars_to_sel)) %>%
+          collect()
+        data_map <- data_core %>%
+          left_join(data_sig, by = 'idparcela') %>%
+          left_join(data_clima, by = 'idparcela')
+        
+        
+        if (is.numeric(data_map[[color_val]])) {
+          na <- NA_real_
+        } else {
+          na <- NA_character_
         }
         
-        # data polygons modified. We need to modify the data from the polygons
-        # object to be able to colour as NA when the filtering results in
-        # some admin_divs without data (ie, filtering for platanus genera when
-        # in province admin_div only return data for Barcelona and Girona). If
-        # we modify the data slot in the polygon data frame with a left/right
-        # join we can add the admin divs as NAs
-        admin_div <- mod_data$admin_div
-        polygons_label_var <- polygons_dictionary[[admin_div]][['label_chr']]
+        data_map <- data_map %>%
+          mutate(
+            !!color_val := case_when(
+              !!sym(glue('id{mod_data$agg_level}')) == grup_func_val ~ !!sym(color_val),
+              TRUE ~ na
+            )
+          )
+        
+        # color palette
+        if (is.null(color_val) || color_val == '') {
+          color_vector <- rep('parcel·la', nrow(data_map))
+          pal <- colorFactor('viridis', color_vector)
+        } else {
+          
+          # We must take into account if the variable is categorical or
+          # numerical
+          color_vector <- data_map[[color_val]]
+          if (is.numeric(color_vector)) {
+            pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal_val)
+          } else {
+            pal <- colorFactor('viridis', color_vector, reverse = inverse_pal_val)
+          }
+        }
+        
+        # mida vector
+        # size vector
+        if (is.null(mida_val) || mida_val == '') {
+          mida_vector <- rep(750, nrow(data_map))
+        } else {
+          # We must take into account if the variable is categorical or
+          # numerical
+          mida_val_values <- data_map[[mida_val]]
+          
+          if (is.numeric(mida_val_values)) {
+            mida_vector <- mida_val_values / max(mida_val_values, na.rm = TRUE) * 3000
+          } else {
+            mida_vector <- as.numeric(as.factor(mida_val_values)) /
+              max(as.numeric(as.factor(mida_val_values)), na.rm = TRUE) * 3000
+          }
+        }
+        
+        # update map
+        leafletProxy('map', data = data_map) %>%
+          clearGroup('idparcela') %>%
+          addCircles(
+            group = 'idparcela', lng = ~longitude, lat = ~latitude,
+            label = ~idparcela, layerId = ~idparcela,
+            stroke = FALSE, fillOpacity = 0.4, fillColor = pal(color_vector),
+            radius = mida_vector,
+            options = pathOptions(pane = 'parceles')
+          ) %>%
+          addLegend(
+            position = 'topright', pal = pal, values = color_vector,
+            title = color_val, layerId = 'color_legend'
+          ) %>%
+          clearGroup('vegueria') %>%
+          clearGroup('comarca') %>%
+          clearGroup('municipi') %>%
+          clearGroup('provincia') %>%
+          addPolygons(
+            data = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['polygon']])),
+            group = polygons_dictionary[[admin_div]][['group']],
+            label = polygons_dictionary[[admin_div]][['label']],
+            layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+            weight = 1, smoothFactor = 1,
+            opacity = 1.0, fill = TRUE,
+            color = '#6C7A89FF', fillColor = "#CF000F00",
+            highlightOptions = highlightOptions(
+              color = "#CF000F", weight = 2,
+              bringToFront = FALSE,
+              fill = TRUE, fillColor = "#CF000F00"
+            ),
+            options = pathOptions(
+              pane = 'admin_divs'
+            )
+          )
+      } else {
+        return()
+      }
+    }
+  )
+  
+  scenario3_reactive <- eventReactive(
+    ignoreNULL = TRUE, ignoreInit = TRUE,
+    eventExpr = {
+       if (
+         any(
+           is.null(mod_data$inverse_pal) || mod_data$inverse_pal == '',
+           is.null(mod_data$color) || mod_data$color == '',
+           is.null(mod_data$tipo_grup_func) || mod_data$tipo_grup_func == '',
+           is.null(mod_data$grup_func) || mod_data$grup_func == '',
+           is.null(mod_data$statistic) || mod_data$statistic == ''
+         )
+       ) {
+         return(NULL)
+       } else {
+         return(TRUE)
+       }
+    },
+    
+    valueExpr = {
+      
+      if (input_scenario() == 'scenario3') {
+        # viz_inputs needed
+        color_val <- mod_data$color
+        tipo_grup_func_val <- mod_data$tipo_grup_func
+        grup_func_val <- mod_data$grup_func
+        statistic_val <- mod_data$statistic
+        inverse_pal_val <- mod_data$inverse_pal
+        admin_div_val <- mod_data$admin_div
+        
+        if (grup_func_val == 'Qualsevol') {
+          data_map <- mod_data$data_core()
+        } else {
+          data_sig <- mod_data$data_sig() %>% collect()
+          filter_arg_val <- glue('{tipo_grup_func_val}dens == {grup_func_val}')
+          
+          data_map <- data_generator(
+            oracle_ifn, mod_data$ifn, 'polygon', 'parcela',admin_div_val,
+            FALSE, {mod_data$data_sig() %>% collect()}, filter_arg_val,
+            funs(
+              mean(., na.rm = TRUE),
+              sd(., na.rm = TRUE),
+              min(., na.rm = TRUE),
+              max(., na.rm = TRUE),
+              median(., na.rm = TRUE),
+              q95 = quantile(., probs = 0.95, na.rm = TRUE),
+              n()
+            )
+          )
+        }
+        
+        # browser()
+        
+        polygons_label_var <- polygons_dictionary[[admin_div_val]][['label_chr']]
         polygon_data <- rlang::eval_tidy(
-          sym(polygons_dictionary[[admin_div]][['polygon']])
+          sym(polygons_dictionary[[admin_div_val]][['polygon']])
         )
         
         polygon_data@data <- polygon_data@data %>%
           # select(!!sym(polygons_label_var)) %>%
-          rename(!!sym(admin_div) := !!sym(polygons_label_var)) %>%
-          left_join(data_map, by = admin_div)
-        
+          rename(!!sym(admin_div_val) := !!sym(polygons_label_var)) %>%
+          left_join(data_map, by = admin_div_val)
         
         # color palette
-        if (is.null(color_var) || color_var == '') {
-          color_variable_def <- 'Cap'
+        if (is.null(color_val) || color_val == '') {
+          color_valiable_def <- 'Sense color'
           color_vector <- rep('parcel·la', nrow(polygon_data@data))
           pal <- colorFactor('viridis', color_vector)
         } else {
           
           # We must take into account if the variable is categorical or
           # numerical
-          color_variable_def <- paste0(color_var, statistic_var)
-          color_vector <- polygon_data@data[[color_variable_def]]
+          color_valiable_def <- paste0(color_val, statistic_val)
+          color_vector <- polygon_data@data[[color_valiable_def]]
           
           if (is.numeric(color_vector)) {
             pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
@@ -410,12 +480,7 @@ mod_map <- function(
           }
         }
         
-        # debug
-        # remove
-        # browser()
-        
-        # we need to remove the inexistent polygons when some genus or species
-        # are selected, as there is no info in that polygons after filtering
+        browser()
         
         if (admin_div == '') {
           leafletProxy('map') %>%
@@ -452,204 +517,445 @@ mod_map <- function(
               title = color_variable_def, layerId = 'color_legend', opacity = 1
             )
         }
+      } else {
+        return()
       }
-      
-      
-      # # parceles, tipus and derivats (points!!!)
-      # if (agg %in% c(
-      #   'parcela', 'especie', 'espsimple', 'genere', 'cadesclcon', 'plancon',
-      #   'especie_rt', 'espsimple_rt', 'genere_rt', 'cadesclcon_rt', 'plancon_rt'
-      # )) {
-      #   
-      #   vars_sel <- quos(
-      #     !!sym(color_var), !!sym(mida_var),
-      #     !!sym('latitude'), !!sym('longitude'), !!sym('idparcela')
-      #   )
-      #   
-      #   # check for any empty (color or mida) and remove it from the quosures
-      #   vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
-      #   
-      #   data_parceles <- mod_data$data_viz() %>%
-      #     inner_join({
-      #       mod_data$data_sig() %>% collect()
-      #     }, by = 'idparcela') %>% 
-      #     inner_join({
-      #       mod_data$data_clima() %>% collect()
-      #     }, by = 'idparcela') %>% 
-      #     dplyr::select(!!! vars_sel) %>% 
-      #     collect()
-      #   
-        # # color palette
-        # if (is.null(color_var) || color_var == '') {
-        #   color_vector <- rep('parcel·la', nrow(data_parceles))
-        #   pal <- colorFactor('viridis', color_vector)
-        # } else {
-        # 
-        #   # We must take into account if the variable is categorical or
-        #   # numerical
-        #   color_vector <- data_parceles[[color_var]]
-        #   if (is.numeric(color_vector)) {
-        #     pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
-        #   } else {
-        #     pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
-        #   }
-        # }
-        # 
-        # # size vector
-        # if (is.null(mida_var) || mida_var == '') {
-        #   mida_vector <- rep(750, nrow(data_parceles))
-        # } else {
-        #   # We must take into account if the variable is categorical or
-        #   # numerical
-        #   mida_var_values <- data_parceles[[mida_var]]
-        #   if (is.numeric(mida_var_values)) {
-        #     mida_vector <- mida_var_values / max(mida_var_values, na.rm = TRUE) * 3000
-        #   } else {
-        #     mida_vector <- rep(750, nrow(data_parceles))
-        #   }
-        # }
-      #   
-        # # update map
-        # leafletProxy('map', data = data_parceles) %>%
-        #   clearGroup('idparcela') %>%
-        #   addCircles(
-        #     group = 'idparcela', lng = ~longitude, lat = ~latitude,
-        #     label = ~idparcela, layerId = ~idparcela,
-        #     stroke = FALSE, fillOpacity = 0.4, fillColor = pal(color_vector),
-        #     radius = mida_vector,
-        #     options = pathOptions(pane = 'parceles')
-        #   ) %>%
-        #   addLegend(
-        #     position = 'topright', pal = pal, values = color_vector,
-        #     title = color_var, layerId = 'color_legend'
-        #   )
-      #   
-      #   admin_div <- mod_data$admin_div
-      #   
-      #   if (admin_div == '') {
-      #     leafletProxy('map') %>%
-      #       clearGroup('vegueria') %>%
-      #       clearGroup('comarca') %>%
-      #       clearGroup('municipi') %>%
-      #       clearGroup('provincia')
-      #   } else {
-          # leafletProxy('map') %>%
-          #   clearGroup('vegueria') %>%
-          #   clearGroup('comarca') %>%
-          #   clearGroup('municipi') %>%
-          #   clearGroup('provincia') %>%
-          #   addPolygons(
-          #     data = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['polygon']])),
-          #     group = polygons_dictionary[[admin_div]][['group']],
-          #     label = polygons_dictionary[[admin_div]][['label']],
-          #     layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
-          #     weight = 1, smoothFactor = 1,
-          #     opacity = 1.0, fill = TRUE,
-          #     color = '#6C7A89FF', fillColor = "#CF000F00",
-          #     highlightOptions = highlightOptions(
-          #       color = "#CF000F", weight = 2,
-          #       bringToFront = FALSE,
-          #       fill = TRUE, fillColor = "#CF000F00"
-          #     ),
-          #     options = pathOptions(
-          #       pane = 'admin_divs'
-          #     )
-          #   )
-      #   }
-      # } else {
-      #   
-      #   # administratiu (polygons!!!)
-      #   
-        # grup_fun_val <- agg %>%
-        #   stringr::str_remove('_rt') %>%
-        #   stringr::str_remove('territori_') %>%
-        #   paste0('id',.)
-        # 
-        # # data parceles from data_viz()
-        # if (mida_var == '') {
-        #   data_parceles <- mod_data$data_viz()
-        # } else {
-        #   data_parceles <- mod_data$data_viz() %>%
-        #     filter(!!sym(grup_fun_val) == mida_var)
-        # }
-        # 
-        # # data polygons modified. We need to modify the data from the polygons
-        # # object to be able to colour as NA when the filtering results in
-        # # some admin_divs without data (ie, filtering for platanus genera when
-        # # in province admin_div only return data for Barcelona and Girona). If
-        # # we modify the data slot in the polygon data frame with a left/right
-        # # join we can add the admin divs as NAs
-        # admin_div <- mod_data$admin_div
-        # polygons_label_var <- polygons_dictionary[[admin_div]][['label_chr']]
-        # polygon_data <- rlang::eval_tidy(
-        #   sym(polygons_dictionary[[admin_div]][['polygon']])
-        # )
-        # 
-        # polygon_data@data <- polygon_data@data %>%
-        #   select(!!sym(polygons_label_var)) %>%
-        #   rename(!!sym(admin_div) := !!sym(polygons_label_var)) %>%
-        #   left_join(data_parceles, by = admin_div)
-        # 
-        # 
-        # 
-        # # color palette
-        # if (is.null(color_var) || color_var == '') {
-        #   color_vector <- rep('parcel·la', nrow(polygon_data@data))
-        #   pal <- colorFactor('viridis', color_vector)
-        # } else {
-        # 
-        #   # We must take into account if the variable is categorical or
-        #   # numerical
-        #   color_vector <- polygon_data@data[[color_var]]
-        # 
-        #   if (is.numeric(color_vector)) {
-        #     pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
-        #   } else {
-        #     pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
-        #   }
-        # }
-        # 
-        # # we need to remove the inexistent polygons when some genus or species
-        # # are selected, as there is no info in that polygons after filtering
-        # 
-        # if (admin_div == '') {
-        #   leafletProxy('map') %>%
-        #     clearGroup('vegueria') %>%
-        #     clearGroup('comarca') %>%
-        #     clearGroup('municipi') %>%
-        #     clearGroup('provincia')
-        # } else {
-        #   leafletProxy('map') %>%
-        #     clearGroup('vegueria') %>%
-        #     clearGroup('comarca') %>%
-        #     clearGroup('municipi') %>%
-        #     clearGroup('provincia') %>%
-        #     clearGroup('idparcela') %>%
-        #     addPolygons(
-        #       data = polygon_data,
-        #       group = polygons_dictionary[[admin_div]][['group']],
-        #       label = polygons_dictionary[[admin_div]][['label_new']],
-        #       layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
-        #       weight = 1, smoothFactor = 1,
-        #       opacity = 1.0, color = '#6C7A89FF',
-        #       fill = TRUE, fillColor = pal(color_vector),
-        #       fillOpacity = 1,
-        #       highlightOptions = highlightOptions(
-        #         color = "#CF000F", weight = 2,
-        #         bringToFront = FALSE
-        #       ),
-        #       options = pathOptions(
-        #         pane = 'admin_divs'
-        #       )
-        #     ) %>%
-        #     addLegend(
-        #       position = 'topright', pal = pal, values = color_vector,
-        #       title = color_var, layerId = 'color_legend', opacity = 1
-        #     )
-        # }
-      # }
     }
   )
+  
+  scenario4_reactive <- eventReactive(
+    eventExpr = {
+      
+      mod_data$inverse_pal
+      mod_data$color
+      mod_data$grup_func
+      mod_data$statistic
+      
+    },
+    
+    valueExpr = {
+      
+      if (input_scenario() == 'scenario4') {
+        # viz_inputs needed
+        color_val <- mod_data$color
+        grup_func_val <- mod_data$grup_func
+        statistic_val <- mod_data$statistic
+        inverse_pal_val <- mod_data$inverse_pal
+        admin_div_val <- mod_data$admin_div
+        
+        data_map <- mod_data$data_core() %>%
+          filter(!!sym(glue('id{mod_data$agg_level}')) == grup_func_val)
+        
+        polygons_label_var <- polygons_dictionary[[admin_div_val]][['label_chr']]
+        polygon_data <- rlang::eval_tidy(
+          sym(polygons_dictionary[[admin_div_val]][['polygon']])
+        )
+        
+        polygon_data@data <- polygon_data@data %>%
+          # select(!!sym(polygons_label_var)) %>%
+          rename(!!sym(admin_div_val) := !!sym(polygons_label_var)) %>%
+          left_join(data_map, by = admin_div_val)
+        
+        # color palette
+        if (is.null(color_val) || color_val == '') {
+          color_valiable_def <- 'Sense color'
+          color_vector <- rep('parcel·la', nrow(polygon_data@data))
+          pal <- colorFactor('viridis', color_vector)
+        } else {
+          
+          # We must take into account if the variable is categorical or
+          # numerical
+          color_valiable_def <- paste0(color_val, statistic_val)
+          color_vector <- polygon_data@data[[color_valiable_def]]
+          
+          if (is.numeric(color_vector)) {
+            pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+          } else {
+            pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+          }
+        }
+        
+        if (admin_div == '') {
+          leafletProxy('map') %>%
+            clearGroup('vegueria') %>%
+            clearGroup('comarca') %>%
+            clearGroup('municipi') %>%
+            clearGroup('provincia')
+        } else {
+          leafletProxy('map') %>%
+            clearGroup('vegueria') %>%
+            clearGroup('comarca') %>%
+            clearGroup('municipi') %>%
+            clearGroup('provincia') %>%
+            clearGroup('idparcela') %>%
+            addPolygons(
+              data = polygon_data,
+              group = polygons_dictionary[[admin_div]][['group']],
+              label = polygons_dictionary[[admin_div]][['label_new']],
+              layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+              weight = 1, smoothFactor = 1,
+              opacity = 1.0, color = '#6C7A89FF',
+              fill = TRUE, fillColor = pal(color_vector),
+              fillOpacity = 1,
+              highlightOptions = highlightOptions(
+                color = "#CF000F", weight = 2,
+                bringToFront = FALSE
+              ),
+              options = pathOptions(
+                pane = 'admin_divs'
+              )
+            ) %>%
+            addLegend(
+              position = 'topright', pal = pal, values = color_vector,
+              title = color_variable_def, layerId = 'color_legend', opacity = 1
+            )
+        }
+      } else {
+        return()
+      }
+    }
+  )
+  
+  # observer for visual candy in the map (color and size of parceles or color
+  # of the polygons in the administratiu aggregation levels)
+  observeEvent(
+    eventExpr = {
+      mod_data$data_core()
+      scenario1_reactive()
+      scenario2_reactive()
+      scenario4_reactive()
+      scenario3_reactive()
+    },
+    
+    handlerExpr = {
+      
+      browser()
+      
+      rlang::eval_tidy(sym(glue('{input_scenario()}_reactive()')))
+    }
+  )
+  
+  # # observer for visual candy in the map (color and size of parceles or color
+  # # of the polygons in the administratiu aggregation levels)
+  # observeEvent(
+  #   ignoreNULL = TRUE, ignoreInit = FALSE, 
+  #   eventExpr = {
+  #     
+  #     scenario <- get_scenario(mod_data$viz_shape, mod_data$agg_level)
+  #     
+  #     # scenario1, parcelas-parcelas
+  #     if (scenario == 'scenario1') {
+  #       # en este escenario solo se depende de color y mida, aunque mida puede
+  #       # estar vacio
+  #       if (
+  #         is.null(mod_data$color) || mod_data$color == '' ||
+  #         is.null(mod_data$tipo_grup_func) || mod_data$tipo_grup_func == '' ||
+  #         is.null(mod_data$grup_func) || mod_data$grup_func == ''
+  #       ) {
+  #         return(NULL)
+  #       } else {
+  #         return(TRUE)
+  #       }
+  #     }
+  #     
+  #     # scenario2, parcelas-grupofunc
+  #     if (scenario == 'scenario2') {
+  #       # en este escenario se depende de color, mida y grup_func, siendo el
+  #       # problemático grup_func, que se resetea al cambiar la cosa
+  #       if (
+  #         is.null(mod_data$grup_func) || mod_data$grup_func == '' ||
+  #         is.null(mod_data$color) || mod_data$color == ''
+  #       ) {
+  #         return(NULL)
+  #       } else {
+  #         return(TRUE)
+  #       }
+  #     }
+  #     
+  #     # scenario3, polígonos-parcelas
+  #     if (scenario == 'scenario3') {
+  #       # en este caso dependemos de color y estadístico
+  #       if (
+  #         is.null(mod_data$tipo_grup_func) || mod_data$tipo_grup_func == '' ||
+  #         is.null(mod_data$grup_func) || mod_data$grup_func == '' ||
+  #         is.null(mod_data$statistic) || mod_data$statistic == '' ||
+  #         is.null(mod_data$color) || mod_data$color == ''
+  #       ) {
+  #         return(NULL)
+  #       } else {
+  #         return(TRUE)
+  #       }
+  #     }
+  #     
+  #     # scenario4, polígonos-grupofunc
+  #     if (scenario == 'scenario4') {
+  #       # aquí dependemos de color, estadístico y grupo funcional
+  #       if (
+  #         
+  #         is.null(mod_data$grup_func) || mod_data$grup_func == '' ||
+  #         is.null(mod_data$statistic) || mod_data$statistic == '' ||
+  #         is.null(mod_data$color) || mod_data$color == ''
+  #       ) {
+  #         return(NULL)
+  #       } else {
+  #         return(TRUE)
+  #       }
+  #     }
+  #     
+  #     
+  #     # mod_data$data_core()
+  #     # 
+  #     # mod_data$grup_func
+  #     # mod_data$statistic
+  #     # mod_data$color
+  #     # mod_data$mida
+  #     # mod_data$inverse_pal
+  #     
+  #   },
+  #   handlerExpr = {
+  #     
+  #     # mod_data stuff needed
+  #     color_var <- mod_data$color
+  #     mida_var <- mod_data$mida
+  #     inverse_pal <- mod_data$inverse_pal
+  #     grup_func_choices <- mod_data$grup_func
+  #     statistic_val <- mod_data$statistic
+  #     
+  #     # mod_data stuff
+  #     data_core <- mod_data$data_core()
+  #     agg_level <- mod_data$agg_level
+  #     grup_func_var <- glue('id{mod_data$agg_level}')
+  #     viz_shape <- mod_data$viz_shape
+  #     admin_div <- mod_data$admin_div
+  #     
+  #     # plots
+  #     if (viz_shape == 'parcela') {
+  #       
+  #       # variables to select
+  #       vars_sel <- quos(
+  #         !!sym(color_var), !!sym(mida_var),
+  #         !!sym(grup_func_var),
+  #         !!sym('latitude'), !!sym('longitude'), !!sym('idparcela')
+  #       )
+  #       # check for any empty variable and remove it from the quosures
+  #       vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
+  #       
+  #       # extra data needed for parcela
+  #       data_sig <- mod_data$data_sig() %>% collect()
+  #       data_clima <- mod_data$data_clima() %>% collect()
+  #       
+  #       # data_map
+  #       data_map <- data_core %>%
+  #         left_join(data_sig, by = 'idparcela') %>%
+  #         left_join(data_clima, by = 'idparcela') %>%
+  #         dplyr::select(!!! vars_sel)
+  #       
+  #       if (agg_level != 'parcela') {
+  #         
+  #         if (is.null(grup_func_choices) || grup_func_choices == '') {
+  #           grup_func_choices <- data_map %>%
+  #             pull(!!grup_func_var)
+  #         }
+  #         
+  #         if (is.numeric(data_map[[color_var]])) {
+  #           na <- NA_real_
+  #         } else {
+  #           na <- NA_character_
+  #         }
+  #         
+  #         # debug
+  #         # browser()
+  #         
+  #         data_map <- data_map %>%
+  #           # filter(!!sym(grup_func_var) %in% grup_func_choices)
+  #           mutate(!!color_var := case_when(
+  #             !!sym(grup_func_var) %in% grup_func_choices ~ !!sym(color_var),
+  #             TRUE ~ na
+  #           )) %>%
+  #           arrange(!is.na(!!sym(color_var)), !!sym(color_var))
+  #       }
+  #       
+  #       # color palette
+  #       if (is.null(color_var) || color_var == '') {
+  #         color_vector <- rep('parcel·la', nrow(data_map))
+  #         pal <- colorFactor('viridis', color_vector)
+  #       } else {
+  #         
+  #         # We must take into account if the variable is categorical or
+  #         # numerical
+  #         color_vector <- data_map[[color_var]]
+  #         if (is.numeric(color_vector)) {
+  #           pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+  #         } else {
+  #           pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+  #         }
+  #       }
+  #       
+  #       # size vector
+  #       if (is.null(mida_var) || mida_var == '') {
+  #         mida_vector <- rep(750, nrow(data_map))
+  #       } else {
+  #         # We must take into account if the variable is categorical or
+  #         # numerical
+  #         mida_var_values <- data_map[[mida_var]]
+  #         if (is.numeric(mida_var_values)) {
+  #           mida_vector <- mida_var_values / max(mida_var_values, na.rm = TRUE) * 3000
+  #         } else {
+  #           mida_vector <- rep(750, nrow(data_map))
+  #         }
+  #       }
+  #       
+  #       # update map
+  #       leafletProxy('map', data = data_map) %>%
+  #         clearGroup('idparcela') %>%
+  #         addCircles(
+  #           group = 'idparcela', lng = ~longitude, lat = ~latitude,
+  #           label = ~idparcela, layerId = ~idparcela,
+  #           stroke = FALSE, fillOpacity = 0.4, fillColor = pal(color_vector),
+  #           radius = mida_vector,
+  #           options = pathOptions(pane = 'parceles')
+  #         ) %>%
+  #         addLegend(
+  #           position = 'topright', pal = pal, values = color_vector,
+  #           title = color_var, layerId = 'color_legend'
+  #         ) %>%
+  #         clearGroup('vegueria') %>%
+  #         clearGroup('comarca') %>%
+  #         clearGroup('municipi') %>%
+  #         clearGroup('provincia') %>%
+  #         addPolygons(
+  #           data = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['polygon']])),
+  #           group = polygons_dictionary[[admin_div]][['group']],
+  #           label = polygons_dictionary[[admin_div]][['label']],
+  #           layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+  #           weight = 1, smoothFactor = 1,
+  #           opacity = 1.0, fill = TRUE,
+  #           color = '#6C7A89FF', fillColor = "#CF000F00",
+  #           highlightOptions = highlightOptions(
+  #             color = "#CF000F", weight = 2,
+  #             bringToFront = FALSE,
+  #             fill = TRUE, fillColor = "#CF000F00"
+  #           ),
+  #           options = pathOptions(
+  #             pane = 'admin_divs'
+  #           )
+  #         )
+  #       
+  #     } else {
+  #       # viz_shape == 'polygon'
+  #       
+  #       # debug
+  #       # remove
+  #       # browser()
+  #       
+  #       # variables to select
+  #       vars_sel <- quos(
+  #         !!sym(paste0(color_var, statistic_val)), !!sym(mida_var),
+  #         !!sym(grup_func_var), !!sym(admin_div)
+  #       )
+  #       # check for any empty variable and remove it from the quosures
+  #       vars_sel <- vars_sel[!vapply(vars_sel, rlang::quo_is_missing, logical(1))]
+  #       # data_map
+  #       data_map <- data_core #%>%
+  #         # dplyr::select(!!! vars_sel)
+  #       
+  #       if (agg_level != 'parcela') {
+  #         
+  #         if (is.null(grup_func_choices) || grup_func_choices == '') {
+  #           grup_func_choices <- data_map %>%
+  #             pull(!!grup_func_var)
+  #         }
+  #         
+  #         data_map <- data_map %>%
+  #           filter(!!sym(grup_func_var) %in% grup_func_choices)
+  #         # mutate(!!color_var := case_when(
+  #         #   !!grup_func_var %in% grup_func_choices ~ !!color_var,
+  #         #   TRUE ~ NA
+  #         # ))
+  #       }
+  #       
+  #       # data polygons modified. We need to modify the data from the polygons
+  #       # object to be able to colour as NA when the filtering results in
+  #       # some admin_divs without data (ie, filtering for platanus genera when
+  #       # in province admin_div only return data for Barcelona and Girona). If
+  #       # we modify the data slot in the polygon data frame with a left/right
+  #       # join we can add the admin divs as NAs
+  #       admin_div <- mod_data$admin_div
+  #       polygons_label_var <- polygons_dictionary[[admin_div]][['label_chr']]
+  #       polygon_data <- rlang::eval_tidy(
+  #         sym(polygons_dictionary[[admin_div]][['polygon']])
+  #       )
+  #       
+  #       polygon_data@data <- polygon_data@data %>%
+  #         # select(!!sym(polygons_label_var)) %>%
+  #         rename(!!sym(admin_div) := !!sym(polygons_label_var)) %>%
+  #         left_join(data_map, by = admin_div)
+  #       
+  #       
+  #       # color palette
+  #       if (is.null(color_var) || color_var == '') {
+  #         color_variable_def <- 'Cap'
+  #         color_vector <- rep('parcel·la', nrow(polygon_data@data))
+  #         pal <- colorFactor('viridis', color_vector)
+  #       } else {
+  #         
+  #         # We must take into account if the variable is categorical or
+  #         # numerical
+  #         color_variable_def <- paste0(color_var, statistic_val)
+  #         color_vector <- polygon_data@data[[color_variable_def]]
+  #         
+  #         if (is.numeric(color_vector)) {
+  #           pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+  #         } else {
+  #           pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+  #         }
+  #       }
+  #       
+  #       # debug
+  #       # remove
+  #       # browser()
+  #       
+  #       # we need to remove the inexistent polygons when some genus or species
+  #       # are selected, as there is no info in that polygons after filtering
+  #       
+  #       if (admin_div == '') {
+  #         leafletProxy('map') %>%
+  #           clearGroup('vegueria') %>%
+  #           clearGroup('comarca') %>%
+  #           clearGroup('municipi') %>%
+  #           clearGroup('provincia')
+  #       } else {
+  #         leafletProxy('map') %>%
+  #           clearGroup('vegueria') %>%
+  #           clearGroup('comarca') %>%
+  #           clearGroup('municipi') %>%
+  #           clearGroup('provincia') %>%
+  #           clearGroup('idparcela') %>%
+  #           addPolygons(
+  #             data = polygon_data,
+  #             group = polygons_dictionary[[admin_div]][['group']],
+  #             label = polygons_dictionary[[admin_div]][['label_new']],
+  #             layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+  #             weight = 1, smoothFactor = 1,
+  #             opacity = 1.0, color = '#6C7A89FF',
+  #             fill = TRUE, fillColor = pal(color_vector),
+  #             fillOpacity = 1,
+  #             highlightOptions = highlightOptions(
+  #               color = "#CF000F", weight = 2,
+  #               bringToFront = FALSE
+  #             ),
+  #             options = pathOptions(
+  #               pane = 'admin_divs'
+  #             )
+  #           ) %>%
+  #           addLegend(
+  #             position = 'topright', pal = pal, values = color_vector,
+  #             title = color_variable_def, layerId = 'color_legend', opacity = 1
+  #           )
+  #       }
+  #     }
+  #   }
+  # )
   
   # reactive with the map events
   map_reactives <- reactiveValues()
