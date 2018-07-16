@@ -164,11 +164,11 @@ server <- function(input, output, session) {
     data_reactives$agg_level
   })
   output$debug2 <- renderPrint({
-    data_reactives$viz_shape
+    data_reactives$apply_filters
   })
   output$debug3 <- renderPrint({
     # infoPanel_reactives$data_shape() %>% collect() %>% as.data.frame() %>% head()
-    data_reactives$data_core() %>% collect() %>% as.data.frame() %>% head()
+    data_reactives$data_sig() %>% collect() %>% as.data.frame() %>% head()
   })
 }
 

@@ -148,6 +148,7 @@ mod_map <- function(
   scenario1_reactive <- eventReactive(
     eventExpr = {
       
+      mod_data$data_sig()
       mod_data$inverse_pal
       mod_data$color
       mod_data$mida
@@ -278,6 +279,7 @@ mod_map <- function(
   scenario2_reactive <- eventReactive(
     eventExpr = {
       
+      mod_data$data_sig()
       mod_data$inverse_pal
       mod_data$color
       mod_data$mida
@@ -404,6 +406,7 @@ mod_map <- function(
     ignoreNULL = TRUE, ignoreInit = TRUE,
     eventExpr = {
       
+      mod_data$data_sig()
       mod_data$inverse_pal
       mod_data$color
       mod_data$tipo_grup_func
@@ -416,7 +419,6 @@ mod_map <- function(
       
       if (input_scenario() == 'scenario3') {
         
-        # browser()
         # viz_inputs needed
         color_val <- mod_data$color
         tipo_grup_func_val <- mod_data$tipo_grup_func
@@ -519,6 +521,7 @@ mod_map <- function(
   scenario4_reactive <- eventReactive(
     eventExpr = {
       
+      mod_data$data_sig()
       mod_data$inverse_pal
       mod_data$color
       mod_data$grup_func
@@ -614,8 +617,6 @@ mod_map <- function(
   # of the polygons in the administratiu aggregation levels)
   observeEvent(
     eventExpr = {
-      mod_data$data_sig()
-      # mod_data$data_core()
       scenario1_reactive()
       scenario2_reactive()
       scenario4_reactive()
