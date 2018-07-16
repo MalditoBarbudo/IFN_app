@@ -69,6 +69,11 @@ mod_infoPanel <- function(
       # filter expression
       filter_expr <- quo(!!sym(click$group) == click$id)
       
+      # scenario
+      input_scenario <- reactive({
+        get_scenario(mod_data$viz_shape, mod_data$agg_level)
+      })
+      
       # aggregation level
       agg_real <- mod_data$agg_level
       
