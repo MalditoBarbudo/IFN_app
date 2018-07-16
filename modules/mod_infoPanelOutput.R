@@ -47,14 +47,13 @@ mod_infoPanelOutput <- function(id) {
 #' 
 #' @param mod_data reactive with the reactive data and the data inputs
 #' @param mod_map reactive with the map events from the map module
-#' @param mod_viz reactive with the viz inputs
 #' 
 #' @export
 #' 
 #' @rdname mod_infoPanelOutput
 mod_infoPanel <- function(
   input, output, session,
-  mod_data, mod_map, mod_viz
+  mod_data, mod_map
 ) {
   
   # shape data, we need an eventReactive
