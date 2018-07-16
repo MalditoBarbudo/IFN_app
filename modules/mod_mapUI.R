@@ -164,7 +164,9 @@ mod_map <- function(
         tipo_grup_func_val <- mod_data$tipo_grup_func
         grup_func_val <- mod_data$grup_func
         inverse_pal_val <- mod_data$inverse_pal
+        admin_div_val <- mod_data$admin_div
         
+        # browser()
         # vars to select
         vars_to_sel <- c(
           color_val, mida_val, 'latitude', 'longitude', 'idparcela',
@@ -183,28 +185,27 @@ mod_map <- function(
           left_join(data_sig, by = 'idparcela') %>%
           left_join(data_clima, by = 'idparcela')
         
-        
-        if (grup_func_val != 'Qualsevol') {
-          if (is.numeric(data_map[[color_val]])) {
-            na <- NA_real_
-          } else {
-            na <- NA_character_
-          }
-          
-          data_map <- data_map %>%
-            mutate(
-              !!color_val := case_when(
-                !!sym(glue('{tipo_grup_func_val}dens')) == grup_func_val ~ !!sym(color_val),
-                TRUE ~ na
-              )
-            )
-        }
-        
         # color palette
         if (is.null(color_val) || color_val == '') {
           color_vector <- rep('parcel·la', nrow(data_map))
           pal <- colorFactor('viridis', color_vector)
         } else {
+          
+          if (grup_func_val != 'Qualsevol') {
+            if (is.numeric(data_map[[color_val]])) {
+              na <- NA_real_
+            } else {
+              na <- NA_character_
+            }
+            
+            data_map <- data_map %>%
+              mutate(
+                !!color_val := case_when(
+                  !!sym(glue('{tipo_grup_func_val}dens')) == grup_func_val ~ !!sym(color_val),
+                  TRUE ~ na
+                )
+              )
+          }
           
           # We must take into account if the variable is categorical or
           # numerical
@@ -252,10 +253,10 @@ mod_map <- function(
           clearGroup('municipi') %>%
           clearGroup('provincia') %>%
           addPolygons(
-            data = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['polygon']])),
-            group = polygons_dictionary[[admin_div]][['group']],
-            label = polygons_dictionary[[admin_div]][['label']],
-            layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+            data = rlang::eval_tidy(sym(polygons_dictionary[[admin_div_val]][['polygon']])),
+            group = polygons_dictionary[[admin_div_val]][['group']],
+            label = polygons_dictionary[[admin_div_val]][['label']],
+            layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div_val]][['layerId']])),
             weight = 1, smoothFactor = 1,
             opacity = 1.0, fill = TRUE,
             color = '#6C7A89FF', fillColor = "#CF000F00",
@@ -402,24 +403,20 @@ mod_map <- function(
   scenario3_reactive <- eventReactive(
     ignoreNULL = TRUE, ignoreInit = TRUE,
     eventExpr = {
-       if (
-         any(
-           is.null(mod_data$inverse_pal) || mod_data$inverse_pal == '',
-           is.null(mod_data$color) || mod_data$color == '',
-           is.null(mod_data$tipo_grup_func) || mod_data$tipo_grup_func == '',
-           is.null(mod_data$grup_func) || mod_data$grup_func == '',
-           is.null(mod_data$statistic) || mod_data$statistic == ''
-         )
-       ) {
-         return(NULL)
-       } else {
-         return(TRUE)
-       }
+      
+      mod_data$inverse_pal
+      mod_data$color
+      mod_data$tipo_grup_func
+      mod_data$grup_func
+      mod_data$statistic
+      
     },
     
     valueExpr = {
       
       if (input_scenario() == 'scenario3') {
+        
+        # browser()
         # viz_inputs needed
         color_val <- mod_data$color
         tipo_grup_func_val <- mod_data$tipo_grup_func
@@ -432,11 +429,11 @@ mod_map <- function(
           data_map <- mod_data$data_core()
         } else {
           data_sig <- mod_data$data_sig() %>% collect()
-          filter_arg_val <- glue('{tipo_grup_func_val}dens == {grup_func_val}')
+          filter_arg_val <- quo(!!sym(glue('{tipo_grup_func_val}dens')) == !!grup_func_val)
           
           data_map <- data_generator(
-            oracle_ifn, mod_data$ifn, 'polygon', 'parcela',admin_div_val,
-            FALSE, {mod_data$data_sig() %>% collect()}, filter_arg_val,
+            oracle_ifn, mod_data$ifn, 'polygon', 'parcela', admin_div_val,
+            FALSE, data_sig, filter_arg_val,
             funs(
               mean(., na.rm = TRUE),
               sd(., na.rm = TRUE),
@@ -448,8 +445,6 @@ mod_map <- function(
             )
           )
         }
-        
-        # browser()
         
         polygons_label_var <- polygons_dictionary[[admin_div_val]][['label_chr']]
         polygon_data <- rlang::eval_tidy(
@@ -463,26 +458,24 @@ mod_map <- function(
         
         # color palette
         if (is.null(color_val) || color_val == '') {
-          color_valiable_def <- 'Sense color'
+          color_variable_def <- 'Sense color'
           color_vector <- rep('parcel·la', nrow(polygon_data@data))
           pal <- colorFactor('viridis', color_vector)
         } else {
           
           # We must take into account if the variable is categorical or
           # numerical
-          color_valiable_def <- paste0(color_val, statistic_val)
-          color_vector <- polygon_data@data[[color_valiable_def]]
+          color_variable_def <- paste0(color_val, statistic_val)
+          color_vector <- polygon_data@data[[color_variable_def]]
           
           if (is.numeric(color_vector)) {
-            pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+            pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal_val)
           } else {
-            pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+            pal <- colorFactor('viridis', color_vector, reverse = inverse_pal_val)
           }
         }
         
-        browser()
-        
-        if (admin_div == '') {
+        if (admin_div_val == '') {
           leafletProxy('map') %>%
             clearGroup('vegueria') %>%
             clearGroup('comarca') %>%
@@ -497,9 +490,9 @@ mod_map <- function(
             clearGroup('idparcela') %>%
             addPolygons(
               data = polygon_data,
-              group = polygons_dictionary[[admin_div]][['group']],
-              label = polygons_dictionary[[admin_div]][['label_new']],
-              layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+              group = polygons_dictionary[[admin_div_val]][['group']],
+              label = polygons_dictionary[[admin_div_val]][['label_new']],
+              layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div_val]][['layerId']])),
               weight = 1, smoothFactor = 1,
               opacity = 1.0, color = '#6C7A89FF',
               fill = TRUE, fillColor = pal(color_vector),
@@ -536,6 +529,7 @@ mod_map <- function(
     valueExpr = {
       
       if (input_scenario() == 'scenario4') {
+        
         # viz_inputs needed
         color_val <- mod_data$color
         grup_func_val <- mod_data$grup_func
@@ -558,24 +552,24 @@ mod_map <- function(
         
         # color palette
         if (is.null(color_val) || color_val == '') {
-          color_valiable_def <- 'Sense color'
+          color_variable_def <- 'Sense color'
           color_vector <- rep('parcel·la', nrow(polygon_data@data))
           pal <- colorFactor('viridis', color_vector)
         } else {
           
           # We must take into account if the variable is categorical or
           # numerical
-          color_valiable_def <- paste0(color_val, statistic_val)
-          color_vector <- polygon_data@data[[color_valiable_def]]
+          color_variable_def <- paste0(color_val, statistic_val)
+          color_vector <- polygon_data@data[[color_variable_def]]
           
           if (is.numeric(color_vector)) {
-            pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+            pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal_val)
           } else {
-            pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+            pal <- colorFactor('viridis', color_vector, reverse = inverse_pal_val)
           }
         }
         
-        if (admin_div == '') {
+        if (admin_div_val == '') {
           leafletProxy('map') %>%
             clearGroup('vegueria') %>%
             clearGroup('comarca') %>%
@@ -590,9 +584,9 @@ mod_map <- function(
             clearGroup('idparcela') %>%
             addPolygons(
               data = polygon_data,
-              group = polygons_dictionary[[admin_div]][['group']],
-              label = polygons_dictionary[[admin_div]][['label_new']],
-              layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div]][['layerId']])),
+              group = polygons_dictionary[[admin_div_val]][['group']],
+              label = polygons_dictionary[[admin_div_val]][['label_new']],
+              layerId = rlang::eval_tidy(sym(polygons_dictionary[[admin_div_val]][['layerId']])),
               weight = 1, smoothFactor = 1,
               opacity = 1.0, color = '#6C7A89FF',
               fill = TRUE, fillColor = pal(color_vector),
@@ -620,7 +614,8 @@ mod_map <- function(
   # of the polygons in the administratiu aggregation levels)
   observeEvent(
     eventExpr = {
-      mod_data$data_core()
+      mod_data$data_sig()
+      # mod_data$data_core()
       scenario1_reactive()
       scenario2_reactive()
       scenario4_reactive()
@@ -628,10 +623,7 @@ mod_map <- function(
     },
     
     handlerExpr = {
-      
-      browser()
-      
-      rlang::eval_tidy(sym(glue('{input_scenario()}_reactive()')))
+      rlang::eval_tidy(sym(glue('{input_scenario()}_reactive')))()
     }
   )
   
@@ -785,9 +777,9 @@ mod_map <- function(
   #         # numerical
   #         color_vector <- data_map[[color_var]]
   #         if (is.numeric(color_vector)) {
-  #           pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+  #           pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal_val)
   #         } else {
-  #           pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+  #           pal <- colorFactor('viridis', color_vector, reverse = inverse_pal_val)
   #         }
   #       }
   #       
@@ -905,9 +897,9 @@ mod_map <- function(
   #         color_vector <- polygon_data@data[[color_variable_def]]
   #         
   #         if (is.numeric(color_vector)) {
-  #           pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal)
+  #           pal <- colorBin('viridis', color_vector, 9, reverse = inverse_pal_val)
   #         } else {
-  #           pal <- colorFactor('viridis', color_vector, reverse = inverse_pal)
+  #           pal <- colorFactor('viridis', color_vector, reverse = inverse_pal_val)
   #         }
   #       }
   #       

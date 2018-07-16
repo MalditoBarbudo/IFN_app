@@ -390,6 +390,7 @@ mod_data <- function(
     data_reactives$color <- viz_reactives$color
     data_reactives$inverse_pal <- viz_reactives$inverse_pal
     data_reactives$mida <- viz_reactives$mida
+    data_reactives$tipo_grup_func <- viz_reactives$tipo_grup_func
     data_reactives$grup_func <- viz_reactives$grup_func
     data_reactives$statistic <- viz_reactives$statistic
   })

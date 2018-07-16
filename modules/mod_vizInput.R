@@ -26,8 +26,10 @@ mod_vizInput <- function(id) {
         checkboxInput(
           ns('inverse_pal'), 'Invertir colors', value = FALSE
         ),
-        selectInput(
-          ns('mida'), 'Mida', c(Cap = ''), width = '100%'
+        hidden(
+          selectInput(
+            ns('mida'), 'Mida', c(Cap = ''), width = '100%'
+          )
         ),
         selectInput(
           ns('tipo_grup_func'), 'Tipus grup funcional',
@@ -82,7 +84,7 @@ mod_viz <- function(
     eventExpr = input_scenario(),
     handlerExpr = {
       # if scenario changes, reset the input
-      shinyjs::reset('color')
+      # shinyjs::reset('color')
       
       # scenarios 1 and 2 (parecelas con y sin desglose)
       if (input_scenario() %in% c('scenario1', 'scenario2')) {
@@ -130,15 +132,17 @@ mod_viz <- function(
     eventExpr = input_scenario(),
     handlerExpr = {
       # if scenario changes, reset the input
-      shinyjs::reset('mida')
+      # shinyjs::reset('mida')
       
+      # browser()
       # scenarios 1 and 2 (parecelas con y sin desglose)
       if (input_scenario() %in% c('scenario1', 'scenario2')) {
         # data needed
         vars_clima <- names(mod_data$data_clima() %>% collect()) %>%
           stringr::str_sort()
         vars_viz <- names(mod_data$data_core()) %>%
-          stringr::str_sort()
+          stringr::str_sort() %>%
+          paste0('', .)
         
         vars_to_use <- list(
           "Variables parcel·la" = vars_viz,
@@ -147,18 +151,18 @@ mod_viz <- function(
         
         # update the needed inputs
         updateSelectInput(
-          session, 'color', label = 'Color',
-          choices = vars_to_use, selected = vars_to_use[1]
+          session, 'mida', label = 'Mida',
+          choices = vars_to_use, selected = ''
         )
         
         # show and enable
         shinyjs::show('mida')
-        shinyjs::enable('mida')
+        # shinyjs::enable('mida')
         
       } else {
         # hide and disable
         shinyjs::hide('mida')
-        shinyjs::disable('mida')
+        # shinyjs::disable('mida')
       }
     }
   )
@@ -180,7 +184,10 @@ mod_viz <- function(
   
   # grup_func input
   observeEvent(
-    eventExpr = input$tipo_grup_func,
+    eventExpr = {
+      input$tipo_grup_func
+      mod_data$agg_level
+    },
     handlerExpr = {
       # este está presente en los cuatro scenarios, pero su valor depende de
       # de tipo_grup_funcional en 1 y 3 y de los datos en 2 y 4
@@ -490,6 +497,7 @@ mod_viz <- function(
     viz_reactives$color <- input$color
     viz_reactives$inverse_pal <- input$inverse_pal
     viz_reactives$mida <- input$mida
+    viz_reactives$tipo_grup_func <- input$tipo_grup_func
     viz_reactives$grup_func <- input$grup_func
     viz_reactives$statistic <- input$statistic
   })
