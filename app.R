@@ -19,6 +19,7 @@ source('modules/mod_dataUI.R')
 source('modules/mod_mapUI.R')
 source('modules/mod_vizInput.R')
 source('modules/mod_infoPanelOutput.R')
+source('modules/mod_tableOutput.R')
 
 # source('modules/mod_baseMapOutput.R')
 # source('modules/mod_shapeCondPanelUI.R')
@@ -91,18 +92,18 @@ ui <- tagList(
           "Dades compilats pel CREAF & CTFC basats en l'IFN"
         )
       )
-    )
+    ),
     
     # data tab
-    # tabPanel(
-    #   "Explora les dades",
-    #   
-    #   # row for inputs, already in the module
-    #   # mod_aggregationInput('aggregation'),
-    #   
-    #   # rows for tables
-    #   mod_baseTableOutput('tables_outputs')
-    # )
+    tabPanel(
+      "Explora les dades",
+
+      # row for inputs, already in the module
+      # mod_aggregationInput('aggregation'),
+
+      # rows for tables
+      mod_tableOutput('mod_tableOutput')
+    )
   )
 )
 
@@ -125,6 +126,11 @@ server <- function(input, output, session) {
   infoPanel_reactives <- callModule(
     mod_infoPanel, 'mod_infoPanelOutput',
     data_reactives, map_reactives
+  )
+  
+  callModule(
+    mod_table, 'mod_tableOutput',
+    data_reactives
   )
   
   ## hide infoPanel ####

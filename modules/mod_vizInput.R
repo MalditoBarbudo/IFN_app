@@ -84,7 +84,7 @@ mod_viz <- function(
     eventExpr = input_scenario(),
     handlerExpr = {
       # if scenario changes, reset the input
-      # shinyjs::reset('color')
+      shinyjs::reset('color')
       
       # scenarios 1 and 2 (parecelas con y sin desglose)
       if (input_scenario() %in% c('scenario1', 'scenario2')) {
@@ -102,7 +102,7 @@ mod_viz <- function(
         # update the needed inputs
         updateSelectInput(
           session, 'color', label = 'Color',
-          choices = vars_to_use, selected = vars_to_use[1]
+          choices = vars_to_use, selected = vars_to_use[[1]][1]
         )
       } else {
         # scenarios 3 y 4
@@ -121,7 +121,7 @@ mod_viz <- function(
         # update the needed inputs
         updateSelectInput(
           session, 'color', label = 'Color',
-          choices = vars_to_use
+          choices = vars_to_use, selected = vars_to_use[[1]][1]
         )
       }
     }
