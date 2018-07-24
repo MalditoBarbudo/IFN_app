@@ -12,14 +12,16 @@ library(DT)
 library(patchwork)
 library(shinycssloaders)
 library(glue)
+library(tidyIFN)
+library(IFNappkg)
 
 ## SOURCES ####
 source('global.R')
-source('modules/mod_dataUI.R')
-source('modules/mod_mapUI.R')
-source('modules/mod_vizInput.R')
-source('modules/mod_infoPanelOutput.R')
-source('modules/mod_tableOutput.R')
+# source('modules/mod_dataUI.R')
+# source('modules/mod_mapUI.R')
+# source('modules/mod_vizInput.R')
+# source('modules/mod_infoPanelOutput.R')
+# source('modules/mod_tableOutput.R')
 
 # source('modules/mod_baseMapOutput.R')
 # source('modules/mod_shapeCondPanelUI.R')
@@ -69,7 +71,7 @@ ui <- tagList(
         
         ## mod_data ####
         # mod_data module, it includes the dataSel, dataFil and dataAgg inputs
-        mod_dataUI('mod_dataUI'),
+        mod_dataInput('mod_dataInput'),
 
         ## mod_map ####
         # mod_map, it includes the map
@@ -77,14 +79,14 @@ ui <- tagList(
         
         ## mod_infoPanel ####
         # mod_infoPanel, it includes the map events info panel
-        disabled(
-          hidden(
-            div(
-              id = 'hiddeable_pan',
-              mod_infoPanelOutput('mod_infoPanelOutput')
-            )
-          )
-        ),
+        # disabled(
+        #   hidden(
+        #     div(
+        #       id = 'hiddeable_pan',
+        #       mod_infoPanelOutput('mod_infoPanelOutput')
+        #     )
+        #   )
+        # ),
         
         ## cite div ####
         tags$div(
@@ -96,13 +98,18 @@ ui <- tagList(
     
     # data tab
     tabPanel(
-      "Explora les dades",
+      "Explora les dades"
 
       # row for inputs, already in the module
       # mod_aggregationInput('aggregation'),
 
       # rows for tables
-      mod_tableOutput('mod_tableOutput')
+      # mod_tableOutput('mod_tableOutput')
+    ),
+    
+    # Alometrias tab
+    tabPanel(
+      "Alometrías"
     )
   )
 )
@@ -113,57 +120,57 @@ server <- function(input, output, session) {
   ## module calling ####
   # data
   data_reactives <- callModule(
-    mod_data, 'mod_dataUI'
+    mod_data, 'mod_dataInput'
   )
   
   # map
   map_reactives <- callModule(
     mod_map, 'mod_mapUI',
-    data_reactives
+    data_reactives, ifndb
   )
   
   # info panel
-  infoPanel_reactives <- callModule(
-    mod_infoPanel, 'mod_infoPanelOutput',
-    data_reactives, map_reactives
-  )
+  # infoPanel_reactives <- callModule(
+  #   mod_infoPanel, 'mod_infoPanelOutput',
+  #   data_reactives, map_reactives
+  # )
   
-  callModule(
-    mod_table, 'mod_tableOutput',
-    data_reactives
-  )
+  # callModule(
+  #   mod_table, 'mod_tableOutput',
+  #   data_reactives
+  # )
   
   ## hide infoPanel ####
-  observeEvent(
-    eventExpr = {
-      # all the inputs
-      # data inputs
-      data_reactives$ifn
-      data_reactives$admin_divs
-      data_reactives$espai_tipus
-      data_reactives$apply_filters
-      data_reactives$agg_level
-      data_reactives$diam_class
-      # viz inputs
-      data_reactives$color
-      data_reactives$mida
-      data_reactives$inverse_pal
-      #
-    },
-    handlerExpr = {
-      shinyjs::disable('hiddeable_pan')
-      shinyjs::hide('hiddeable_pan')
-    }
-  )
+  # observeEvent(
+  #   eventExpr = {
+  #     # all the inputs
+  #     # data inputs
+  #     data_reactives$ifn
+  #     data_reactives$admin_divs
+  #     data_reactives$espai_tipus
+  #     data_reactives$apply_filters
+  #     data_reactives$agg_level
+  #     data_reactives$diam_class
+  #     # viz inputs
+  #     data_reactives$color
+  #     data_reactives$mida
+  #     data_reactives$inverse_pal
+  #     #
+  #   },
+  #   handlerExpr = {
+  #     shinyjs::disable('hiddeable_pan')
+  #     shinyjs::hide('hiddeable_pan')
+  #   }
+  # )
   
   # observeEvent to showw the panel when a shape is clicked
-  observeEvent(
-    map_reactives$map_shape_click,
-    {
-      shinyjs::enable('hiddeable_pan')
-      shinyjs::show('hiddeable_pan')
-    }
-  )
+  # observeEvent(
+  #   map_reactives$map_shape_click,
+  #   {
+  #     shinyjs::enable('hiddeable_pan')
+  #     shinyjs::show('hiddeable_pan')
+  #   }
+  # )
   
   ## debug #####
   output$debug1 <- renderPrint({
@@ -174,7 +181,7 @@ server <- function(input, output, session) {
   })
   output$debug3 <- renderPrint({
     # infoPanel_reactives$data_shape() %>% collect() %>% as.data.frame() %>% head()
-    data_reactives$data_sig() %>% collect() %>% as.data.frame() %>% head()
+    # data_reactives$data_sig() %>% collect() %>% as.data.frame() %>% head()
   })
 }
 
