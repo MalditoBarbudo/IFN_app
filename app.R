@@ -79,14 +79,14 @@ ui <- tagList(
         
         ## mod_infoPanel ####
         # mod_infoPanel, it includes the map events info panel
-        # disabled(
-        #   hidden(
-        #     div(
-        #       id = 'hiddeable_pan',
-        #       mod_infoPanelOutput('mod_infoPanelOutput')
-        #     )
-        #   )
-        # ),
+        disabled(
+          hidden(
+            div(
+              id = 'hiddeable_pan',
+              mod_infopanelUI('mod_infopanelUI')
+            )
+          )
+        ),
         
         ## cite div ####
         tags$div(
@@ -130,10 +130,10 @@ server <- function(input, output, session) {
   )
   
   # info panel
-  # infoPanel_reactives <- callModule(
-  #   mod_infoPanel, 'mod_infoPanelOutput',
-  #   data_reactives, map_reactives
-  # )
+  callModule(
+    mod_infopanel, 'mod_infopanelUI',
+    data_reactives, map_reactives, ifndb
+  )
   
   # callModule(
   #   mod_table, 'mod_tableOutput',
@@ -164,20 +164,20 @@ server <- function(input, output, session) {
   # )
   
   # observeEvent to showw the panel when a shape is clicked
-  # observeEvent(
-  #   map_reactives$map_shape_click,
-  #   {
-  #     shinyjs::enable('hiddeable_pan')
-  #     shinyjs::show('hiddeable_pan')
-  #   }
-  # )
+  observeEvent(
+    map_reactives$map_shape_click,
+    {
+      shinyjs::enable('hiddeable_pan')
+      shinyjs::show('hiddeable_pan')
+    }
+  )
   
   ## debug #####
   output$debug1 <- renderPrint({
-    data_reactives$agg_level
+    map_reactives$map_shape_click
   })
   output$debug2 <- renderPrint({
-    data_reactives$apply_filters
+    get_scenario(data_reactives$viz_shape, data_reactives$agg_level)
   })
   output$debug3 <- renderPrint({
     # infoPanel_reactives$data_shape() %>% collect() %>% as.data.frame() %>% head()
