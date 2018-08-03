@@ -180,8 +180,7 @@ server <- function(input, output, session) {
     get_scenario(data_reactives$viz_shape, data_reactives$agg_level)
   })
   output$debug3 <- renderPrint({
-    # infoPanel_reactives$data_shape() %>% collect() %>% as.data.frame() %>% head()
-    # data_reactives$data_sig() %>% collect() %>% as.data.frame() %>% head()
+    data_reactives$espai_tipus_fil
   })
 }
 
