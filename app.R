@@ -79,14 +79,7 @@ ui <- tagList(
         
         ## mod_infoPanel ####
         # mod_infoPanel, it includes the map events info panel
-        disabled(
-          hidden(
-            div(
-              id = 'hiddeable_pan',
-              mod_infopanelUI('mod_infopanelUI')
-            )
-          )
-        ),
+        mod_infopanelUI('mod_infopanelUI'),
         
         ## cite div ####
         tags$div(
@@ -98,13 +91,13 @@ ui <- tagList(
     
     # data tab
     tabPanel(
-      "Explora les dades"
+      "Explora les dades",
 
       # row for inputs, already in the module
       # mod_aggregationInput('aggregation'),
 
       # rows for tables
-      # mod_tableOutput('mod_tableOutput')
+      mod_tableOutput('mod_tableOutput')
     ),
     
     # Alometrias tab
@@ -135,41 +128,9 @@ server <- function(input, output, session) {
     data_reactives, map_reactives, ifndb
   )
   
-  # callModule(
-  #   mod_table, 'mod_tableOutput',
-  #   data_reactives
-  # )
-  
-  ## hide infoPanel ####
-  # observeEvent(
-  #   eventExpr = {
-  #     # all the inputs
-  #     # data inputs
-  #     data_reactives$ifn
-  #     data_reactives$admin_divs
-  #     data_reactives$espai_tipus
-  #     data_reactives$apply_filters
-  #     data_reactives$agg_level
-  #     data_reactives$diam_class
-  #     # viz inputs
-  #     data_reactives$color
-  #     data_reactives$mida
-  #     data_reactives$inverse_pal
-  #     #
-  #   },
-  #   handlerExpr = {
-  #     shinyjs::disable('hiddeable_pan')
-  #     shinyjs::hide('hiddeable_pan')
-  #   }
-  # )
-  
-  # observeEvent to showw the panel when a shape is clicked
-  observeEvent(
-    map_reactives$map_shape_click,
-    {
-      shinyjs::enable('hiddeable_pan')
-      shinyjs::show('hiddeable_pan')
-    }
+  callModule(
+    mod_table, 'mod_tableOutput',
+    data_reactives
   )
   
   ## debug #####
