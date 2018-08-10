@@ -93,11 +93,7 @@ ui <- tagList(
     tabPanel(
       "Explora les dades",
 
-      # row for inputs, already in the module
-      # mod_aggregationInput('aggregation'),
-
-      # rows for tables
-      mod_tableOutput('mod_tableOutput')
+     mod_tableOutput('mod_tableOutput')
     ),
     
     # Alometrias tab
@@ -128,14 +124,14 @@ server <- function(input, output, session) {
     data_reactives, map_reactives, ifndb
   )
   
-  callModule(
+  table_reactives <- callModule(
     mod_table, 'mod_tableOutput',
     data_reactives
   )
   
   ## debug #####
   output$debug1 <- renderPrint({
-    map_reactives$map_shape_click
+    # table_reactives$col_vis_input
   })
   output$debug2 <- renderPrint({
     get_scenario(data_reactives$viz_shape, data_reactives$agg_level)
