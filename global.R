@@ -2,7 +2,9 @@
 
 ### DB access ##################################################################
 ifndb <- tidyIFN::ifn_connect(
-  'ifn', rstudioapi::askForPassword('pass'), 'ifndb'
+  'malditobarbudo',
+  # rstudioapi::askForPassword('pass'),
+  'ifndb'
 )
 
 ## On.Stop routine #############################################################

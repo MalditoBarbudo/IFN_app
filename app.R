@@ -81,6 +81,9 @@ ui <- tagList(
         # mod_infoPanel, it includes the map events info panel
         mod_infopanelUI('mod_infopanelUI'),
         
+        ## mod_advancedFilters ####
+        mod_advancedFiltersUI('mod_advancedFiltersUI'),
+        
         ## cite div ####
         tags$div(
           id = 'cite',
@@ -112,10 +115,15 @@ server <- function(input, output, session) {
     mod_data, 'mod_dataInput'
   )
   
+  # advancedFilters
+  advancedFIlters_reactives <- callModule(
+    mod_advancedFilters, 'mod_advancedFiltersUI'
+  )
+  
   # map
   map_reactives <- callModule(
     mod_map, 'mod_mapUI',
-    data_reactives, ifndb
+    data_reactives, advancedFIlters_reactives, ifndb
   )
   
   # info panel
@@ -126,7 +134,7 @@ server <- function(input, output, session) {
   
   table_reactives <- callModule(
     mod_table, 'mod_tableOutput',
-    data_reactives
+    data_reactives, advancedFIlters_reactives
   )
   
   ## debug #####
