@@ -117,7 +117,8 @@ server <- function(input, output, session) {
   
   # advancedFilters
   advancedFIlters_reactives <- callModule(
-    mod_advancedFilters, 'mod_advancedFiltersUI'
+    mod_advancedFilters, 'mod_advancedFiltersUI',
+    data_reactives
   )
   
   # map
@@ -139,7 +140,7 @@ server <- function(input, output, session) {
   
   ## debug #####
   output$debug1 <- renderPrint({
-    # table_reactives$col_vis_input
+    data_reactives$show_adv_fils
   })
   output$debug2 <- renderPrint({
     get_scenario(data_reactives$viz_shape, data_reactives$agg_level)
