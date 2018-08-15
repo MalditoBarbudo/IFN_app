@@ -129,7 +129,7 @@ server <- function(input, output, session) {
   # info panel
   callModule(
     mod_infopanel, 'mod_infopanelUI',
-    data_reactives, map_reactives, ifndb
+    data_reactives, map_reactives, advancedFIlters_reactives, ifndb
   )
   
   table_reactives <- callModule(
