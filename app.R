@@ -35,6 +35,7 @@ source('global.R')
 ui <- tagList(
   
   useShinyjs(),
+  shinyWidgets::chooseSliderSkin(skin = "Flat", color = '#0DB3D4'),
   
   navbarPage(
     # opts
